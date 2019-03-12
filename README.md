@@ -1,0 +1,2 @@
+# DomiSolConverter
+This program aims to develop a effective key transposer of a sheet music. Many musicians sometimes need to transpose music when they play a instrument. Although a variety of music notation programs provide the transposition function, a program having lots of functions is not efficient for a user who does not need professional use. To solve this, we propose a user-friendly web application that produces key transformed sheet music.
