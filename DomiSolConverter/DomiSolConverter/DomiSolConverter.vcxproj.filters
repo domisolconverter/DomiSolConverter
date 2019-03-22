@@ -38,5 +38,14 @@
     <ClCompile Include="DomiSolConverter.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Analysis.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Postprocessing.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Preprocessing.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

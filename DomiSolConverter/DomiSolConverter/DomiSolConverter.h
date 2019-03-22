@@ -12,6 +12,7 @@ private:
 	class Preprocessing;
 	class Analysis;
 	class Postproecessing;
+
 	Mat inputImg;
 	Mat binaryImg;
 	Mat straightenedImg;
