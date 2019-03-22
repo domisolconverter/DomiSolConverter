@@ -1,8 +1,21 @@
-#db files
+# db files
 *.db
 *.opendb
 
-#log files
+# log files
 *.log
 *.tlog
 *.lastbuildstate
+
+# No need
+*.exe
+*.ilk
+*.pdb
+*.idb
+*.obj
+
+# DO NOT delete comment annotation
+# *.suo
+# *.ipch
+# *.vcxproj
+# *.vcxproj.user
