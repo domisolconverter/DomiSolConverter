@@ -163,7 +163,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Analysis.h" />
+    <ClInclude Include="DomiSolConverter.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Postprocessing.h" />
+    <ClInclude Include="Preprocessing.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DomiSolConverter.cpp" />

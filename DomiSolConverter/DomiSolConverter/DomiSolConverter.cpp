@@ -1,9 +1,5 @@
-﻿#include <iostream>
-#include "pch.h"
-#include <opencv2/opencv.hpp>
-
-using namespace std;
-using namespace cv;
+﻿#include "pch.h"
+#include "DomiSolConverter.h"
 
 int main()
 {
