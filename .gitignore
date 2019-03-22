@@ -1,0 +1,8 @@
+#db files
+*.db
+*.opendb
+
+#log files
+*.log
+*.tlog
+*.lastbuildstate
