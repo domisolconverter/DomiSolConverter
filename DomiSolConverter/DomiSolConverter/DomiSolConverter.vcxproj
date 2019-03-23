@@ -163,15 +163,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Analysis.h" />
     <ClInclude Include="DomiSolConverter.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Postprocessing.h" />
-    <ClInclude Include="Preprocessing.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Analysis.cpp" />
     <ClCompile Include="DomiSolConverter.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

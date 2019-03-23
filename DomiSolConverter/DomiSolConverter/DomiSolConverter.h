@@ -7,11 +7,55 @@
 using namespace std;
 using namespace cv;
 
-class DomisolConverter {
+class DomiSolConverter {
 private:
-	class Preprocessing;
-	class Analysis;
-	class Postproecessing;
+	class Preprocessing {
+	private:
+		Mat edgeImg;
+		Mat lineImg;
+
+		void binarization();
+		void detectEdge();
+		void straightenImg();
+		void removeStaff();
+		void extractObject();
+
+	public:
+		Preprocessing();
+	};
+
+	class Analysis {
+	private:
+		vector<Point> staffXY;
+		int staffHeight;
+		int staffSpace;
+		vector<string> note;
+		vector<string> nonNote;
+		vector<string> text;
+
+		void extractFeature();
+		void calculatePitch();
+		void recognizeObject();
+		void recognizeGeneralSymbol();
+		void recognizeText();
+		void recognizeNoteSymbol();
+
+	public:
+		Analysis();
+		vector<string> getNote();
+		vector<string> getNonNote();
+		vector<string> getText();
+	};
+
+	class Postproecessing{
+	private:
+		void combineInfo();
+		void transposeKey();
+		void saveFile();
+
+	public:
+		Postproecessing();
+	};
 
 	Mat inputImg;
 	Mat binaryImg;
@@ -21,5 +65,5 @@ private:
 	Mat resultImg;
 
 public:
-	DomisolConverter(Mat input);
+	DomiSolConverter(Mat input);
 };
