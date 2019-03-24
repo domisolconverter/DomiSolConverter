@@ -33,6 +33,9 @@ private:
 		vector<string> nonNote;
 		vector<string> text;
 
+		void calculateStaffHeight();
+		void calculateStaffSpace();
+		void calculateStaffXY();
 		void extractFeature();
 		void calculatePitch();
 		void recognizeObject();
