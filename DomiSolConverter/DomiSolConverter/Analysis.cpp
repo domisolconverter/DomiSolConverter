@@ -1,6 +1,23 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
+void calculateStaffHeight();
+void calculateStaffSpace();
+void calculateStaffXY();
+
+
+void DomiSolConverter::Analysis::calculateStaffHeight(){
+
+}
+
+void DomiSolConverter::Analysis::calculateStaffSpace(){
+
+}
+
+void DomiSolConverter::Analysis::calculateStaffXY(){
+
+}
+
 void DomiSolConverter::Analysis::extractFeature() {
 
 }
