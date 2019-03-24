@@ -3,20 +3,32 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
+# define INPUTFOLDER "./inputImage/"
+# define OUTPUTFOLDER "./outputImage/"
+
+// Change test case
+string INPUTFILE = "case1.jpg";
+string OUTPUTFILE = "";
+
+
 int main()
 {
+	// Set path of input image and output image
+	string INPUTPATH = INPUTFOLDER + INPUTFILE;
+	string OUTPUTPATH = OUTPUTFOLDER + OUTPUTFILE;
+
 	cout << "OpenCV Version : " << CV_VERSION << endl;
 	Mat img;
-	namedWindow("EXAMPLE01", CV_WINDOW_AUTOSIZE);
+	namedWindow("CASE01", CV_WINDOW_AUTOSIZE);
 
-	img = imread("test.jpg", CV_LOAD_IMAGE_COLOR);
+	img = imread(INPUTPATH, CV_LOAD_IMAGE_COLOR);
 	if (img.empty())
 	{
-		cout << "[!] You can NOT see the cat!" << endl;
+		cout << "[!] You can NOT open the test image!" << endl;
 		return -1;
 	}
-	imshow("EXAMPLE01", img);
+	imshow("CASE01", img);
 	waitKey(0);
-	destroyWindow("EXAMPLE01");
+	destroyWindow("CASE01");
 	return 0;
 }
