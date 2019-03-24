@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
+#define offset(s, m) \
+02	(size_t)&reinterpret_cast<const volatile char&>((((s *)0)->m));
+
 void calculateStaffHeight();
 void calculateStaffSpace();
 void calculateStaffXY();

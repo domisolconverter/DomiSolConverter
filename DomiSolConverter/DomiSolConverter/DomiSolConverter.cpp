@@ -3,4 +3,6 @@
 
 DomiSolConverter::DomiSolConverter(Mat input) {
 
+	this->inputImg = input;
+
 }
