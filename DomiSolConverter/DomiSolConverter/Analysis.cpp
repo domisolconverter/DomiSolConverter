@@ -78,7 +78,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	}
 
 	for (int i = 0; i < Y.size(); i++) {
-		cout << Y[i] << " ";
+		//cout << Y[i] << " ";
 	}
 
 	// 최소3개 악보 간격보다 2배 이상 커지면
@@ -106,20 +106,20 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 			// 크다 그리고 만약 그게 3줄 이상이면 그 전까지를 staff 하나라고 생각하기!
 			else {
 
-				cout << "현재 평균 " << diffAvg << endl;
-				cout << "간격 " << spaceCnt << endl;
+				//cout << "현재 평균 " << diffAvg << endl;
+				//cout << "간격 " << spaceCnt << endl;
 
 				if (spaceCnt >= 3) {
 					lineCnt++;
-					cout << lineCnt << "번 째 오선이네요 첫번째 줄 y는 " << Y[i - 1 - spaceCnt] << endl;
-					cout << lineCnt << "번 째 오선이네요 마지막 줄 y는 " << Y[i] << endl;
+					//cout << lineCnt << "번 째 오선이네요 첫번째 줄 y는 " << Y[i - 1 - spaceCnt] << endl;
+					//cout << lineCnt << "번 째 오선이네요 마지막 줄 y는 " << Y[i] << endl;
 
 					this->staffXY.push_back(Point(X[(i - 1 - spaceCnt) * 2], Y[i - 1 - spaceCnt]));
 					this->staffXY.push_back(Point(X[(i - 1) * 2 + 1], Y[i - 1]));
 
 				}
 				else {
-					cout << "얘는 오선이 아니에요" << endl;
+					//cout << "얘는 오선이 아니에요" << endl;
 
 				}
 				spaceCnt = 0;
@@ -131,7 +131,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 			// 배열이 끝나고 마지막 staff 체크
 			if (i == Y.size() - 1 && spaceCnt >= 3) {
 				lineCnt++;
-				cout << lineCnt << "번 째 오선이네요" << endl;
+				//cout << lineCnt << "번 째 오선이네요" << endl;
 				this->staffXY.push_back(Point(X[(i - spaceCnt) * 2], Y[i - spaceCnt]));
 				this->staffXY.push_back(Point(X[i * 2 + 1], Y[i]));
 			}
@@ -143,7 +143,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 
 	for (int i = 0; i < staffXY.size(); i++) {
-		cout << "( " << this->staffXY[i].x << " , " << this->staffXY[i].y << " )" << endl;
+		//cout << "( " << this->staffXY[i].x << " , " << this->staffXY[i].y << " )" << endl;
 	}
 
 	/* 애국가 테스트 프린트
