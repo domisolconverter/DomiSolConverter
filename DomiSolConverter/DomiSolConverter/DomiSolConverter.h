@@ -50,6 +50,8 @@ private:
 		vector<string> getText();
 	};
 
+
+
 	class Postproecessing{
 	private:
 		void combineInfo();
