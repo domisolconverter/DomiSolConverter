@@ -222,35 +222,105 @@ void DomiSolConverter::Analysis::recognizeText() {
 
 	// 오선 아닌 부분 잘라서 저장하기
 	
-	Rect ROI;
+	int ROISize = staffXY.size() - (staffXY.size() / 2 - 1);
 	Mat tempImg;
+	Rect *ROI = (Rect*)malloc(sizeof(Rect) * ROISize);
 
 	// 1. 각 오선의 윗부분 crop
-	for (int i = 0; i < staffXY.size(); i++) {
+	for (int i = 0; i < ROISize; i++) {
 		// 처음
 		if (i == 0) {
-			ROI = Rect(0, 0, width, staffXY[i].y);
-			Mat subImg = Mat(src, ROI);
+			ROI[i] = Rect(0, 0, width, staffXY[i].y);
+			Mat subImg = Mat(src, ROI[i]);
 			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
 		}
 		// 마지막
-		else if (i == staffXY.size() - 1) {
-			ROI = Rect(0, staffXY[i].y, width, this->staffHeight * 2);
-			Mat subImg = Mat(src, ROI);
+		else if (i == ROISize - 1) {
+			ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, this->staffHeight * 2);
+			Mat subImg = Mat(src, ROI[i]);
 			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
 		}
 		// 중간
 		else {
-			ROI = Rect(0, staffXY[i].y, width, staffXY[i+1].y - staffXY[i].y);
-			Mat subImg = Mat(src, ROI);
+			ROI[i] = Rect(0, staffXY[2*i-1].y, width, staffXY[2 * i].y - staffXY[2 * i - 1].y);
+			Mat subImg = Mat(src, ROI[i]);
 			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
-			i++;
 		}
 
 	}
 
+	// 문자가 존재하는 부분 : crop
+	
 
+	/* 침식 연산 */
+	/*
+	Mat erored;
+	for (int i = 0; i < ROISize; i++) {
+		erode(Mat(src, ROI[i]), erored, Mat());
+		imwrite(OUTPUTPATH + "_eroded" + to_string(i) + ".jpg", erored);
+	}
+	*/
 
+	/* OPENING 연산  */
+	/*
+	Mat element(3, 3, CV_8U, Scalar(1)); // 3X3 짜리 필터
+	Mat opened;
+	for (int i = 0; i < ROISize; i++) {
+		morphologyEx(Mat(src, ROI[i]), opened, MORPH_OPEN, element);
+		imwrite(OUTPUTPATH + "_opened" + to_string(i) + ".jpg", opened);
+	}
+	*/
+
+	/* CLOSED 연산  */
+	/*
+	Mat element(3, 3, CV_8U, Scalar(1)); // 7X7 짜리 필터
+	Mat closed;
+	for (int i = 0; i < ROISize; i++) {
+		morphologyEx(Mat(src, ROI[i]), closed, MORPH_CLOSE, element);
+		imwrite(OUTPUTPATH + "_closed" + to_string(i) + ".jpg", closed);
+	}
+
+	*/
+
+	/* 침식 연산 ver2 */
+	/*
+	Mat opened;
+	Mat element(2, 2, CV_8U, Scalar(1)); // 7X7 짜리 필터
+	for (int i = 0; i < ROISize; i++) {
+	erode(Mat(src, ROI[i]), opened, element);
+	imwrite(OUTPUTPATH + "_eroded_ver2_" + to_string(i) + ".jpg", opened);
+	}
+	*/
+	
+
+	/* 팽창 연산  */
+	/*
+	Mat dilated;
+	for (int i = 0; i < ROISize; i++) {
+		dilate(Mat(src, ROI[i]), dilated, Mat());
+		imwrite(OUTPUTPATH + "_dilated" + to_string(i) + ".jpg", dilated);
+	}
+	*/
+
+	/*
+	Mat eroded;
+	erode(Mat(src,ROI[3]), eroded, Mat());
+	namedWindow("Eroded Image1");
+	imshow("Eroded Image1", eroded);
+	imwrite(OUTPUTPATH + "_e1" + ".jpg", eroded);
+	
+	Mat dilated;
+	dilate(eroded, dilated, Mat());
+	namedWindow("Dilated Image");
+	imshow("Dilated Image", dilated);
+	imwrite(OUTPUTPATH + "_d1" + ".jpg", dilated);
+
+	Mat tophat;
+	morphologyEx(Mat(src, ROI[3]), tophat, NULL, MORPH_BLACKHAT);
+	namedWindow("Tophat Image");
+	imshow("Tophat Image", tophat);
+	imwrite(OUTPUTPATH + "_t1" + ".jpg", tophat);
+	*/
 }
 
 void DomiSolConverter::Analysis::recognizeNoteSymbol() {
