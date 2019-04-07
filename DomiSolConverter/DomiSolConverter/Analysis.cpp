@@ -28,9 +28,6 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 	Mat src = imread(INPUTPATH, IMREAD_GRAYSCALE);
 
-	//cout<<"Creat Analysis Objects!"<<endl;
-	//cout << "Access OuterClass Instance From InnerClass"<<endl;
-
 	int width = src.cols;
 	int height = src.rows;
 	int oneBar = (int)((width / 100.0) * 20);    // 140
@@ -40,7 +37,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	vector<int> X;
 
 
-	// Y축 히스토그램 그리기 //
+	//* Y축 히스토그램 그리기 *//
 
 	// 악보 한마디(20%)가 되면 오선이라 판단
 
@@ -151,13 +148,24 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 
 	}
+	
+	// 오선의 평균 높이 계산
+	calculateStaffHeight();
 
-
+	//* 오선 검출 결과 테스트 프린트 *//
+	/*
 	for (int i = 0; i < staffXY.size(); i++) {
-		//cout << "( " << this->staffXY[i].x << " , " << this->staffXY[i].y << " )" << endl;
+		cout << "( " << this->staffXY[i].x << " , " << this->staffXY[i].y << " )" << endl;
 	}
+	*/
 
-	/* 애국가 테스트 프린트
+	//* 오선 ROI 테스트 프린트 *//
+	
+	/*
+	Rect rect[10]; // (수정) 동적 할당하기
+	for (int i = 0; i < staffXY.size()/2; i++) {
+		rect[i] = Rect(0, staffXY[i].y, width, this->staffHeight); // (수정)평균 오선 크기 넣기
+	}
 	Rect rect1(0, staffXY[0].y, width, staffXY[1].y - staffXY[0].y);
 	Mat subimage1 = src(rect1);
 	namedWindow("RECT01", CV_WINDOW_AUTOSIZE);
@@ -178,12 +186,6 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	namedWindow("RECT04", CV_WINDOW_AUTOSIZE);
 	imshow("RECT04", subimage4);
 	*/
-
-	Rect rect[10]; // (수정) 동적 할당하기
-
-	for (int i = 0; i < staffXY.size()/2; i++) {
-		rect[i] = Rect(0, staffXY[i].y, width, staffXY[i+1].y - staffXY[i].y); // (수정)평균 오선 크기 넣기
-	}
 
 	namedWindow("OUT01", CV_WINDOW_AUTOSIZE);
 	imshow("OUT01", src);
@@ -261,7 +263,6 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 DomiSolConverter::Analysis::Analysis() {
 	
 	calculateStaffXY();
-	calculateStaffHeight();
 	recognizeText();
 
 }
