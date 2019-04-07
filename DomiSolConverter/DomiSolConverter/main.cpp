@@ -17,17 +17,22 @@ int main()
 	string INPUTPATH = INPUTFOLDER + INPUTFILE;
 	string OUTPUTPATH = OUTPUTFOLDER + OUTPUTFILE;
 
+
 	cout << "OpenCV Version : " << CV_VERSION << endl;
 	Mat img;
 	namedWindow("CASE01", CV_WINDOW_AUTOSIZE);
 
-	img = imread(INPUTPATH, CV_LOAD_IMAGE_COLOR);
+	img = imread(INPUTPATH, IMREAD_GRAYSCALE);
 	if (img.empty())
 	{
 		cout << "[!] You can NOT open the test image!" << endl;
 		return -1;
 	}
 	imshow("CASE01", img);
+	
+	
+	DomiSolConverter domisolconverter(img);
+	
 	waitKey(0);
 	destroyWindow("CASE01");
 	return 0;
