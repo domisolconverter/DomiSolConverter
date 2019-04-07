@@ -97,7 +97,7 @@ void DomiSolConverter::Preprocessing::extractStaff() {
 void DomiSolConverter::Preprocessing::removeStaff() {
 
 	objectsImg = straightenedBinaryImg.clone();
-	int verticalsize = objectsImg.rows / 280;
+	int verticalsize = objectsImg.rows / 250;
 	Mat verticalStructure = getStructuringElement(MORPH_RECT, Size(1, verticalsize));
 	erode(objectsImg, objectsImg, verticalStructure, Point(-1, -1));
 	dilate(objectsImg, objectsImg, verticalStructure, Point(-1, -1));
@@ -171,8 +171,7 @@ DomiSolConverter::Preprocessing::Preprocessing(Mat inputImg) {
 	extractStaff();
 	//show(objectsImg, "objectsImg");
 	removeStaff();
-	//show(objectsImg, "objectsImg");
+	show(objectsImg, "objectsImg");
 	extractObject();
-	//show(Mat img, string title);
 	
 }

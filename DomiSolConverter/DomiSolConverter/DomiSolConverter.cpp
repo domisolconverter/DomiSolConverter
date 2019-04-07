@@ -9,6 +9,4 @@ DomiSolConverter::DomiSolConverter(Mat input) {
 	this->objectXY = P.getObjectXY();
 
 	Analysis A = Analysis(objectsImg, objectXY);
-	//A.setObjectsImg(this->objectsImg);
-	//A.setObjectXY(this->objectsImg);
 }
