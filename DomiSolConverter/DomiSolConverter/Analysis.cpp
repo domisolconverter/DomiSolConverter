@@ -2,10 +2,21 @@
 #include "DomiSolConverter.h"
 
 
+// 오선 한 개(5개의 줄)의 높이
 void DomiSolConverter::Analysis::calculateStaffHeight(){
-
+	int sum = 0;
+	for (int i = 1; i < staffXY.size(); i+=2 ) {
+		sum += staffXY[i].y - staffXY[i - 1].y;
+	}
+	if (staffXY.size() != 0) {
+		this -> staffHeight = sum / (staffXY.size() / 2);
+	}
+	else {
+		cout << "오선의 개수가 0개 입니다"<< endl;
+	}
 }
 
+// 오선에 있는 줄 사이 간격
 void DomiSolConverter::Analysis::calculateStaffSpace(){
 
 }
@@ -168,7 +179,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	imshow("RECT04", subimage4);
 	*/
 
-	Rect rect[10]; // (수정)
+	Rect rect[10]; // (수정) 동적 할당하기
 
 	for (int i = 0; i < staffXY.size()/2; i++) {
 		rect[i] = Rect(0, staffXY[i].y, width, staffXY[i+1].y - staffXY[i].y); // (수정)평균 오선 크기 넣기
@@ -198,6 +209,47 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 }
 
 void DomiSolConverter::Analysis::recognizeText() {
+	
+	// (수정)DomiSolConverter의 straitenedImg로 바꾸세요
+	string INPUTPATH = "./inputImage/straightenedImg.jpg";
+	string OUTPUTPATH = "./outputImage/textpart";
+
+	Mat src = imread(INPUTPATH, IMREAD_GRAYSCALE);
+	int width = src.cols;
+	int height = src.rows;
+
+	// 오선 아닌 부분 잘라서 저장하기
+	
+	Rect ROI;
+	Mat tempImg;
+
+	// 1. 각 오선의 윗부분 crop
+	for (int i = 0; i < staffXY.size(); i++) {
+		// 처음
+		if (i == 0) {
+			ROI = Rect(0, 0, width, staffXY[i].y);
+			Mat subImg = Mat(src, ROI);
+			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
+		}
+		// 마지막
+		else if (i == staffXY.size() - 1) {
+			cout << "라스트" << endl;
+			ROI = Rect(0, staffXY[i].y, width, this->staffHeight * 2);
+			Mat subImg = Mat(src, ROI);
+			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
+		}
+		// 중간
+		else {
+			ROI = Rect(0, staffXY[i].y, width, staffXY[i+1].y - staffXY[i].y);
+			Mat subImg = Mat(src, ROI);
+			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
+			cout << i << endl;
+			i++;
+		}
+
+	}
+
+
 
 }
 
@@ -209,6 +261,8 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 DomiSolConverter::Analysis::Analysis() {
 	
 	calculateStaffXY();
+	calculateStaffHeight();
+	recognizeText();
 
 }
 
