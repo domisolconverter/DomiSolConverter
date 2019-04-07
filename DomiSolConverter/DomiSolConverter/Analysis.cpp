@@ -235,7 +235,6 @@ void DomiSolConverter::Analysis::recognizeText() {
 		}
 		// 마지막
 		else if (i == staffXY.size() - 1) {
-			cout << "라스트" << endl;
 			ROI = Rect(0, staffXY[i].y, width, this->staffHeight * 2);
 			Mat subImg = Mat(src, ROI);
 			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
@@ -245,7 +244,6 @@ void DomiSolConverter::Analysis::recognizeText() {
 			ROI = Rect(0, staffXY[i].y, width, staffXY[i+1].y - staffXY[i].y);
 			Mat subImg = Mat(src, ROI);
 			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
-			cout << i << endl;
 			i++;
 		}
 
