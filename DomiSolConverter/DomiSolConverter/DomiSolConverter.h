@@ -40,6 +40,7 @@ private:
 		void calculatePitch();
 		void recognizeObject();
 		void recognizeGeneralSymbol();
+		void cropTextArea();
 		void recognizeText();
 		void recognizeNoteSymbol();
 

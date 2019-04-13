@@ -210,6 +210,10 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 
 }
 
+void DomiSolConverter::Analysis::cropTextArea() {
+
+}
+
 void DomiSolConverter::Analysis::recognizeText() {
 	
 	// (수정)DomiSolConverter의 straitenedImg로 바꾸세요
@@ -251,6 +255,7 @@ void DomiSolConverter::Analysis::recognizeText() {
 
 	// 문자가 존재하는 부분 : crop
 	
+	// 침식 연산 진행
 
 	/* 침식 연산 */
 	/*
