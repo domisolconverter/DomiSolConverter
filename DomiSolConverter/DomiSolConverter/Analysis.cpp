@@ -220,7 +220,8 @@ void DomiSolConverter::Analysis::cropTextArea() {
 	Mat result;
 	int width = src.cols;
 	int height = src.rows;
-	
+	int ROISize = staffXY.size() - (staffXY.size() / 2 - 1);
+
 	/* 컴포넌트 만들기 */
 	// OTSU 이진화
     threshold(src, binaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
@@ -257,7 +258,7 @@ void DomiSolConverter::Analysis::cropTextArea() {
 	namedWindow("Only Text Component");
 	imshow("Only Text Component", src);
 
-	/* 문자 영역 부분 큰 네모로 해서 자르기 */
+	/* 문자 영역 부분 큰 좌표 정하기 */
 
 	it = contours.begin();
 	int xmin = width;
@@ -283,13 +284,13 @@ void DomiSolConverter::Analysis::cropTextArea() {
 		++it;
 	}
 
-	cout << "x min : " << xmin << endl;
-	cout << "x max : " << xmax << endl;
-	cout << "y min : " << ymin << endl;
-	cout << "y max : " << ymax << endl;
+	xmin = xmin*0.9;
+	xmax = xmax*1.1;
+	ymin = ymin*0.9;
+	ymax = ymax*1.1;
 
 	/* 가로로 긴 형태의 외곽선 Rect로 리턴 */
-
+	
 
 
 }
@@ -337,75 +338,6 @@ void DomiSolConverter::Analysis::recognizeText() {
 	
 	// 침식 연산 진행
 
-	/* 침식 연산 */
-	/*
-	Mat erored;
-	for (int i = 0; i < ROISize; i++) {
-		erode(Mat(src, ROI[i]), erored, Mat());
-		imwrite(OUTPUTPATH + "_eroded" + to_string(i) + ".jpg", erored);
-	}
-	*/
-
-	/* OPENING 연산  */
-	/*
-	Mat element(3, 3, CV_8U, Scalar(1)); // 3X3 짜리 필터
-	Mat opened;
-	for (int i = 0; i < ROISize; i++) {
-		morphologyEx(Mat(src, ROI[i]), opened, MORPH_OPEN, element);
-		imwrite(OUTPUTPATH + "_opened" + to_string(i) + ".jpg", opened);
-	}
-	*/
-
-	/* CLOSED 연산  */
-	/*
-	Mat element(3, 3, CV_8U, Scalar(1)); // 7X7 짜리 필터
-	Mat closed;
-	for (int i = 0; i < ROISize; i++) {
-		morphologyEx(Mat(src, ROI[i]), closed, MORPH_CLOSE, element);
-		imwrite(OUTPUTPATH + "_closed" + to_string(i) + ".jpg", closed);
-	}
-
-	*/
-
-	/* 침식 연산 ver2 */
-	/*
-	Mat opened;
-	Mat element(2, 2, CV_8U, Scalar(1)); // 7X7 짜리 필터
-	for (int i = 0; i < ROISize; i++) {
-	erode(Mat(src, ROI[i]), opened, element);
-	imwrite(OUTPUTPATH + "_eroded_ver2_" + to_string(i) + ".jpg", opened);
-	}
-	*/
-	
-
-	/* 팽창 연산  */
-	/*
-	Mat dilated;
-	for (int i = 0; i < ROISize; i++) {
-		dilate(Mat(src, ROI[i]), dilated, Mat());
-		imwrite(OUTPUTPATH + "_dilated" + to_string(i) + ".jpg", dilated);
-	}
-	*/
-
-	/*
-	Mat eroded;
-	erode(Mat(src,ROI[3]), eroded, Mat());
-	namedWindow("Eroded Image1");
-	imshow("Eroded Image1", eroded);
-	imwrite(OUTPUTPATH + "_e1" + ".jpg", eroded);
-	
-	Mat dilated;
-	dilate(eroded, dilated, Mat());
-	namedWindow("Dilated Image");
-	imshow("Dilated Image", dilated);
-	imwrite(OUTPUTPATH + "_d1" + ".jpg", dilated);
-
-	Mat tophat;
-	morphologyEx(Mat(src, ROI[3]), tophat, NULL, MORPH_BLACKHAT);
-	namedWindow("Tophat Image");
-	imshow("Tophat Image", tophat);
-	imwrite(OUTPUTPATH + "_t1" + ".jpg", tophat);
-	*/
 }
 
 void DomiSolConverter::Analysis::recognizeNoteSymbol() {
