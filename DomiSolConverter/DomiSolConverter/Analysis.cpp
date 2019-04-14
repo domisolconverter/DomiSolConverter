@@ -259,7 +259,34 @@ void DomiSolConverter::Analysis::cropTextArea() {
 
 	/* 문자 영역 부분 큰 네모로 해서 자르기 */
 
+	it = contours.begin();
+	int xmin = width;
+	int ymin = height;
+	int xmax = 0;
+	int ymax = 0;
 
+	for (int i = 0; i < contours.size(); i++) {
+		for (int j = 0; j < it->size(); j++) {
+			if (contours[i][j].x < xmin){
+				xmin = contours[i][j].x;
+			}
+			if (contours[i][j].y < ymin) {
+				ymin = contours[i][j].y;
+			}
+			if (contours[i][j].x > xmax) {
+				xmax = contours[i][j].x;
+			}
+			if (contours[i][j].y > ymax) {
+				ymax = contours[i][j].y;
+			}
+		}
+		++it;
+	}
+
+	cout << "x min : " << xmin << endl;
+	cout << "x max : " << xmax << endl;
+	cout << "y min : " << ymin << endl;
+	cout << "y max : " << ymax << endl;
 
 	/* 가로로 긴 형태의 외곽선 Rect로 리턴 */
 
