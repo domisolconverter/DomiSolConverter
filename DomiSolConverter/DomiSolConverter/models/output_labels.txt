@@ -1,0 +1,11 @@
+g clef
+accent
+dot
+double sharp
+f clef
+flat
+leo
+natural
+sharp
+star
+tie slur
