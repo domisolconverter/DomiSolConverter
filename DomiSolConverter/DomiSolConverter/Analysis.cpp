@@ -211,6 +211,39 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 }
 
 void DomiSolConverter::Analysis::cropTextArea() {
+	// (수정)recognizeText의 ROI들로 바꾸기
+	string INPUTPATH = "./outputImage/textpart1.jpg";
+	Mat src = imread(INPUTPATH, IMREAD_GRAYSCALE);
+	Mat tophat;
+	Mat blackhat;
+	Mat binaryImg;
+	Mat eroded;
+	Mat opened;
+	Mat closed;
+	int width = src.cols;
+	int height = src.rows;
+	
+	/* 컴포넌트 만들기 */
+	// OTSU 이진화
+    threshold(src, binaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	Mat element(width*0.012, width*0.012, CV_8U, Scalar(1)); // 필터 크기 중요
+	// 닫힘 연산
+	morphologyEx(binaryImg, opened, MORPH_OPEN, element);
+	// 열림 연산
+	morphologyEx(opened, closed, MORPH_CLOSE, element);
+	namedWindow("Component Image");
+	imshow("Componen Image", closed);
+
+	/* 컴포넌트의 외곽선 검출 */
+
+
+
+	/* 외곽선 중 가로로 긴 형태만 남기기 */
+
+
+
+
+	/* 가로로 긴 형태의 외곽선 Rect로 리턴 */
 
 }
 
@@ -336,7 +369,8 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 DomiSolConverter::Analysis::Analysis() {
 	
 	calculateStaffXY();
-	recognizeText();
+	cropTextArea();
+	//recognizeText();
 
 }
 
