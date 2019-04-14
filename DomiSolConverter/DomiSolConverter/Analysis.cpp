@@ -291,7 +291,12 @@ void DomiSolConverter::Analysis::cropTextArea() {
 
 	/* 가로로 긴 형태의 외곽선 Rect로 리턴 */
 	
+	Rect* ROI[] = (Rect*)malloc(sizeof(Rect) * ROISize);
+	for (int i = 0; i < ROISize; i++) {
+		ROI[i] = Rect(xmin, ymin, xmax - xmin, ymax - ymin);
+	}
 
+	return &ROI;
 
 }
 
