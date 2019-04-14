@@ -210,93 +210,98 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 
 }
 
-void DomiSolConverter::Analysis::cropTextArea() {
+void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 	// (수정)recognizeText의 ROI들로 바꾸기
-	string INPUTPATH = "./outputImage/textpart4.jpg";
-	Mat src = imread(INPUTPATH, IMREAD_GRAYSCALE);
+	// (수정) src
+	
+	string INPUTPATH = "./inputImage/straightenedImg.jpg";
+	Mat input = imread(INPUTPATH, IMREAD_GRAYSCALE);
 	Mat binaryImg;
 	Mat opened;
 	Mat closed;
 	Mat result;
-	int width = src.cols;
-	int height = src.rows;
+	int width = input.cols;
+	int height = input.rows;
 	int ROISize = staffXY.size() - (staffXY.size() / 2 - 1);
 
-	/* 컴포넌트 만들기 */
-	// OTSU 이진화
-    threshold(src, binaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
-	Mat element(width*0.012, width*0.012, CV_8U, Scalar(1)); // 필터 크기 중요
-	// 닫힘 연산
-	morphologyEx(binaryImg, opened, MORPH_OPEN, element);
-	// 열림 연산
-	morphologyEx(opened, closed, MORPH_CLOSE, element);
-	// 침식 연산
-	erode(closed, result, Mat());
-	namedWindow("Component Image");
-	imshow("Component Image",result);
-
-	/* 컴포넌트의 외곽선 검출 */
-
-	vector<vector<Point>> contours;
-	findContours(result, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
-	Mat contoursResult(result.size(), CV_8U, Scalar(255));
-	drawContours(contoursResult, contours, -1, Scalar(150), 2);
-	namedWindow("Draw Contour Image");
-	imshow("Draw Contour Image", contoursResult);
-
-	int cmax = width;
-	vector<vector<Point>>::const_iterator it = contours.begin();
-	/* 외곽선 중 악보 외곽선은 제거 */
-	while (it != contours.end()) {
-		if (it->size() > cmax) 
-			it = contours.erase(it);
-		else
-			++it;
-	}
-	
-	drawContours(src, contours, -1, Scalar(100,255,0), 2);
-	namedWindow("Only Text Component");
-	imshow("Only Text Component", src);
-
-	/* 문자 영역 부분 큰 좌표 정하기 */
-
-	it = contours.begin();
-	int xmin = width;
-	int ymin = height;
-	int xmax = 0;
-	int ymax = 0;
-
-	for (int i = 0; i < contours.size(); i++) {
-		for (int j = 0; j < it->size(); j++) {
-			if (contours[i][j].x < xmin){
-				xmin = contours[i][j].x;
-			}
-			if (contours[i][j].y < ymin) {
-				ymin = contours[i][j].y;
-			}
-			if (contours[i][j].x > xmax) {
-				xmax = contours[i][j].x;
-			}
-			if (contours[i][j].y > ymax) {
-				ymax = contours[i][j].y;
-			}
-		}
-		++it;
-	}
-
-	xmin = xmin*0.9;
-	xmax = xmax*1.1;
-	ymin = ymin*0.9;
-	ymax = ymax*1.1;
-
-	/* 가로로 긴 형태의 외곽선 Rect로 리턴 */
-	
-	Rect* ROI[] = (Rect*)malloc(sizeof(Rect) * ROISize);
 	for (int i = 0; i < ROISize; i++) {
-		ROI[i] = Rect(xmin, ymin, xmax - xmin, ymax - ymin);
-	}
 
-	return &ROI;
+		Mat src = Mat(input, ROI[i]);
+		
+		/* 컴포넌트 만들기 */
+		// OTSU 이진화
+		threshold(src, binaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
+		Mat element(width*0.012, width*0.012, CV_8U, Scalar(1)); // 필터 크기 중요
+																 // 닫힘 연산
+		morphologyEx(binaryImg, opened, MORPH_OPEN, element);
+		// 열림 연산
+		morphologyEx(opened, closed, MORPH_CLOSE, element);
+		// 침식 연산
+		erode(closed, result, Mat());
+		//namedWindow("Component Image" + to_string(i));
+		//imshow("Component Image" + to_string(i), result);
+
+		/* 컴포넌트의 외곽선 검출 */
+
+		vector<vector<Point>> contours;
+		findContours(result, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+		Mat contoursResult(result.size(), CV_8U, Scalar(255));
+		drawContours(contoursResult, contours, -1, Scalar(150), 2);
+		//namedWindow("Draw Contour Image" + to_string(i));
+		//imshow("Draw Contour Image" + to_string(i), contoursResult);
+
+		int cmax = width;
+		vector<vector<Point>>::const_iterator it = contours.begin();
+		/* 외곽선 중 악보 외곽선은 제거 */
+		while (it != contours.end()) {
+			if (it->size() > cmax)
+				it = contours.erase(it);
+			else
+				++it;
+		}
+
+		//drawContours(src, contours, -1, Scalar(100, 255, 0), 2);
+		//namedWindow("Only Text Component" + to_string(i));
+		//imshow("Only Text Component" + to_string(i), src);
+
+		/* 문자 영역 부분 큰 좌표 정하기 */
+
+		it = contours.begin();
+		int xmin = width;
+		int ymin = height;
+		int xmax = 0;
+		int ymax = 0;
+
+		for (int i = 0; i < contours.size(); i++) {
+			for (int j = 0; j < it->size(); j++) {
+				if (contours[i][j].x < xmin) {
+					xmin = contours[i][j].x;
+				}
+				if (contours[i][j].y < ymin) {
+					ymin = contours[i][j].y;
+				}
+				if (contours[i][j].x > xmax) {
+					xmax = contours[i][j].x;
+				}
+				if (contours[i][j].y > ymax) {
+					ymax = contours[i][j].y;
+				}
+			}
+			++it;
+		}
+
+		xmin = xmin*0.9;
+		xmax = xmax*1.1;
+		ymin = ymin*0.9;
+		ymax = ymax*1.1;
+
+		ROI[i] = Rect(xmin, ymin, xmax - xmin, ymax - ymin);
+		Mat subImg = Mat(src, ROI[i]);
+		imwrite("./outputImage/Onlytextpart" + to_string(i) + ".jpg", subImg);
+
+	}
+	
+
 
 }
 
@@ -305,6 +310,7 @@ void DomiSolConverter::Analysis::recognizeText() {
 	// (수정)DomiSolConverter의 straitenedImg로 바꾸세요
 	string INPUTPATH = "./inputImage/straightenedImg.jpg";
 	string OUTPUTPATH = "./outputImage/textpart";
+	string OUTPUTPATH2 = "./outputImage/Onlytextpart";
 
 	Mat src = imread(INPUTPATH, IMREAD_GRAYSCALE);
 	int width = src.cols;
@@ -341,7 +347,10 @@ void DomiSolConverter::Analysis::recognizeText() {
 
 	// 문자가 존재하는 부분 : crop
 	
+	cropTextArea(ROI);
+
 	// 침식 연산 진행
+
 
 }
 
@@ -353,8 +362,7 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 DomiSolConverter::Analysis::Analysis() {
 	
 	calculateStaffXY();
-	cropTextArea();
-	//recognizeText();
+	recognizeText();
 
 }
 
