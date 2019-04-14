@@ -213,7 +213,6 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 	// (수정)recognizeText의 ROI들로 바꾸기
 	// (수정) src
-	
 	string INPUTPATH = "./inputImage/straightenedImg.jpg";
 	Mat input = imread(INPUTPATH, IMREAD_GRAYSCALE);
 	Mat binaryImg;
@@ -297,11 +296,13 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 
 		ROI[i] = Rect(xmin, ymin, xmax - xmin, ymax - ymin);
 		Mat subImg = Mat(src, ROI[i]);
+		erode(subImg, subImg, Mat());
 		imwrite("./outputImage/Onlytextpart" + to_string(i) + ".jpg", subImg);
+		namedWindow("Onlytextpart" + to_string(i), WINDOW_AUTOSIZE);
+		imshow("Onlytextpart" + to_string(i), Mat(src, ROI[i]));
 
 	}
 	
-
 
 }
 
@@ -345,12 +346,9 @@ void DomiSolConverter::Analysis::recognizeText() {
 
 	}
 
-	// 문자가 존재하는 부분 : crop
+	// 문자가 존재하는 부분 자른 뒤 침식 연산 진행
 	
 	cropTextArea(ROI);
-
-	// 침식 연산 진행
-
 
 }
 
