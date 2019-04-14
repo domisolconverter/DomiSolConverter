@@ -212,14 +212,12 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 
 void DomiSolConverter::Analysis::cropTextArea() {
 	// (수정)recognizeText의 ROI들로 바꾸기
-	string INPUTPATH = "./outputImage/textpart1.jpg";
+	string INPUTPATH = "./outputImage/textpart4.jpg";
 	Mat src = imread(INPUTPATH, IMREAD_GRAYSCALE);
-	Mat tophat;
-	Mat blackhat;
 	Mat binaryImg;
-	Mat eroded;
 	Mat opened;
 	Mat closed;
+	Mat result;
 	int width = src.cols;
 	int height = src.rows;
 	
@@ -231,19 +229,41 @@ void DomiSolConverter::Analysis::cropTextArea() {
 	morphologyEx(binaryImg, opened, MORPH_OPEN, element);
 	// 열림 연산
 	morphologyEx(opened, closed, MORPH_CLOSE, element);
+	// 침식 연산
+	erode(closed, result, Mat());
 	namedWindow("Component Image");
-	imshow("Componen Image", closed);
+	imshow("Component Image",result);
 
 	/* 컴포넌트의 외곽선 검출 */
 
+	vector<vector<Point>> contours;
+	findContours(result, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+	Mat contoursResult(result.size(), CV_8U, Scalar(255));
+	drawContours(contoursResult, contours, -1, Scalar(150), 2);
+	namedWindow("Draw Contour Image");
+	imshow("Draw Contour Image", contoursResult);
 
+	int cmax = width;
+	vector<vector<Point>>::const_iterator it = contours.begin();
+	/* 외곽선 중 악보 외곽선은 제거 */
+	while (it != contours.end()) {
+		if (it->size() > cmax) 
+			it = contours.erase(it);
+		else
+			++it;
+	}
+	
+	drawContours(src, contours, -1, Scalar(100,255,0), 2);
+	namedWindow("Only Text Component");
+	imshow("Only Text Component", src);
 
-	/* 외곽선 중 가로로 긴 형태만 남기기 */
-
+	/* 문자 영역 부분 큰 네모로 해서 자르기 */
 
 
 
 	/* 가로로 긴 형태의 외곽선 Rect로 리턴 */
+
+
 
 }
 
