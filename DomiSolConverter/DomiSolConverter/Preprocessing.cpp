@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
-
-int DomiSolConverter::Preprocessing::show(Mat img, string title) {
+int DomiSolConverter::Preprocessing::show(Mat img, string title, int x=0, int y=0) {
 	// cout << "OpenCV Version : " << CV_VERSION << endl;
 	namedWindow(title, CV_WINDOW_AUTOSIZE);
 
@@ -12,6 +11,7 @@ int DomiSolConverter::Preprocessing::show(Mat img, string title) {
 		return -1;
 	}
 
+	moveWindow(title, x, y);
 	imshow(title, img);
 }
 
@@ -117,7 +117,7 @@ void DomiSolConverter::Preprocessing::extractObject() {
 		   도형 외곽선을 더 적은 꼭지점수를 갖도록 바꿀때 ex) 찢겨진 사각형 복원
 		approxPolyDP(Mat(contours[i]), contours_poly[i], 0, true);
 		if (fabs(contourArea(Mat(contours_poly[i])) > 10)) {
-			objectXY[i] = boundingRect(Mat(contours_poly[i]));
+			objectXY.push_back(boundingRect(Mat(contours_poly[i])));
 		}
 		*/
 		if (fabs(contourArea(Mat(contours[i])) > 5)) {
@@ -126,12 +126,47 @@ void DomiSolConverter::Preprocessing::extractObject() {
 		}
 	}
 	// sort object rectangles by x
-	sort(objectXY.begin(), objectXY.end(), byX());
-	//for (int i = 0; i < objectXY.size(); i++) {
-	//	cout << "x: " << objectXY.at(i).x << "y: " << objectXY.at(i).y << "width: " << objectXY.at(i).width << "height: " << objectXY.at(i).height << endl;
-	//}
+	sort(objectXY.begin(), objectXY.end(), byY());
+	for (int i = 0; i < objectXY.size(); i++) {
+		//cout << "x: " << objectXY.at(i).x << "y: " << objectXY.at(i).y << "width: " << objectXY.at(i).width << "height: " << objectXY.at(i).height << endl;
+	}
 
-	/*
+	int objectsCnt = objectXY.size();
+	for (int i = 0; i < objectsCnt; i++) {
+		cout << i << "th   " << objectXY[i] << endl;
+		int c = 1;
+		while (1) {
+			if (i + c > objectsCnt - 1 || objectXY[i + c].y > objectXY[i].y + objectXY[i].height) {
+				break;
+			}
+			// i번째 사각형보다 i+c번째 사각형이 작을때
+			if (objectXY[i].width > objectXY[i + c].width) {
+				// i+c번째 사각형이 내포돼있을때
+				if (!(objectXY[i].x > objectXY[i + c].x) &&
+					!((objectXY[i].x + objectXY[i].width) < (objectXY[i + c].x + objectXY[i + c].width)) &&
+					!(objectXY[i].y > objectXY[i + c].y) &&
+					!((objectXY[i].y + objectXY[i].height) < (objectXY[i + c].y + objectXY[i + c].height))
+					) {
+					objectXY.erase(objectXY.begin() + i + c);
+					objectsCnt--;
+				}
+			}
+			// i번째 사각형보다 i+c번째 사각형이 클때
+			else if (objectXY[i].width > objectXY[i + c].width) {
+				// i번째 사각형이 내포돼있을때
+				if (!(objectXY[i].x < objectXY[i + c].x) &&
+					!((objectXY[i].x + objectXY[i].width) > (objectXY[i + c].x + objectXY[i + c].width)) &&
+					!(objectXY[i].y < objectXY[i + c].y) &&
+					!((objectXY[i].y + objectXY[i].height) > (objectXY[i + c].y + objectXY[i + c].height))
+					) {
+					objectXY.erase(objectXY.begin() + i);
+					objectsCnt--;
+				}
+			}
+			c++;
+		}
+	}
+	
 	//Draw result
 	Mat contourImg = Mat(objectsImg.rows, objectsImg.cols, CV_8U);
 	//Scalar color(0, 0, 0);
@@ -140,12 +175,12 @@ void DomiSolConverter::Preprocessing::extractObject() {
 		drawContours(contourImg, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
 	}
 	for (int i = 0; i < objectXY.size(); i++) {
-		printf("%d", i);
+		//printf("%d", i);
 		rectangle(contourImg, objectXY[i].tl(), objectXY[i].br(), color, 1);
 	}
 	namedWindow("contours", CV_WINDOW_AUTOSIZE);
 	imshow("contours", contourImg);
-	*/
+	
 }
 
 
@@ -160,18 +195,20 @@ vector<Rect> DomiSolConverter::Preprocessing::getObjectXY() {
 DomiSolConverter::Preprocessing::Preprocessing(Mat inputImg) {
 	this->inputImg = inputImg;
 	
-	binarization();
-	//show(binaryImg, "binaryImg");
-	detectEdge();
+	//binarization();
+	//show(binaryImg, "binaryImg", 700, 0);
+	//detectEdge();
 	//show(edgeImg, "edgeImg");
-	straightenImg();
+	//straightenImg();
 	//show(straightenedImg, "straightenedImg");
+	straightenedImg = inputImg;
 	threshold(~straightenedImg, straightenedBinaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
-	//show(straightenedBinaryImg, "straightenedBinaryImg");
-	extractStaff();
+	show(straightenedBinaryImg, "straightenedBinaryImg");
+	//extractStaff();
+	//show(staffImg, "staffImg");
+	//removeStaff();
 	//show(objectsImg, "objectsImg");
-	removeStaff();
-	show(objectsImg, "objectsImg");
+	objectsImg = straightenedBinaryImg.clone();
 	extractObject();
 	
 }
