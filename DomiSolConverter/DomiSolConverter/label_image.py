@@ -17,8 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import argparse
-
+import os
 import numpy as np
 import tensorflow as tf
 
@@ -71,49 +70,34 @@ def load_labels(label_file):
     label.append(l.rstrip())
   return label
 
+def find_all_images(img_path):
+    if img_path[-1] != '/':
+        img_path = img_path + '/'
 
-if __name__ == "__main__":
-  file_name = "tensorflow/examples/label_image/data/grace_hopper.jpg"
-  model_file = \
-    "tensorflow/examples/label_image/data/inception_v3_2016_08_28_frozen.pb"
-  label_file = "tensorflow/examples/label_image/data/imagenet_slim_labels.txt"
+    file_list = os.listdir(img_path)
+    img_list = [file for file in file_list if file.endswith(".png") or file.endswith(".jpg")]
+    for img in img_list:
+        idx = img_list.index(img)
+        img_list[idx] = img_path + img_list[idx]
+    return img_list
+
+def classify(img_path):
+    img_list = find_all_images(img_path)
+
+    for img in img_list:
+        recognize(img)
+
+def recognize(inputImg):
+  file_name = inputImg
+  model_file = "models/output_graph.pb"
+  label_file = "models/output_labels.txt"
   input_height = 299
   input_width = 299
   input_mean = 0
   input_std = 255
-  input_layer = "input"
-  output_layer = "InceptionV3/Predictions/Reshape_1"
+  input_layer = "Placeholder"
+  output_layer = "final_result"
 
-  parser = argparse.ArgumentParser()
-  parser.add_argument("--image", help="image to be processed")
-  parser.add_argument("--graph", help="graph/model to be executed")
-  parser.add_argument("--labels", help="name of file containing labels")
-  parser.add_argument("--input_height", type=int, help="input height")
-  parser.add_argument("--input_width", type=int, help="input width")
-  parser.add_argument("--input_mean", type=int, help="input mean")
-  parser.add_argument("--input_std", type=int, help="input std")
-  parser.add_argument("--input_layer", help="name of input layer")
-  parser.add_argument("--output_layer", help="name of output layer")
-  args = parser.parse_args()
-
-  if args.graph:
-    model_file = args.graph
-  if args.image:
-    file_name = args.image
-  if args.labels:
-    label_file = args.labels
-  if args.input_height:
-    input_height = args.input_height
-  if args.input_width:
-    input_width = args.input_width
-  if args.input_mean:
-    input_mean = args.input_mean
-  if args.input_std:
-    input_std = args.input_std
-  if args.input_layer:
-    input_layer = args.input_layer
-  if args.output_layer:
-    output_layer = args.output_layer
 
   graph = load_graph(model_file)
   t = read_tensor_from_image_file(
@@ -137,4 +121,5 @@ if __name__ == "__main__":
   top_k = results.argsort()[-5:][::-1]
   labels = load_labels(label_file)
   for i in top_k:
-    print(labels[i], results[i])
+   print(file_name, labels[i], results[i])
+   break
