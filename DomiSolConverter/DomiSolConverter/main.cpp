@@ -7,7 +7,7 @@
 # define OUTPUTFOLDER "./outputImage/"
 
 // Change test case
-string INPUTFILE = "case1.jpg";
+string INPUTFILE = "test1.png";
 string OUTPUTFILE = "";
 
 
@@ -20,7 +20,7 @@ int main()
 
 	cout << "OpenCV Version : " << CV_VERSION << endl;
 	Mat img;
-	namedWindow("CASE01", CV_WINDOW_AUTOSIZE);
+	//namedWindow("CASE01", CV_WINDOW_AUTOSIZE);
 
 	img = imread(INPUTPATH, IMREAD_GRAYSCALE);
 	if (img.empty())
@@ -28,12 +28,13 @@ int main()
 		cout << "[!] You can NOT open the test image!" << endl;
 		return -1;
 	}
-	imshow("CASE01", img);
+	//imshow("CASE01", img);
 	
 	
 	DomiSolConverter domisolconverter(img);
 	
-	waitKey(0);
-	destroyWindow("CASE01");
+	//waitKey(0);
+	//destroyWindow("CASE01");
+	cout << "end" << "\n";
 	return 0;
 }

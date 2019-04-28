@@ -20,9 +20,11 @@ void DomiSolConverter::Analysis::extractFeature() {
 	Scalar color(255, 255, 255);
 	for (int i = 0; i < objectXY.size(); i++) {
 		rectangle(objectsRectImg, objectXY[i].tl(), objectXY[i].br(), color, 1);
+		Mat extractOject = ~objectsRectImg(Rect(objectXY[i]));
+		// assume that it's work
+		string fname = "test_input\\object" + to_string(i) + ".jpg";
+		imwrite(fname, extractOject);
 	}
-	namedWindow("objects", CV_WINDOW_AUTOSIZE);
-	imshow("objects", objectsRectImg);
 }
 
 void DomiSolConverter::Analysis::calculatePitch() {
@@ -34,7 +36,14 @@ void DomiSolConverter::Analysis::recognizeObject() {
 }
 
 void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
+	char output[100];
+	FILE *p = _popen("python label_image.py test_input", "r");
 
+	if (p != NULL) {
+		while (fgets(output, sizeof(output), p) != NULL) {
+			cout << output << "\n";
+		}
+	}
 }
 
 void DomiSolConverter::Analysis::recognizeText() {
@@ -49,7 +58,8 @@ DomiSolConverter::Analysis::Analysis(Mat objectsImg, vector<Rect> objectXY) {
 	this->objectsImg = objectsImg;
 	this->objectXY = objectXY;
 
-	extractFeature();
+	//extractFeature();
+	recognizeGeneralSymbol();
 }
 
 vector<string> DomiSolConverter::Analysis::getNote() {

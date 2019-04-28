@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import sys
 import numpy as np
 import tensorflow as tf
 
@@ -81,12 +82,6 @@ def find_all_images(img_path):
         img_list[idx] = img_path + img_list[idx]
     return img_list
 
-def classify(img_path):
-    img_list = find_all_images(img_path)
-
-    for img in img_list:
-        recognize(img)
-
 def recognize(inputImg):
   file_name = inputImg
   model_file = "models/output_graph.pb"
@@ -120,6 +115,14 @@ def recognize(inputImg):
 
   top_k = results.argsort()[-5:][::-1]
   labels = load_labels(label_file)
+  print ("\n")
   for i in top_k:
    print(file_name, labels[i], results[i])
    break
+
+if __name__ == "__main__":    
+    img_list = find_all_images(sys.argv[1])
+
+    for img in img_list:
+        recognize(img)
+
