@@ -11,21 +11,40 @@ class DomiSolConverter {
 private:
 	class Preprocessing {
 	private:
+		Mat inputImg;
+		Mat binaryImg;
 		Mat edgeImg;
 		Mat lineImg;
+		Mat straightenedImg;
+		Mat straightenedBinaryImg;
+		Mat staffImg;
+		Mat objectsImg;
+		vector<Rect> objectXY;
 
 		void binarization();
 		void detectEdge();
 		void straightenImg();
+		void extractStaff();
 		void removeStaff();
 		void extractObject();
+		int show(Mat img, string title);
 
+		struct byX {
+			bool operator () (const Rect & a, const Rect & b) {
+				return a.x < b.x;
+			}
+		};
 	public:
-		Preprocessing();
+		Preprocessing(Mat inputImg);
+		Mat getObjectsImg();
+		vector<Rect> getObjectXY();
 	};
 
 	class Analysis {
 	private:
+		Mat objectsImg;
+		vector<Rect> objectXY;
+		vector<Rect> noteXY;
 		vector<Point> staffXY;
 		int staffHeight;
 		int staffSpace;
@@ -44,10 +63,12 @@ private:
 		void recognizeNoteSymbol();
 
 	public:
-		Analysis();
+		Analysis(Mat objectsImg, vector<Rect> objectXY);
 		vector<string> getNote();
 		vector<string> getNonNote();
 		vector<string> getText();
+		void setObjectsImg(Mat objectsImg);
+		void setObjectXY(vector<Rect> objectXY);
 	};
 
 
@@ -66,7 +87,8 @@ private:
 	Mat binaryImg;
 	Mat straightenedImg;
 	Mat staffImg;
-	vector<Point> objectXY;
+	Mat objectsImg;
+	vector<Rect> objectXY;
 	Mat resultImg;
 
 public:

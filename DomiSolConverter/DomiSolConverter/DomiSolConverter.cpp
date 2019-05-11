@@ -3,8 +3,11 @@
 
 DomiSolConverter::DomiSolConverter(Mat input) {
 
+
 	this->inputImg = input; 
-	this->straightenedImg = input; // 나중에 삭제
-	cout<<"Create DomiSolConverter Objects!"<<endl;
-	Analysis A;
+	Preprocessing P = Preprocessing(this->inputImg);
+	this->objectsImg = P.getObjectsImg();
+	this->objectXY = P.getObjectXY();
+
+	Analysis A = Analysis(objectsImg, objectXY);
 }
