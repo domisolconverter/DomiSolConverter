@@ -16,6 +16,6 @@
 
 # DO NOT delete comment annotation
 # *.suo
-# *.ipch
-# *.vcxproj
-# *.vcxproj.user
+*.ipch
+*.vcxproj
+*.vcxproj.user

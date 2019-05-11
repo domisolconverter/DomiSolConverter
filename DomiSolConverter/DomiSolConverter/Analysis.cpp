@@ -187,6 +187,10 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	imshow("RECT04", subimage4);
 	*/
 
+	for (int kk = 0; kk < staffXY.size(); kk++) {
+		cout << staffXY[kk] << "\n";
+	}
+
 	namedWindow("OUT01", CV_WINDOW_AUTOSIZE);
 	imshow("OUT01", src);
 
