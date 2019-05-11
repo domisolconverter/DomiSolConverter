@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
-int DomiSolConverter::Preprocessing::show(Mat img, string title, int x=0, int y=0) {
+int DomiSolConverter::Preprocessing::show(Mat img, string title) {
 	// cout << "OpenCV Version : " << CV_VERSION << endl;
 	namedWindow(title, CV_WINDOW_AUTOSIZE);
 
@@ -11,7 +11,6 @@ int DomiSolConverter::Preprocessing::show(Mat img, string title, int x=0, int y=
 		return -1;
 	}
 
-	moveWindow(title, x, y);
 	imshow(title, img);
 }
 
@@ -126,14 +125,14 @@ void DomiSolConverter::Preprocessing::extractObject() {
 		}
 	}
 	// sort object rectangles by x
-	sort(objectXY.begin(), objectXY.end(), byY());
+	sort(objectXY.begin(), objectXY.end(), byX());
 	for (int i = 0; i < objectXY.size(); i++) {
 		//cout << "x: " << objectXY.at(i).x << "y: " << objectXY.at(i).y << "width: " << objectXY.at(i).width << "height: " << objectXY.at(i).height << endl;
 	}
 
 	int objectsCnt = objectXY.size();
 	for (int i = 0; i < objectsCnt; i++) {
-		cout << i << "th   " << objectXY[i] << endl;
+		//cout << i << "th   " << objectXY[i] << endl;
 		int c = 1;
 		while (1) {
 			if (i + c > objectsCnt - 1 || objectXY[i + c].y > objectXY[i].y + objectXY[i].height) {
@@ -195,20 +194,19 @@ vector<Rect> DomiSolConverter::Preprocessing::getObjectXY() {
 DomiSolConverter::Preprocessing::Preprocessing(Mat inputImg) {
 	this->inputImg = inputImg;
 	
-	//binarization();
+	binarization();
 	//show(binaryImg, "binaryImg", 700, 0);
-	//detectEdge();
+	detectEdge();
 	//show(edgeImg, "edgeImg");
-	//straightenImg();
+	straightenImg();
 	//show(straightenedImg, "straightenedImg");
 	straightenedImg = inputImg;
 	threshold(~straightenedImg, straightenedBinaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
-	show(straightenedBinaryImg, "straightenedBinaryImg");
-	//extractStaff();
+	//show(straightenedBinaryImg, "straightenedBinaryImg");
+	extractStaff();
 	//show(staffImg, "staffImg");
-	//removeStaff();
+	removeStaff();
 	//show(objectsImg, "objectsImg");
-	objectsImg = straightenedBinaryImg.clone();
 	extractObject();
 	
 }
