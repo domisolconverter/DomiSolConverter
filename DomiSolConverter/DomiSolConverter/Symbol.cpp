@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Symbol.h"
 
 Symbol::Symbol(int lineNum, int barNum, int orderNum) {
@@ -16,16 +17,6 @@ int Symbol::getBarNum() {
 
 int Symbol::getOrderNum() {
 	return this->orderNum;
-}
-
-Note::Note(int flag, bool isEmptyHead, bool dot, bool isWholeNote, char scale, int octave, hash_map<string, bool> nonNotes) {
-	this->flag = flag;
-	this->isEmptyHead = isEmptyHead;
-	this->dot = dot;
-	this->isWholeNote = isWholeNote;
-	this->scale = scale;
-	this->octave = octave;
-	this->nonNotes = nonNotes;
 }
 
 int Note::getFlag() {
@@ -52,15 +43,42 @@ int Note::getOctave() {
 	return this->octave;
 }
 
-hash_map<string, bool> Note::getNonNotes() {
-	return this->nonNotes;
+//hash_map<string, bool> Note::getNonNotes() {
+//	return this->nonNotes;
+//}
+
+void Note::setFlag_Head(int flag, bool isEmptyHead) {
+	this->flag = flag;
+	this->isEmptyHead = isEmptyHead;
+}
+
+void Note::setDot(bool dot) {
+	this->dot = dot;
+}
+
+void Note::setIsWholeNote(bool isWholeNote) {
+	this->isWholeNote = isWholeNote;
+}
+
+void Note::setScale_Octave(char scale, int octave) {
+	this->scale = scale;
+	this->octave = octave;
+}
+
+//void Note::setNonNotes(hash_map<string, bool> nonNotes) {
+//	this->nonNotes = nonNotes;
+//}
+
+void Note::setResult(string result) {
+	this->result = result;
 }
 
 
-NonNote::NonNote(int lineNum, int barNum, int orderNum, string nonNoteType) {
-	this->nonNoteType = nonNoteType;
-}
 
 string NonNote::getNonNoteType() {
 	return this->nonNoteType;
+}
+
+void NonNote::setNonNoteType() {
+	this->nonNoteType = nonNoteType;
 }

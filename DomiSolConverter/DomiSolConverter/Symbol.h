@@ -1,6 +1,7 @@
 #pragma once
+#include "pch.h"
 #include <iostream>
-#include <hash_map>
+//#include <hash_map>
 #include <algorithm>
 using namespace std;
 
@@ -25,36 +26,32 @@ private:
 	bool isWholeNote; // 온음표 따로 체크
 	char scale; // 도레미파솔라시도
 	int octave; // 음역대
-	hash_map<string, bool> nonNotes; // 음표에 붙은 비음표들
+	//hash_map<string, bool> nonNotes; // 음표에 붙은 비음표들
 	string result;	// 음표 종류 판단 결과 저장
 public:
-	Note(int flag, bool isEmptyHead, bool dot, bool isWholeNote, char scale, int octave, hash_map<string, bool> nonNotes);
+	Note(int lineNum, int barNum, int orderNum): Symbol(lineNum, barNum, orderNum) {}
 	int getFlag();
 	bool getIsEmptyHead();
 	bool getDot();
 	bool getIsWholeNote();
 	char getScale();
 	int getOctave();
-	hash_map<string, bool> getNonNotes();
-	void setResult();
-
+	//hash_map<string, bool> getNonNotes();
+	string getResult;
+	void setFlag_Head(int flag, bool isEmptyHead);
+	void setDot(bool dot);
+	void setIsWholeNote(bool isWholeNote);
+	void setScale_Octave(char scale, int octave);
+	//void setNonNotes(hash_map<string, bool> nonNotes);
+	void setResult(string result);
 };
 
 class NonNote : public Symbol {
 private:
 	string nonNoteType;
 public:
-	NonNote(int lineNum, int barNum, int orderNum, string nonNoteType);
+	NonNote(int lineNum, int barNum, int orderNum, string nonNoteType) : Symbol(lineNum, barNum, orderNum) { this->nonNoteType = nonNoteType; }
 	string getNonNoteType();
-	Symbol(lineNum, barNum, orderNum) {}
-};
-
-int main(void) {
-	vector<Symbol> wholeSymbols;
-	vector<Note> wholeNotes;
-	vector<NonNote> wholeNonNotes;
-	Note tmp;
+	void setNonNoteType();
 	
-	merge(wholeNotes.begin(), wholeNotes.end(), wholeNonNotes.begin(), wholeNonNotes.end(), back_inserter(wholeSymbols));
-
-}
+};
