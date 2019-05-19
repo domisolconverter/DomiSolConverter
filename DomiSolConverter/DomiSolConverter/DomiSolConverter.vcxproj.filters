@@ -21,6 +21,9 @@
     <ClInclude Include="DomiSolConverter.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Symbol.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -39,6 +42,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Symbol.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
