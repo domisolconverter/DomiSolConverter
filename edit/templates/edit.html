@@ -1,0 +1,64 @@
+{% extends 'header.html' %}
+
+{% block content %}
+<style>
+.mybtn_Save{
+  margin-left : 115px;
+  padding: 5px 28px;
+}
+
+.mybtn_Finish{
+    margin-left : 5px;
+    padding: 5px 28px;
+
+}
+
+.menu{
+  margin-bottom : 10px;
+}
+
+</style>
+{% load static %}
+<form method="POST">
+{% csrf_token %}
+<div class = "container">
+  <div class = "row menu">
+    <div class="col-6 dropdown">
+      <select  class="custom-select" style="width:20%;height:35px;" id="조이름">
+        <option value="F_major">F major</option>
+        <option value="C_major">C major</option>
+        <option value="G_major">G major</option>
+        <option value="D_major">D major</option>
+        <option value="A_major">A major</option>
+        <option value="E_major">E major</option>
+        <option value="B_major">B major</option>
+        <option value="F_minor">F minor</option>
+        <option value="C_minor">C minor</option>
+        <option value="G_minor">G minor</option>
+        <option value="D_minor">D minor</option>
+        <option value="A_minor">A minor</option>
+        <option value="E_minor">E minor</option>
+        <option value="B_minor">B minor</option>
+      </select>
+      <select class="custom-select" style="width:20%;height:35px;" id="file_format">
+        <option value="F_major">JPG</option>
+        <option value="C_major">PDF</option>
+        <option value="G_major">MIDI</option>
+      </select>
+      <button type="button" class="btn btn-secondary mybtn_Save">Save</button>
+      <button type="button" class="btn btn-secondary mybtn_Finish">Finish</button>
+    </div>
+  </div>
+  <div class = "row sheet">
+    <div class="col-6 text">
+        <div class="form-group">
+          <textarea class="form-control" name="lily_text" rows="20"></textarea>
+        </div>
+    </div>
+    <div class="col-6 image">
+      <img src="{% static "img/result1.jpg" %}" height="700" width = "480">
+    </div>
+  </div>
+</div>
+</form>
+{% endblock %}
