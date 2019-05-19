@@ -1,15 +1,15 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
-void DomiSolConverter::Analysis::calculateStaffHeight(){
+void DomiSolConverter::Analysis::calculateStaffHeight() {
 
 }
 
-void DomiSolConverter::Analysis::calculateStaffSpace(){
+void DomiSolConverter::Analysis::calculateStaffSpace() {
 
 }
 
-void DomiSolConverter::Analysis::calculateStaffXY(){
+void DomiSolConverter::Analysis::calculateStaffXY() {
 
 }
 
@@ -37,11 +37,13 @@ void DomiSolConverter::Analysis::recognizeObject() {
 
 void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 	char output[100];
-	FILE *p = _popen("python label_image.py test_input", "r");
+	FILE *p = _popen("python label_image.py symbols", "r");
 
 	if (p != NULL) {
 		while (fgets(output, sizeof(output), p) != NULL) {
-			cout << output << "\n";
+			if (strlen(output) > 0) {
+				this->nonNote.push_back(output);
+			}
 		}
 	}
 }

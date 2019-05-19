@@ -82,9 +82,8 @@ def find_all_images(img_path):
         img_list[idx] = img_path + img_list[idx]
     return img_list
 
-def recognize(inputImg):
+def recognize(inputImg, graph):
   file_name = inputImg
-  model_file = "models/output_graph.pb"
   label_file = "models/output_labels.txt"
   input_height = 299
   input_width = 299
@@ -94,7 +93,6 @@ def recognize(inputImg):
   output_layer = "final_result"
 
 
-  graph = load_graph(model_file)
   t = read_tensor_from_image_file(
       file_name,
       input_height=input_height,
@@ -115,14 +113,17 @@ def recognize(inputImg):
 
   top_k = results.argsort()[-5:][::-1]
   labels = load_labels(label_file)
-  print ("\n")
   for i in top_k:
-   print(file_name, labels[i], results[i])
+   #print (file_name, "  " , end="")
+   print(labels[i])
+   #print (results[i], "  ", end="")
    break
 
 if __name__ == "__main__":    
     img_list = find_all_images(sys.argv[1])
-
+    model_file = "models/output_graph.pb"
+    graph = load_graph(model_file)
+    
     for img in img_list:
-        recognize(img)
+        recognize(img, graph)
 
