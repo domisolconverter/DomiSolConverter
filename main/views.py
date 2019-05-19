@@ -21,9 +21,18 @@ def main(request):
                 redirect_to = reverse('main')
                 return HttpResponseRedirect(redirect_to)
 
-        # (수정) 이 부분이 form.save() 밑에 들어가야 합니다!
-        else:
-            print('수정해라 예솔아~~~~');
-            form = UploadFileForm()
 
-    return render(request, 'main.html', { 'form' : form })
+        else:
+            form = UploadFileForm()
+            ####### (수정) 이 부분이 form.save() 밑에 들어가야 합니다! ###########
+            print('수정해라 예솔아~~~~');
+            redirect_to = reverse('uploading')
+            return HttpResponseRedirect(redirect_to)
+
+    return render(request, 'main.html', { })
+
+
+# 소켓 연결해서 로딩화면 띄우면서 서버에 있는 프로그램 돌리고 서버로부터 데이터 받아오는 것이 필요하당
+def process_upload(request):
+
+    return render(request, 'uploading.html', {})
