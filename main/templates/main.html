@@ -1,0 +1,48 @@
+{% extends 'header.html' %}
+
+
+{% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css?family=Nanum+Gothic|Nanum+Myeongjo|Noto+Sans+KR&display=swap&subset=korean');
+#dragBox{
+  border:2px dotted #3292A2;
+  width:70%;
+  height:300px;
+  color:#92AAB0;
+  text-align:center;
+  font-size:24px;
+  padding-top:12px;
+  margin-top:50px;
+}
+.intro1{
+  font-family:'Noto Sans KR', sans-serif;
+  font-size:30px;
+  margin-bottom:20px;
+  margin-top:15px;
+}
+.intro2{
+  font-family:'Nanum Myeongjo', serif;
+  font-size:18px;
+  margin-bottom:15px;
+}
+</style>
+<div class = "container intro1">
+  <div class = "row justify-content-md-center">
+    <div class = "col-md-auto">
+          악보 조옮김 웹 사이트
+    </div>
+  </div>
+</div>
+<div class = "container intro2">
+  <div class = "row justify-content-md-center">
+    <div class = "col-md-auto">
+          악보 조옮김을 할 수 있는 가장 쉬운 방법
+    </div>
+  </div>
+</div>
+<div id = "dragBox">
+  <div class = "row">
+    여기로 악보 PDF 파일을 드래그 앤 드롭 하세요.
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="kr" dir="ltr">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <!-- Custom styles for this template -->
+    {% load static %}
+    <style>
+    .title-bar{
+      border-bottom: 2px solid #d3d3d3 ;
+      padding-bottom: 20px;
+    }
+    </style>
+  </head>
+  <body>
+    <header class="title-bar">
+      <div class = "container">
+        <div class = "row justify-content-md-center">
+          <div class = "col-md-auto">
+          <a class="navbar-brand LOGO" href=""><img src="{% static "img/logo_temp.png" %}" height="90" width = "480"></a>
+          </div>
+        </div>
+      </div>
+    </header>
+    <br/>
+    <br/>
+    {% block content %}{% endblock %}
+  </body>
+</html>
