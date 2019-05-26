@@ -28,13 +28,12 @@ int main()
 		cout << "[!] You can NOT open the test image!" << endl;
 		return -1;
 	}
-	//imshow("CASE01", img);
+	imshow("CASE01", img);
 	
 	
 	DomiSolConverter domisolconverter(img);
 	
-	//waitKey(0);
-	//destroyWindow("CASE01");
-	cout << "end" << "\n";
+	waitKey(0);
+	destroyWindow("CASE01");
 	return 0;
 }

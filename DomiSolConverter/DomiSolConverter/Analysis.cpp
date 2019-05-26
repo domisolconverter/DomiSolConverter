@@ -1,6 +1,14 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
+DomiSolConverter::Analysis::Analysis(Mat objectsImg, vector<Rect> objectXY) {
+	this->objectsImg = objectsImg;
+	this->objectXY = objectXY;
+
+	//extractFeature();
+	recognizeGeneralSymbol();
+}
+
 void DomiSolConverter::Analysis::calculateStaffHeight() {
 
 }
@@ -22,7 +30,7 @@ void DomiSolConverter::Analysis::extractFeature() {
 		rectangle(objectsRectImg, objectXY[i].tl(), objectXY[i].br(), color, 1);
 		Mat extractOject = ~objectsRectImg(Rect(objectXY[i]));
 		// assume that it's work
-		string fname = "test_input\\object" + to_string(i) + ".jpg";
+		string fname = "symbols\\object" + to_string(i) + ".jpg";
 		imwrite(fname, extractOject);
 	}
 }
@@ -38,12 +46,20 @@ void DomiSolConverter::Analysis::recognizeObject() {
 void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 	char output[100];
 	FILE *p = _popen("python label_image.py symbols", "r");
-
+	
 	if (p != NULL) {
+		int idx = 0;
 		while (fgets(output, sizeof(output), p) != NULL) {
 			if (strlen(output) > 0) {
+				for (int i = 0; i < 100; i++) {
+					if (output[i] == '\n') {
+						output[i] = '\0';
+					}
+				}
+				cout << output << "\n";
 				this->nonNote.push_back(output);
 			}
+			idx++;
 		}
 	}
 }
@@ -54,14 +70,6 @@ void DomiSolConverter::Analysis::recognizeText() {
 
 void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 
-}
-
-DomiSolConverter::Analysis::Analysis(Mat objectsImg, vector<Rect> objectXY) {
-	this->objectsImg = objectsImg;
-	this->objectXY = objectXY;
-
-	//extractFeature();
-	recognizeGeneralSymbol();
 }
 
 vector<string> DomiSolConverter::Analysis::getNote() {
