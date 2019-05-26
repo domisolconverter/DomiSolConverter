@@ -395,7 +395,8 @@ void DomiSolConverter::Analysis::calculatePitch() {
 				if (headY >= staff_start - (3 * this->staffSpace) && headY <= staff_end + (3 * this->staffSpace)) {
 					char tone = 'E';
 					float curStaff = staff_end + (3 * this->staffSpace);
-					const int threshold = (staffSpace / 3);
+					//const int threshold = (staffSpace / 3);
+					const int threshold = 3.7;
 					for (curStaff; curStaff >= staff_start - (3 * this->staffSpace); curStaff -= staffSpace) {
 						tone++;
 						if (tone == 'H') {
