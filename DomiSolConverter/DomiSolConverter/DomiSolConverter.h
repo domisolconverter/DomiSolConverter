@@ -47,7 +47,7 @@ private:
 		vector<Rect> noteXY;
 		vector<Point> staffXY;
 		int staffHeight;
-		int staffSpace;
+		float staffSpace;
 		vector<string> note;
 		vector<string> nonNote;
 		vector<string> text;
