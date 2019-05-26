@@ -5,7 +5,7 @@ DomiSolConverter::Analysis::Analysis(Mat objectsImg, vector<Rect> objectXY) {
 	this->objectsImg = objectsImg;
 	this->objectXY = objectXY;
 
-	//extractFeature();
+	extractFeature();
 	recognizeGeneralSymbol();
 }
 
@@ -57,7 +57,8 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 					}
 				}
 				cout << output << "\n";
-				this->nonNote.push_back(output);
+				NonNote nn(1, 1, 1, output, objectXY[idx].x + (objectXY[idx].width / 2), objectXY[idx].y + (objectXY[idx].height / 2));
+				this->nonNote.push_back(nn);
 			}
 			idx++;
 		}

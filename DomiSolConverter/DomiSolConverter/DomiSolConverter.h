@@ -3,6 +3,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include "Symbol.h"
 
 using namespace std;
 using namespace cv;
@@ -48,7 +49,7 @@ private:
 		int staffHeight;
 		int staffSpace;
 		vector<string> note;
-		vector<string> nonNote;
+		vector<Symbol> nonNote;
 		vector<string> text;
 
 		void calculateStaffHeight();
