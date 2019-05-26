@@ -10,4 +10,6 @@ DomiSolConverter::DomiSolConverter(Mat input) {
 	this->objectXY = P.getObjectXY();
 
 	Analysis A = Analysis(objectsImg, objectXY);
+
+	Postproecessing pp = Postproecessing(notes, nonNotes);
 }

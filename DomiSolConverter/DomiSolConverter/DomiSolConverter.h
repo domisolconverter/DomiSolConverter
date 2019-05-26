@@ -2,6 +2,7 @@
 #include "pch.h"
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include "Symbol.h"
 #include <vector>
 
 using namespace std;
@@ -48,9 +49,9 @@ private:
 		vector<Point> staffXY;
 		int staffHeight;
 		float staffSpace;
-		vector<string> note;
-		vector<string> nonNote;
 		vector<string> text;
+		vector<Note> notes;
+		vector<NonNote> nonNotes;
 
 		void calculateStaffHeight();
 		void calculateStaffSpace();
@@ -78,9 +79,11 @@ private:
 		void combineInfo();
 		void transposeKey();
 		void saveFile();
+		vector<Note> notes;
+		vector<NonNote> nonNotes;
 
 	public:
-		Postproecessing();
+		Postproecessing(vector<Note> notes, vector<NonNote> nonNotes);
 	};
 
 	Mat inputImg;
@@ -90,6 +93,8 @@ private:
 	Mat objectsImg;
 	vector<Rect> objectXY;
 	Mat resultImg;
+	vector<Note> notes;
+	vector<NonNote> nonNotes;
 
 public:
 	DomiSolConverter(Mat input);

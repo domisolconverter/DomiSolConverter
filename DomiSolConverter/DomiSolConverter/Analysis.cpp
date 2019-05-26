@@ -8,7 +8,7 @@ DomiSolConverter::Analysis::Analysis(Mat objectsImg, vector<Rect> objectXY) {
 	calculateStaffXY();
 	recognizeText();
 	extractFeature();
-	calculatePitch();
+	//calculatePitch();
 }
 
 // 오선 한 개(5개의 줄)의 높이
