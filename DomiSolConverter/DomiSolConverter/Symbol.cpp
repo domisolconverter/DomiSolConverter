@@ -82,3 +82,37 @@ string NonNote::getNonNoteType() {
 void NonNote::setNonNoteType() {
 	this->nonNoteType = nonNoteType;
 }
+
+
+
+enum {
+	TWO = 2,
+	TWO_DOT,
+	FOUR,
+	FOUR_DOT,
+	EIEGHT = 8,
+	EIEGHT_DOT,
+	WHOLE,
+	SIXT = 16,
+	SIXT_DOT
+};
+
+int Note::transposeNote() {
+	if (isWholeNote) {
+		return WHOLE;
+	}
+	else if (flag == 0 && isEmptyHead && !dot) {
+		return TWO;
+	}
+	else if (flag == 0 && isEmptyHead && dot) {
+		return TWO_DOT;
+	}
+	else if (flag == 0 && !isEmptyHead && dot) {
+		return FOUR;
+	}
+	else if (flag == 0 && !isEmptyHead && dot) {
+		return FOUR_DOT;
+	}
+}
+
+

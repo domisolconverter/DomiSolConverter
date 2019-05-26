@@ -1,27 +1,37 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
+DomiSolConverter::Analysis::Analysis(Mat objectsImg, vector<Rect> objectXY) {
+	this->objectsImg = objectsImg;
+	this->objectXY = objectXY;
+
+	calculateStaffXY();
+	recognizeText();
+	extractFeature();
+	calculatePitch();
+}
+
 // 오선 한 개(5개의 줄)의 높이
-void DomiSolConverter::Analysis::calculateStaffHeight(){
+void DomiSolConverter::Analysis::calculateStaffHeight() {
 	int sum = 0;
-	for (int i = 1; i < staffXY.size(); i+=2 ) {
+	for (int i = 1; i < staffXY.size(); i += 2) {
 		sum += staffXY[i].y - staffXY[i - 1].y;
 	}
 	if (staffXY.size() != 0) {
-		this -> staffHeight = sum / (staffXY.size() / 2);
+		this->staffHeight = sum / (staffXY.size() / 2);
 	}
 	else {
-		cout << "오선의 개수가 0개 입니다"<< endl;
+		cout << "오선의 개수가 0개 입니다" << endl;
 	}
 }
 
 // 오선에 있는 줄 사이 간격
-void DomiSolConverter::Analysis::calculateStaffSpace(){
-
+void DomiSolConverter::Analysis::calculateStaffSpace() {
+	this->staffSpace = this->staffHeight / 5;
 }
 
-void DomiSolConverter::Analysis::calculateStaffXY(){
-	
+void DomiSolConverter::Analysis::calculateStaffXY() {
+
 	// (수정)DomiSolConverter의 straitenedImg로 바꾸세요
 	string INPUTPATH = "./inputImage/staffLine.jpg";
 
@@ -49,7 +59,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 		for (int nc = 0; nc < width; nc++) {
 
-			if (pixel[nc]>230) {
+			if (pixel[nc] > 230) {
 				tempX.push_back(nc);
 				colCnt++;
 			}
@@ -147,9 +157,10 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 
 	}
-	
+
 	// 오선의 평균 높이 계산
 	calculateStaffHeight();
+	calculateStaffSpace();
 
 	//* 오선 검출 결과 테스트 프린트 *//
 	/*
@@ -159,7 +170,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	*/
 
 	//* 오선 ROI 테스트 프린트 *//
-	
+
 	/*
 	Rect rect[10]; // (수정) 동적 할당하기
 	for (int i = 0; i < staffXY.size()/2; i++) {
@@ -185,20 +196,10 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	namedWindow("RECT04", CV_WINDOW_AUTOSIZE);
 	imshow("RECT04", subimage4);
 	*/
-
-	for (int kk = 0; kk < staffXY.size(); kk++) {
-		cout << staffXY[kk] << "\n";
-	}
-
-	namedWindow("OUT01", CV_WINDOW_AUTOSIZE);
-	imshow("OUT01", src);
-
-	destroyWindow("OUT01");
-
 }
 
 void DomiSolConverter::Analysis::extractFeature() {
-	
+
 	Mat objectsRectImg = objectsImg;
 
 	cvtColor(objectsRectImg, objectsRectImg, COLOR_GRAY2RGB);
@@ -226,11 +227,11 @@ void DomiSolConverter::Analysis::extractFeature() {
 			Mat grad_x, grad_y;
 			Mat abs_grad_x, abs_grad_y;
 
-			
+
 			// reduce the noise (kernel size=3)
 			Mat blurredImg;
 			GaussianBlur(object, object, Size(3, 3), 0, 0, BORDER_DEFAULT);
-			
+
 
 			// calculate derivatives in x and y directions
 			Sobel(object, grad_x, ddepth, 1, 0, 3, scale, delta, BORDER_DEFAULT);
@@ -262,7 +263,7 @@ void DomiSolConverter::Analysis::extractFeature() {
 				/*
 				** 라인이 검출되면 histogram으로 음표인지 판단
 				*/
-				
+
 				vector<int> Xhist(width, 0);
 				vector<int> Yhist(height, 0);
 				/*
@@ -308,20 +309,99 @@ void DomiSolConverter::Analysis::extractFeature() {
 				*/
 				//cout << endl;
 				//cout << object << endl;
-				
-			}
 
+			}
 			//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object);
 		}
-		
+
 	}
-	imshow("objects", objectsRectImg);
+
 	imwrite("outputImage/objects.jpg", objectsRectImg);
-	
+
+
 }
 
 void DomiSolConverter::Analysis::calculatePitch() {
+	vector<Rect>::iterator note = noteXY.begin();
+	int checkCnt = 0;
 
+	for (note; note != noteXY.end(); note++) {
+		Rect upHead((*note).x, (*note).y, (*note).width, this->staffSpace);
+		Rect downHead((*note).x, (*note).y + (*note).height - this->staffSpace, (*note).width, this->staffSpace);
+
+		Mat up = this->objectsImg(upHead);
+		Mat down = this->objectsImg(downHead);
+
+		Rect head;
+
+		int upCnt = 0;
+		int downCnt = 0;
+
+		for (int row = -1; row < 2; row++) {
+			for (int pixel = 0; pixel < (*note).width; pixel++) {
+				int upVal = (int)(up.at<uchar>((upHead.height / 2) + row, pixel));
+				int downVal = (int)(down.at<uchar>((downHead.height / 2) + row, pixel));
+				if (upVal == 255) {
+					upCnt++;
+				}
+				if (downVal == 255) {
+					downCnt++;
+				}
+			}
+		}
+		if (upCnt > downCnt) {
+			head = upHead;
+		}
+
+		else {
+			head = downHead;
+		}
+
+		// For test
+		vector<int> test;
+		test.push_back(135);
+		test.push_back(135 + staffHeight);
+		test.push_back(240);
+		test.push_back(240 + staffHeight);
+		test.push_back(345);
+		test.push_back(345 + staffHeight);
+		test.push_back(450);
+		test.push_back(450 + staffHeight);
+		vector<int>::iterator staff = test.begin();
+
+		int staff_start = 0;
+		int staff_end = 0;
+		for (staff; staff != test.end(); staff++) {
+			int index = distance(test.begin(), staff);
+			if (index % 2 == 0) {
+				staff_start = (*staff);
+			}
+			else {
+				staff_end = (*staff);
+				int headY = head.y + (head.height / 2);
+
+				if (headY >= staff_start - (3 * this->staffSpace) && headY <= staff_end + (3* this->staffSpace)) {
+					char tone = 'F';
+					string toneName;
+					int curStaff = staff_end + (3 * this->staffSpace);
+
+					for (curStaff; curStaff >= staff_start - (3 * this->staffSpace); curStaff -= staffSpace) {
+						if (headY < curStaff + (staffSpace / 4) && headY > curStaff - (staffSpace / 4)) {
+							break;
+						}
+						tone++;
+						if (headY < curStaff + staffSpace - (staffSpace / 4)){
+							break;
+						}
+
+					}
+					
+					putText(this->objectsImg, toneName, Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
+				}
+			}
+		}
+	}
+	imshow("youngmu", this->objectsImg);
 }
 
 void DomiSolConverter::Analysis::recognizeObject() {
@@ -333,7 +413,7 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 }
 
 void DomiSolConverter::Analysis::recognizeText() {
-	
+
 	// (수정)DomiSolConverter의 straitenedImg로 바꾸세요
 	string INPUTPATH = "./inputImage/straightenedImg.jpg";
 	string OUTPUTPATH = "./outputImage/textpart";
@@ -343,7 +423,7 @@ void DomiSolConverter::Analysis::recognizeText() {
 	int height = src.rows;
 
 	// 오선 아닌 부분 잘라서 저장하기
-	
+
 	Rect ROI;
 	Mat tempImg;
 
@@ -363,7 +443,7 @@ void DomiSolConverter::Analysis::recognizeText() {
 		}
 		// 중간
 		else {
-			ROI = Rect(0, staffXY[i].y, width, staffXY[i+1].y - staffXY[i].y);
+			ROI = Rect(0, staffXY[i].y, width, staffXY[i + 1].y - staffXY[i].y);
 			Mat subImg = Mat(src, ROI);
 			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
 			i++;
@@ -376,17 +456,9 @@ void DomiSolConverter::Analysis::recognizeText() {
 }
 
 void DomiSolConverter::Analysis::recognizeNoteSymbol() {
-	
+
 }
 
-DomiSolConverter::Analysis::Analysis(Mat objectsImg, vector<Rect> objectXY) {
-	this->objectsImg = objectsImg;
-	this->objectXY = objectXY;
-	
-	calculateStaffXY();
-	recognizeText();
-	extractFeature();
-}
 
 vector<string> DomiSolConverter::Analysis::getNote() {
 	vector<string> result;

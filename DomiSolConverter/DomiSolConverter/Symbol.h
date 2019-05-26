@@ -44,6 +44,7 @@ public:
 	void setScale_Octave(char scale, int octave);
 	//void setNonNotes(hash_map<string, bool> nonNotes);
 	void setResult(string result);
+	int transposeNote();
 };
 
 class NonNote : public Symbol {

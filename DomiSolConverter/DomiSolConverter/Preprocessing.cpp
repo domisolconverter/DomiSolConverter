@@ -1,6 +1,26 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
+DomiSolConverter::Preprocessing::Preprocessing(Mat inputImg) {
+	this->inputImg = inputImg;
+
+	binarization();
+	//show(binaryImg, "binaryImg", 700, 0);
+	detectEdge();
+	//show(edgeImg, "edgeImg");
+	straightenImg();
+	//show(straightenedImg, "straightenedImg");
+	straightenedImg = inputImg;
+	threshold(~straightenedImg, straightenedBinaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	//show(straightenedBinaryImg, "straightenedBinaryImg");
+	extractStaff();
+	//show(staffImg, "staffImg");
+	removeStaff();
+	//show(objectsImg, "objectsImg");
+	extractObject();
+
+}
+
 int DomiSolConverter::Preprocessing::show(Mat img, string title) {
 	// cout << "OpenCV Version : " << CV_VERSION << endl;
 	namedWindow(title, CV_WINDOW_AUTOSIZE);
@@ -189,24 +209,4 @@ Mat DomiSolConverter::Preprocessing::getObjectsImg() {
 
 vector<Rect> DomiSolConverter::Preprocessing::getObjectXY() {
 	return objectXY;
-}
-
-DomiSolConverter::Preprocessing::Preprocessing(Mat inputImg) {
-	this->inputImg = inputImg;
-	
-	binarization();
-	//show(binaryImg, "binaryImg", 700, 0);
-	detectEdge();
-	//show(edgeImg, "edgeImg");
-	straightenImg();
-	//show(straightenedImg, "straightenedImg");
-	straightenedImg = inputImg;
-	threshold(~straightenedImg, straightenedBinaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
-	//show(straightenedBinaryImg, "straightenedBinaryImg");
-	extractStaff();
-	//show(staffImg, "staffImg");
-	removeStaff();
-	//show(objectsImg, "objectsImg");
-	extractObject();
-	
 }

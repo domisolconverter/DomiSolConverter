@@ -32,10 +32,7 @@ int main()
 	DomiSolConverter dm(img);
 
 	imshow("CASE01", img);
-	
-	
-	DomiSolConverter domisolconverter(img);
-	
+		
 	waitKey(0);
 	destroyWindow("CASE01");
 	return 0;
