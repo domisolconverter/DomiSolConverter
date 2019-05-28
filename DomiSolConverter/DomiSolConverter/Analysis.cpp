@@ -257,11 +257,27 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 	
 }
 
+void DomiSolConverter::Analysis::tempFunction() {
 
-DomiSolConverter::Analysis::Analysis() {
+	Mat input = this->straightenedImg;
+
+	// 양쪽 네 곳의 모서리에 대해서 Run Length Coding 진행
+
+	// 하얀색으로 칠하기
+
+	// 출력
+	namedWindow("input", CV_WINDOW_AUTOSIZE);
+	imshow("input", input);
+
+	destroyWindow("input");
+}
+
+DomiSolConverter::Analysis::Analysis(Mat straightenedImg){
 	
-	calculateStaffXY();
-	recognizeText();
+	this->straightenedImg = straightenedImg;
+	//calculateStaffXY();
+	tempFunction(); // 오선 인식 고친 함수
+	//recognizeText();
 
 }
 

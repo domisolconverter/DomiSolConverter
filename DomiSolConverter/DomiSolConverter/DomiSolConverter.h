@@ -26,6 +26,9 @@ private:
 
 	class Analysis {
 	private:
+		
+		Mat straightenedImg;
+
 		vector<Point> staffXY;
 		int staffHeight;
 		int staffSpace;
@@ -42,9 +45,10 @@ private:
 		void recognizeGeneralSymbol();
 		void recognizeText();
 		void recognizeNoteSymbol();
+		void tempFunction();
 
 	public:
-		Analysis();
+		Analysis(Mat straightenedImg);
 		vector<string> getNote();
 		vector<string> getNonNote();
 		vector<string> getText();
