@@ -60,7 +60,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 		for (int nc = 0; nc < width; nc++) {
 
-			if (pixel[nc]<10) {
+			if (pixel[nc]==0) {
 				tempX.push_back(nc);
 				colCnt++;
 			}
@@ -160,14 +160,14 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	}
 	
 	// 오선의 평균 높이 계산
-	calculateStaffHeight();
+	 calculateStaffHeight();
 
 	//* 오선 검출 결과 테스트 프린트 *//
-	/*
+	
 	for (int i = 0; i < staffXY.size(); i++) {
 		cout << "( " << this->staffXY[i].x << " , " << this->staffXY[i].y << " )" << endl;
 	}
-	*/
+	
 
 	//* 오선 ROI 테스트 프린트 *//
 	
@@ -203,6 +203,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	destroyWindow("OUT01");
 	*/
 
+	show(src, "오선인식한 이미지");
 }
 
 void DomiSolConverter::Analysis::extractFeature() {
