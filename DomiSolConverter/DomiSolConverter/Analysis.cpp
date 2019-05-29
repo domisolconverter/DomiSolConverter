@@ -257,26 +257,62 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 	
 }
 
-void DomiSolConverter::Analysis::tempFunction() {
+// 기울기 보정한 이미지의 검은색 모서리 부분을 하얀색으로 바꾸기
+void DomiSolConverter::Analysis::colorConers() {
 
 	Mat input = this->straightenedImg;
+	int width = input.cols;
+	int height = input.rows;
+	int bar = (int)((width / 100.0) * 20);
 
 	// 양쪽 네 곳의 모서리에 대해서 Run Length Coding 진행
-
 	// 하얀색으로 칠하기
+	for (int nr = 0; nr < height; nr++) {
 
-	// 출력
+		uchar* pixel = input.ptr<uchar>(nr);
+
+		for (int nc = 0; nc < width; nc++) {
+			if (pixel[nc] < 10) {
+				pixel[nc] = 255;
+			}
+			else {
+				break;
+			}
+		}
+
+	}
+
+	for (int nr = 0; nr < height; nr++) {
+
+		uchar* pixel = input.ptr<uchar>(nr);
+
+		for (int nc = width-1; nc >= 0; nc--) {
+			if (pixel[nc] < 10) {
+				pixel[nc] = 255;
+			}
+			else {
+				break;
+			}
+		}
+
+	}
+
+	// 출력 //
+	/*
 	namedWindow("input", CV_WINDOW_AUTOSIZE);
 	imshow("input", input);
 
 	destroyWindow("input");
+	*/
+
 }
 
 DomiSolConverter::Analysis::Analysis(Mat straightenedImg){
 	
 	this->straightenedImg = straightenedImg;
+	colorConers(); 
 	//calculateStaffXY();
-	tempFunction(); // 오선 인식 고친 함수
+	
 	//recognizeText();
 
 }

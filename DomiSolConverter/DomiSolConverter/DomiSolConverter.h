@@ -23,11 +23,12 @@ private:
 	public:
 		Preprocessing();
 	};
-
+	
 	class Analysis {
 	private:
 		
 		Mat straightenedImg;
+		Mat inputCalculateStaffImg;
 
 		vector<Point> staffXY;
 		int staffHeight;
@@ -45,7 +46,7 @@ private:
 		void recognizeGeneralSymbol();
 		void recognizeText();
 		void recognizeNoteSymbol();
-		void tempFunction();
+		void colorConers();
 
 	public:
 		Analysis(Mat straightenedImg);
