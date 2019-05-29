@@ -297,10 +297,12 @@ void DomiSolConverter::Analysis::colorConers() {
 
 	}
 
+	this->inputCalculateStaffImg = input;
+
 	// Ãâ·Â //
 	/*
 	namedWindow("input", CV_WINDOW_AUTOSIZE);
-	imshow("input", input);
+	imshow("input", this->inputCalculateStaffImg);
 
 	destroyWindow("input");
 	*/
