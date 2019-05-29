@@ -5,11 +5,12 @@ DomiSolConverter::DomiSolConverter(Mat input) {
 
 	this->inputImg = input;
 
-	// (수정) //
-	this->straightenedImg = imread("./inputImage/straightenedImg.jpg", CV_LOAD_IMAGE_GRAYSCALE);
-	threshold(this->straightenedImg, this->straightenedImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
-	// (수정) // 
-	
-	cout<<"Create DomiSolConverter Objects!"<<endl;
-	Analysis A(straightenedImg);
+	Preprocessing P = Preprocessing(this->inputImg);
+	this->objectsImg = P.getObjectsImg();
+	this->objectXY = P.getObjectXY();
+	this->straightenedImg = P.getStraightenedImg();
+	Analysis A = Analysis(straightenedImg, objectsImg, objectXY);
+	//A.setObjectsImg(this->objectsImg);
+	//A.setObjectXY(this->objectsImg);
+
 }

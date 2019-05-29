@@ -2,6 +2,19 @@
 #include "DomiSolConverter.h"
 
 
+int DomiSolConverter::Analysis::show(Mat img, string title) {
+	// cout << "OpenCV Version : " << CV_VERSION << endl;
+	namedWindow(title, CV_WINDOW_AUTOSIZE);
+
+	if (img.empty())
+	{
+		cout << "There's no sheet file!" << endl;
+		return -1;
+	}
+
+	imshow(title, img);
+}
+
 // 오선 한 개(5개의 줄)의 높이
 void DomiSolConverter::Analysis::calculateStaffHeight(){
 	int sum = 0;
@@ -193,7 +206,15 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 }
 
 void DomiSolConverter::Analysis::extractFeature() {
-
+	//Draw result
+	Mat objectsRectImg = objectsImg;
+	//Scalar color(0, 0, 0);
+	Scalar color(255, 255, 255);
+	for (int i = 0; i < objectXY.size(); i++) {
+		rectangle(objectsRectImg, objectXY[i].tl(), objectXY[i].br(), color, 1);
+	}
+	// namedWindow("objects", CV_WINDOW_AUTOSIZE);
+	// imshow("objects", objectsRectImg);
 }
 
 void DomiSolConverter::Analysis::calculatePitch() {
@@ -265,6 +286,7 @@ void DomiSolConverter::Analysis::colorConers() {
 
 	// 양쪽 네 곳의 모서리에 대해서 Run Length Coding 진행
 	// 하얀색으로 칠하기
+	
 	for (int nr = 0; nr < height; nr++) {
 
 		uchar* pixel = input.ptr<uchar>(nr);
@@ -294,27 +316,26 @@ void DomiSolConverter::Analysis::colorConers() {
 		}
 
 	}
-
+	
 	this->inputCalculateStaffImg = input;
-
-	// 출력 //
-	
-	namedWindow("input", CV_WINDOW_AUTOSIZE);
-	imshow("input", this->inputCalculateStaffImg);
-
-	destroyWindow("input");
-	
 
 }
 
-DomiSolConverter::Analysis::Analysis(Mat straightenedImg){
-	
+
+DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat objectsImg, vector<Rect> objectXY) {
+
+	// 오선 검출
 	this->straightenedImg = straightenedImg;
-	colorConers(); 
+	colorConers();
+	//show(this->inputCalculateStaffImg, "오선인식할 이미지");
 	calculateStaffXY();
-	
+
+	// 글자 인식
 	//recognizeText();
 
+	this->objectsImg = objectsImg;
+	this->objectXY = objectXY;
+	extractFeature();
 }
 
 vector<string> DomiSolConverter::Analysis::getNote() {
@@ -330,4 +351,12 @@ vector<string> DomiSolConverter::Analysis::getNonNote() {
 vector<string> DomiSolConverter::Analysis::getText() {
 	vector<string> result;
 	return result;
+}
+
+void DomiSolConverter::Analysis::setObjectsImg(Mat objectsImg) {
+	this->objectsImg = objectsImg;
+}
+
+void DomiSolConverter::Analysis::setObjectXY(vector<Rect> objectXY) {
+	this->objectXY = objectXY;
 }
