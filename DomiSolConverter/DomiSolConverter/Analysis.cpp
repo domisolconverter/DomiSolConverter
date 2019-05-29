@@ -22,11 +22,9 @@ void DomiSolConverter::Analysis::calculateStaffSpace(){
 }
 
 void DomiSolConverter::Analysis::calculateStaffXY(){
-	
-	// (수정)DomiSolConverter의 straitenedImg로 바꾸세요
-	string INPUTPATH = "./inputImage/staffLine.jpg";
 
-	Mat src = imread(INPUTPATH, IMREAD_GRAYSCALE);
+
+	Mat src = this->inputCalculateStaffImg;
 
 	int width = src.cols;
 	int height = src.rows;
@@ -35,7 +33,6 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	int staffNum = 0;
 	vector<int> Y;
 	vector<int> X;
-
 
 	//* Y축 히스토그램 그리기 *//
 
@@ -50,7 +47,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 		for (int nc = 0; nc < width; nc++) {
 
-			if (pixel[nc]>230) {
+			if (pixel[nc]<10) {
 				tempX.push_back(nc);
 				colCnt++;
 			}
@@ -185,12 +182,13 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	Mat subimage4 = src(rect4);
 	namedWindow("RECT04", CV_WINDOW_AUTOSIZE);
 	imshow("RECT04", subimage4);
-	*/
+	
 
 	namedWindow("OUT01", CV_WINDOW_AUTOSIZE);
 	imshow("OUT01", src);
 
 	destroyWindow("OUT01");
+	*/
 
 }
 
@@ -300,12 +298,12 @@ void DomiSolConverter::Analysis::colorConers() {
 	this->inputCalculateStaffImg = input;
 
 	// 출력 //
-	/*
+	
 	namedWindow("input", CV_WINDOW_AUTOSIZE);
 	imshow("input", this->inputCalculateStaffImg);
 
 	destroyWindow("input");
-	*/
+	
 
 }
 
@@ -313,7 +311,7 @@ DomiSolConverter::Analysis::Analysis(Mat straightenedImg){
 	
 	this->straightenedImg = straightenedImg;
 	colorConers(); 
-	//calculateStaffXY();
+	calculateStaffXY();
 	
 	//recognizeText();
 
