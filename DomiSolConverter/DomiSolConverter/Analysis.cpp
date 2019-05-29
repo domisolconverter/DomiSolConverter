@@ -170,39 +170,19 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	
 
 	//* 오선 ROI 테스트 프린트 *//
-	
-	/*
-	Rect rect[10]; // (수정) 동적 할당하기
-	for (int i = 0; i < staffXY.size()/2; i++) {
-		rect[i] = Rect(0, staffXY[i].y, width, this->staffHeight); // (수정)평균 오선 크기 넣기
+
+	Rect ROI;
+
+	if (staffXY.size() >= 2) {
+		for (int i = 0; i < staffXY.size(); i+=2) {
+			// 처음
+			ROI = Rect(0, staffXY[i].y, width, staffXY[i + 1].y - staffXY[i].y);
+			Mat subImg = Mat(src, ROI);
+			show(subImg, to_string(i) + "번 째 오선");
+
+		}
 	}
-	Rect rect1(0, staffXY[0].y, width, staffXY[1].y - staffXY[0].y);
-	Mat subimage1 = src(rect1);
-	namedWindow("RECT01", CV_WINDOW_AUTOSIZE);
-	imshow("RECT01", subimage1);
-
-	Rect rect2(0, staffXY[2].y, width, staffXY[3].y - staffXY[2].y);
-	Mat subimage2 = src(rect2);
-	namedWindow("RECT02", CV_WINDOW_AUTOSIZE);
-	imshow("RECT02", subimage2);
-
-	Rect rect3(0, staffXY[4].y, width, staffXY[5].y - staffXY[4].y);
-	Mat subimage3 = src(rect3);
-	namedWindow("RECT03", CV_WINDOW_AUTOSIZE);
-	imshow("RECT03", subimage3);
-
-	Rect rect4(0, staffXY[6].y, width, staffXY[7].y - staffXY[6].y);
-	Mat subimage4 = src(rect4);
-	namedWindow("RECT04", CV_WINDOW_AUTOSIZE);
-	imshow("RECT04", subimage4);
 	
-
-	namedWindow("OUT01", CV_WINDOW_AUTOSIZE);
-	imshow("OUT01", src);
-
-	destroyWindow("OUT01");
-	*/
-
 	show(src, "오선인식한 이미지");
 }
 
