@@ -446,7 +446,7 @@ void DomiSolConverter::Analysis::calculatePitch() {
 					}
 					putText(toneImg, string(1, tone), Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
 					oneNote.setScale_Octave(tone, octave);
-					this->
+					
 				}
 			}
 		}
