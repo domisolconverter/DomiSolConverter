@@ -2,6 +2,7 @@
 #include "pch.h"
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include "Symbol.h"
 #include <vector>
 
 using namespace std;

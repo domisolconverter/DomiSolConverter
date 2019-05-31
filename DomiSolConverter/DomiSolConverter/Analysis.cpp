@@ -392,16 +392,16 @@ void DomiSolConverter::Analysis::calculatePitch() {
 
 		float staff_start = 0;
 		float staff_end = 0;
+		int lineNum = -1;
+
 		for (staff; staff != test.end(); staff++) {
 			int index = distance(test.begin(), staff);
 			if (index % 2 == 0) {
 				staff_start = (*staff);
+				lineNum++;
 			}
 			else {
 				staff_end = (*staff);
-				if (headY == 451) {
-					imwrite("HEAD.jpg", ~(this->objectsImg(head)));
-				}
 				line(this->objectsImg, Point(100, staff_start), Point(700, staff_start), Scalar(255, 255, 255));
 				line(this->objectsImg, Point(100, staff_start + staffSpace), Point(700, staff_start + staffSpace), Scalar(255, 255, 255));
 				line(this->objectsImg, Point(100, staff_start + staffSpace * 2), Point(700, staff_start + staffSpace * 2), Scalar(255, 255, 255));
@@ -409,9 +409,9 @@ void DomiSolConverter::Analysis::calculatePitch() {
 				line(this->objectsImg, Point(100, staff_end), Point(700, staff_end), Scalar(255, 255, 255));
 
 				if (headY >= staff_start - (3 * this->staffSpace) && headY <= staff_end + (3 * this->staffSpace)) {
-					if (headY == 447) {
-						imwrite("HEAD.jpg", this->objectsImg(head));
-					}
+					Note oneNote(lineNum, 0, 0);
+					int octave = 0;
+
 					char tone = 'E';
 					float curStaff = staff_end + (3 * this->staffSpace);
 					const int threshold = (staffSpace / 3);
@@ -419,6 +419,9 @@ void DomiSolConverter::Analysis::calculatePitch() {
 						tone++;
 						if (tone == 'H') {
 							tone = 'A';
+						}
+						else if (tone == 'C') {
+							octave++;
 						}
 						if (headY < curStaff + threshold && headY > curStaff - threshold) {
 							break;
@@ -428,18 +431,25 @@ void DomiSolConverter::Analysis::calculatePitch() {
 							if (tone == 'H') {
 								tone = 'A';
 							}
+							else if (tone == 'C') {
+								octave++;
+							}
 							break;
 						}
 						tone++;
 						if (tone == 'H') {
 							tone = 'A';
 						}
+						else if (tone == 'C') {
+							octave++;
+						}
 					}
 					putText(toneImg, string(1, tone), Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
+					oneNote.setScale_Octave(tone, octave);
+					this->
 				}
 			}
 		}
-
 	}
 	imshow("Tone", toneImg);
 }
