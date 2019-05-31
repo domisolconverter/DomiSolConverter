@@ -323,7 +323,7 @@ void DomiSolConverter::Analysis::extractFeature() {
 
 void DomiSolConverter::Analysis::calculatePitch() {
 	vector<Rect>::iterator note = noteXY.begin();
-	Mat testImg = this->objectsImg.clone();
+	Mat toneImg = this->objectsImg.clone();
 
 	for (note; note != noteXY.end(); note++) {
 		Rect upHead((*note).x, (*note).y, (*note).width, this->staffSpace);
@@ -339,7 +339,7 @@ void DomiSolConverter::Analysis::calculatePitch() {
 
 		// For test
 		this->staffHeight = 34;
-		this->staffSpace = (float)34 / (float)4;
+		this->staffSpace = (float)33 / (float)4;
 		vector<int> test;
 		test.push_back(136);
 		test.push_back(135 + staffHeight);
@@ -350,19 +350,36 @@ void DomiSolConverter::Analysis::calculatePitch() {
 		test.push_back(447);
 		test.push_back(447 + 33);
 		vector<int>::iterator staff = test.begin();
+		int maxCnt = 0;
 
-		for (int row = -1; row < 2; row++) {
+		float headY = 0;
+		int headCnt = 0;
+
+		for (int row = upHead.height / 4; row <= (upHead.height / 4) * 3; row++) {
+			int upOneLine = 0;
+			int downOneLine = 0;
 			for (int pixel = 0; pixel < (*note).width; pixel++) {
-				int upVal = (int)(up.at<uchar>((upHead.height / 2) + row, pixel));
-				int downVal = (int)(down.at<uchar>((downHead.height / 2) + row, pixel));
+				int upVal = (int)(up.at<uchar>(row, pixel));
+				int downVal = (int)(down.at<uchar>(row, pixel));
 				if (upVal == 255) {
-					upCnt++;
+					upOneLine++;
 				}
 				if (downVal == 255) {
-					downCnt++;
+					downOneLine++;
 				}
 			}
+			upCnt += upOneLine;
+			downCnt += downOneLine;
+
+			if (maxCnt < upOneLine) {
+				maxCnt = upOneLine;
+			}
+
+			if (maxCnt < downOneLine) {
+				maxCnt = downOneLine;
+			}
 		}
+
 		if (upCnt > downCnt) {
 			head = upHead;
 		}
@@ -371,21 +388,20 @@ void DomiSolConverter::Analysis::calculatePitch() {
 			head = downHead;
 		}
 
+		headY = head.y + (head.height / 2);
+
 		float staff_start = 0;
 		float staff_end = 0;
 		for (staff; staff != test.end(); staff++) {
-			putText(testImg, to_string((*staff)), Point(30, (*staff)), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
 			int index = distance(test.begin(), staff);
 			if (index % 2 == 0) {
 				staff_start = (*staff);
 			}
 			else {
-				if (index == 2) {
-					staffSpace = (float)33 / (float)4;
-				}
 				staff_end = (*staff);
-
-				float headY = head.y + ((float)head.height / (float)2);
+				if (headY == 451) {
+					imwrite("HEAD.jpg", ~(this->objectsImg(head)));
+				}
 				line(this->objectsImg, Point(100, staff_start), Point(700, staff_start), Scalar(255, 255, 255));
 				line(this->objectsImg, Point(100, staff_start + staffSpace), Point(700, staff_start + staffSpace), Scalar(255, 255, 255));
 				line(this->objectsImg, Point(100, staff_start + staffSpace * 2), Point(700, staff_start + staffSpace * 2), Scalar(255, 255, 255));
@@ -393,10 +409,12 @@ void DomiSolConverter::Analysis::calculatePitch() {
 				line(this->objectsImg, Point(100, staff_end), Point(700, staff_end), Scalar(255, 255, 255));
 
 				if (headY >= staff_start - (3 * this->staffSpace) && headY <= staff_end + (3 * this->staffSpace)) {
+					if (headY == 447) {
+						imwrite("HEAD.jpg", this->objectsImg(head));
+					}
 					char tone = 'E';
 					float curStaff = staff_end + (3 * this->staffSpace);
-					//const int threshold = (staffSpace / 3);
-					const int threshold = 3.7;
+					const int threshold = (staffSpace / 3);
 					for (curStaff; curStaff >= staff_start - (3 * this->staffSpace); curStaff -= staffSpace) {
 						tone++;
 						if (tone == 'H') {
@@ -405,7 +423,7 @@ void DomiSolConverter::Analysis::calculatePitch() {
 						if (headY < curStaff + threshold && headY > curStaff - threshold) {
 							break;
 						}
-						else if (headY < curStaff + staffSpace - threshold && headY > curStaff + threshold) {
+						else if (headY > curStaff - staffSpace + threshold && headY < curStaff - threshold) {
 							tone++;
 							if (tone == 'H') {
 								tone = 'A';
@@ -417,15 +435,13 @@ void DomiSolConverter::Analysis::calculatePitch() {
 							tone = 'A';
 						}
 					}
-
-					putText(testImg, to_string(int(headY)), Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
-					putText(this->objectsImg, string(1, tone), Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
+					putText(toneImg, string(1, tone), Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
 				}
 			}
 		}
+
 	}
-	imshow("XY", testImg);
-	imshow("Tone", this->objectsImg);
+	imshow("Tone", toneImg);
 }
 
 void DomiSolConverter::Analysis::recognizeObject() {
