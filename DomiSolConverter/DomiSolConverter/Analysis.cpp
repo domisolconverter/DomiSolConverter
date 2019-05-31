@@ -41,15 +41,18 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 	int width = src.cols;
 	int height = src.rows;
-	int oneBar = (int)((width / 100.0) * 20);    // 140
+	int oneBar = (int)((width / 100.0) * 10);    // 140
 	int colCnt = 0;
 	int staffNum = 0;
+
 	vector<int> Y;
 	vector<int> X;
 
 	//* Y축 히스토그램 그리기 *//
 
-	// 악보 한마디(20%)가 되면 오선이라 판단
+	// 하얀줄이 (20%)가 되고
+	// 끊기지 않으면
+	// 오선이라 판단
 
 	for (int nr = 0; nr < height; nr++) {
 
@@ -57,20 +60,31 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 		uchar* pixel = src.ptr<uchar>(nr);
 		list<int> tempX;
 		colCnt = 0;
+		int space = 0;
 
+		// Run Length Coding
+		// 하얀줄이 끊겼는지 확인
 		for (int nc = 0; nc < width; nc++) {
 
-			if (pixel[nc]==0) {
-				tempX.push_back(nc);
-				colCnt++;
+			if (pixel[nc]==255) {
+				if (tempX.size() != 0) {
+					space = nc - tempX.back();
+					if (space < 10) {
+						tempX.push_back(nc);
+						colCnt++;
+					}
+					else {
+						break;
+					}
+				}
+				else {
+					tempX.push_back(nc);
+					colCnt++;
+				}
 			}
 		}
-		
-		if (colCnt != 0) {
-		cout <<  "의심 " << nr <<" 값 " <<  colCnt << endl;
-		}
-		
-
+				
+		// 한 마디 이상인지
 		if (colCnt >= oneBar) {
 
 			Y.push_back(nr);
@@ -85,21 +99,16 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 	}
 
-	// 악보 라인 보정
-
-	for (int i = 1; i < Y.size(); i++) {
+	// * 라인보정 * //
+	for (int i = 1; i < Y.size();) {
 		if (Y[i] - Y[i - 1] <= 2) {
-			Y.erase(Y.begin() + i - 1);
-			X.erase(X.begin() + 2 * i);
-			X.erase(X.begin() + 2 * i + 1);
+			Y.erase(Y.begin() + i);
+			X.erase(X.begin() + 2 * i, X.begin() + 2 * i + 2);
+		}
+		else {
+			i++;
 		}
 	}
-	/*
-	printf("라인보정한 결과");
-	for (int i = 0; i < Y.size(); i++) {
-		cout << Y[i] << " ";
-	}
-	*/
 
 	// 최소3개 악보 간격보다 2배 이상 커지면
 	// 다음 오선으로 판단
@@ -163,13 +172,14 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	
 	// 오선의 평균 높이 계산
 	 calculateStaffHeight();
+	 
 
 	//* 오선 검출 결과 테스트 프린트 *//
-	
+	/*	
 	for (int i = 0; i < staffXY.size(); i++) {
 		cout << "( " << this->staffXY[i].x << " , " << this->staffXY[i].y << " )" << endl;
 	}
-	
+	*/
 	
 	//* 오선 ROI 테스트 프린트 *//
 	
@@ -178,9 +188,9 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	if (staffXY.size() >= 2) {
 		for (int i = 0; i < staffXY.size(); i+=2) {
 			// 처음
-			ROI = Rect(0, staffXY[i].y, width, staffXY[i + 1].y - staffXY[i].y);
+			ROI = Rect(staffXY[i].x, staffXY[i].y, staffXY[i+1].x - staffXY[i].x, staffXY[i + 1].y - staffXY[i].y);
 			Mat subImg = Mat(src, ROI);
-			show(subImg, to_string(i) + "번 째 오선");
+			show(subImg, to_string(i/2) + "번 째 오선");
 
 		}
 	}
@@ -268,15 +278,15 @@ void DomiSolConverter::Analysis::colorConers() {
 	int bar = (int)((width / 100.0) * 20);
 
 	// 양쪽 네 곳의 모서리에 대해서 Run Length Coding 진행
-	// 하얀색으로 칠하기
+	// 검은색으로 칠하기
 	
 	for (int nr = 0; nr < height; nr++) {
 
 		uchar* pixel = input.ptr<uchar>(nr);
 
 		for (int nc = 0; nc < width; nc++) {
-			if (pixel[nc] < 10) {
-				pixel[nc] = 255;
+			if (pixel[nc] == 255) {
+				pixel[nc] = 0;
 			}
 			else {
 				break;
@@ -290,8 +300,8 @@ void DomiSolConverter::Analysis::colorConers() {
 		uchar* pixel = input.ptr<uchar>(nr);
 
 		for (int nc = width-1; nc >= 0; nc--) {
-			if (pixel[nc] < 10) {
-				pixel[nc] = 255;
+			if (pixel[nc] == 255) {
+				pixel[nc] = 0;
 			}
 			else {
 				break;
@@ -310,7 +320,7 @@ DomiSolConverter::Analysis::Analysis(Mat straightenedBinaryImg, Mat objectsImg, 
 	// 오선 검출
 	this->straightenedBinaryImg = straightenedBinaryImg;
 	colorConers();
-	//show(this->inputCalculateStaffImg, "오선인식할 이미지");
+	show(this->inputCalculateStaffImg, "오선인식할 이미지");
 	calculateStaffXY();
 
 	// 글자 인식

@@ -16,9 +16,9 @@ int DomiSolConverter::Preprocessing::show(Mat img, string title) {
 }
 
 void DomiSolConverter::Preprocessing::binarization() {
-	//adaptiveThreshold(~inputImg, this->binaryImg, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 5, 10);
+	adaptiveThreshold(~inputImg, this->binaryImg, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 5, -10);
 	//adaptiveThreshold(~inputImg, this->binaryImg, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 15, -2);
-	threshold(~inputImg, binaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	//threshold(~inputImg, binaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
 }
 
 void DomiSolConverter::Preprocessing::detectEdge() {
@@ -171,7 +171,8 @@ DomiSolConverter::Preprocessing::Preprocessing(Mat inputImg) {
 	//show(edgeImg, "edgeImg");
 	straightenImg();
 	//show(straightenedImg, "straightenedImg");
-	threshold(~straightenedImg, straightenedBinaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	//threshold(~straightenedImg, straightenedBinaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	adaptiveThreshold(~straightenedImg, straightenedBinaryImg, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 5, -10);
 	//show(straightenedBinaryImg, "straightenedBinaryImg");
 	extractStaff();
 	//show(objectsImg, "objectsImg");
