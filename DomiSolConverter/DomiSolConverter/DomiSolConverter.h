@@ -37,7 +37,7 @@ private:
 	public:
 		Preprocessing(Mat inputImg);
 		Mat getObjectsImg();
-		Mat getStraightenedImg();
+		Mat getStraightenedBinaryImg();
 		vector<Rect> getObjectXY();
 	};
 	
@@ -45,7 +45,7 @@ private:
 	private:
 
 		
-		Mat straightenedImg;
+		Mat straightenedBinaryImg;
 		Mat inputCalculateStaffImg;
 		Mat objectsImg;
 		vector<Rect> objectXY;
@@ -94,7 +94,7 @@ private:
 
 	Mat inputImg;
 	Mat binaryImg;
-	Mat straightenedImg;
+	Mat straightenedBinaryImg;
 	Mat staffImg;
 	Mat objectsImg;
 	vector<Rect> objectXY;

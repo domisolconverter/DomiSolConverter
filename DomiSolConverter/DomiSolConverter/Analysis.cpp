@@ -65,11 +65,11 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 				colCnt++;
 			}
 		}
-		/*
+		
 		if (colCnt != 0) {
 		cout <<  "의심 " << nr <<" 값 " <<  colCnt << endl;
 		}
-		*/
+		
 
 		if (colCnt >= oneBar) {
 
@@ -94,10 +94,12 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 			X.erase(X.begin() + 2 * i + 1);
 		}
 	}
-
+	/*
+	printf("라인보정한 결과");
 	for (int i = 0; i < Y.size(); i++) {
-		//cout << Y[i] << " ";
+		cout << Y[i] << " ";
 	}
+	*/
 
 	// 최소3개 악보 간격보다 2배 이상 커지면
 	// 다음 오선으로 판단
@@ -168,9 +170,9 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 		cout << "( " << this->staffXY[i].x << " , " << this->staffXY[i].y << " )" << endl;
 	}
 	
-
+	
 	//* 오선 ROI 테스트 프린트 *//
-
+	
 	Rect ROI;
 
 	if (staffXY.size() >= 2) {
@@ -260,7 +262,7 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 // 기울기 보정한 이미지의 검은색 모서리 부분을 하얀색으로 바꾸기
 void DomiSolConverter::Analysis::colorConers() {
 
-	Mat input = this->straightenedImg;
+	Mat input = this->straightenedBinaryImg;
 	int width = input.cols;
 	int height = input.rows;
 	int bar = (int)((width / 100.0) * 20);
@@ -303,10 +305,10 @@ void DomiSolConverter::Analysis::colorConers() {
 }
 
 
-DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat objectsImg, vector<Rect> objectXY) {
+DomiSolConverter::Analysis::Analysis(Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY) {
 
 	// 오선 검출
-	this->straightenedImg = straightenedImg;
+	this->straightenedBinaryImg = straightenedBinaryImg;
 	colorConers();
 	//show(this->inputCalculateStaffImg, "오선인식할 이미지");
 	calculateStaffXY();

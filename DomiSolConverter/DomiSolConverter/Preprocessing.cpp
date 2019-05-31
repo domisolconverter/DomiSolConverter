@@ -157,8 +157,8 @@ vector<Rect> DomiSolConverter::Preprocessing::getObjectXY() {
 	return objectXY;
 }
 
-Mat DomiSolConverter::Preprocessing::getStraightenedImg() {
-	return straightenedImg;
+Mat DomiSolConverter::Preprocessing::getStraightenedBinaryImg() {
+	return straightenedBinaryImg;
 }
 
 

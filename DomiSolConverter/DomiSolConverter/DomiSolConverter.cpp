@@ -8,8 +8,8 @@ DomiSolConverter::DomiSolConverter(Mat input) {
 	Preprocessing P = Preprocessing(this->inputImg);
 	this->objectsImg = P.getObjectsImg();
 	this->objectXY = P.getObjectXY();
-	this->straightenedImg = P.getStraightenedImg();
-	Analysis A = Analysis(straightenedImg, objectsImg, objectXY);
+	this->straightenedBinaryImg = P.getStraightenedBinaryImg();
+	Analysis A = Analysis(straightenedBinaryImg, objectsImg, objectXY);
 	//A.setObjectsImg(this->objectsImg);
 	//A.setObjectXY(this->objectsImg);
 
