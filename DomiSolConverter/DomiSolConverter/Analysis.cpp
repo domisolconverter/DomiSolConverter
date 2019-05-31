@@ -2,6 +2,19 @@
 #include "DomiSolConverter.h"
 
 
+int DomiSolConverter::Analysis::show(Mat img, string title) {
+	// cout << "OpenCV Version : " << CV_VERSION << endl;
+	namedWindow(title, CV_WINDOW_AUTOSIZE);
+
+	if (img.empty())
+	{
+		cout << "There's no sheet file!" << endl;
+		return -1;
+	}
+
+	imshow(title, img);
+}
+
 // 오선 한 개(5개의 줄)의 높이
 void DomiSolConverter::Analysis::calculateStaffHeight(){
 	int sum = 0;
@@ -22,24 +35,24 @@ void DomiSolConverter::Analysis::calculateStaffSpace(){
 }
 
 void DomiSolConverter::Analysis::calculateStaffXY(){
-	
-	// (수정)DomiSolConverter의 straitenedImg로 바꾸세요
-	string INPUTPATH = "./inputImage/staffLine.jpg";
 
-	Mat src = imread(INPUTPATH, IMREAD_GRAYSCALE);
+
+	Mat src = this->inputCalculateStaffImg;
 
 	int width = src.cols;
 	int height = src.rows;
-	int oneBar = (int)((width / 100.0) * 20);    // 140
+	int oneBar = (int)((width / 100.0) * 10);    // 140
 	int colCnt = 0;
 	int staffNum = 0;
+
 	vector<int> Y;
 	vector<int> X;
 
-
 	//* Y축 히스토그램 그리기 *//
 
-	// 악보 한마디(20%)가 되면 오선이라 판단
+	// 하얀줄이 (20%)가 되고
+	// 끊기지 않으면
+	// 오선이라 판단
 
 	for (int nr = 0; nr < height; nr++) {
 
@@ -47,20 +60,31 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 		uchar* pixel = src.ptr<uchar>(nr);
 		list<int> tempX;
 		colCnt = 0;
+		int space = 0;
 
+		// Run Length Coding
+		// 하얀줄이 끊겼는지 확인
 		for (int nc = 0; nc < width; nc++) {
 
-			if (pixel[nc]>230) {
-				tempX.push_back(nc);
-				colCnt++;
+			if (pixel[nc]==255) {
+				if (tempX.size() != 0) {
+					space = nc - tempX.back();
+					if (space < 10) {
+						tempX.push_back(nc);
+						colCnt++;
+					}
+					else {
+						break;
+					}
+				}
+				else {
+					tempX.push_back(nc);
+					colCnt++;
+				}
 			}
 		}
-		/*
-		if (colCnt != 0) {
-		cout <<  "의심 " << nr <<" 값 " <<  colCnt << endl;
-		}
-		*/
-
+				
+		// 한 마디 이상인지
 		if (colCnt >= oneBar) {
 
 			Y.push_back(nr);
@@ -75,18 +99,15 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 	}
 
-	// 악보 라인 보정
-
-	for (int i = 1; i < Y.size(); i++) {
+	// * 라인보정 * //
+	for (int i = 1; i < Y.size();) {
 		if (Y[i] - Y[i - 1] <= 2) {
-			Y.erase(Y.begin() + i - 1);
-			X.erase(X.begin() + 2 * i);
-			X.erase(X.begin() + 2 * i + 1);
+			Y.erase(Y.begin() + i);
+			X.erase(X.begin() + 2 * i, X.begin() + 2 * i + 2);
 		}
-	}
-
-	for (int i = 0; i < Y.size(); i++) {
-		//cout << Y[i] << " ";
+		else {
+			i++;
+		}
 	}
 
 	// 최소3개 악보 간격보다 2배 이상 커지면
@@ -150,52 +171,43 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	}
 	
 	// 오선의 평균 높이 계산
-	calculateStaffHeight();
+	 calculateStaffHeight();
+	 
 
 	//* 오선 검출 결과 테스트 프린트 *//
-	/*
+	/*	
 	for (int i = 0; i < staffXY.size(); i++) {
 		cout << "( " << this->staffXY[i].x << " , " << this->staffXY[i].y << " )" << endl;
 	}
 	*/
-
+	
 	//* 오선 ROI 테스트 프린트 *//
 	
-	/*
-	Rect rect[10]; // (수정) 동적 할당하기
-	for (int i = 0; i < staffXY.size()/2; i++) {
-		rect[i] = Rect(0, staffXY[i].y, width, this->staffHeight); // (수정)평균 오선 크기 넣기
+	Rect ROI;
+
+	if (staffXY.size() >= 2) {
+		for (int i = 0; i < staffXY.size(); i+=2) {
+			// 처음
+			ROI = Rect(staffXY[i].x, staffXY[i].y, staffXY[i+1].x - staffXY[i].x, staffXY[i + 1].y - staffXY[i].y);
+			Mat subImg = Mat(src, ROI);
+			show(subImg, to_string(i/2) + "번 째 오선");
+
+		}
 	}
-	Rect rect1(0, staffXY[0].y, width, staffXY[1].y - staffXY[0].y);
-	Mat subimage1 = src(rect1);
-	namedWindow("RECT01", CV_WINDOW_AUTOSIZE);
-	imshow("RECT01", subimage1);
-
-	Rect rect2(0, staffXY[2].y, width, staffXY[3].y - staffXY[2].y);
-	Mat subimage2 = src(rect2);
-	namedWindow("RECT02", CV_WINDOW_AUTOSIZE);
-	imshow("RECT02", subimage2);
-
-	Rect rect3(0, staffXY[4].y, width, staffXY[5].y - staffXY[4].y);
-	Mat subimage3 = src(rect3);
-	namedWindow("RECT03", CV_WINDOW_AUTOSIZE);
-	imshow("RECT03", subimage3);
-
-	Rect rect4(0, staffXY[6].y, width, staffXY[7].y - staffXY[6].y);
-	Mat subimage4 = src(rect4);
-	namedWindow("RECT04", CV_WINDOW_AUTOSIZE);
-	imshow("RECT04", subimage4);
-	*/
-
-	namedWindow("OUT01", CV_WINDOW_AUTOSIZE);
-	imshow("OUT01", src);
-
-	destroyWindow("OUT01");
-
+	
+	show(src, "오선인식한 이미지");
 }
 
 void DomiSolConverter::Analysis::extractFeature() {
-
+	//Draw result
+	Mat objectsRectImg = objectsImg;
+	//Scalar color(0, 0, 0);
+	Scalar color(255, 255, 255);
+	for (int i = 0; i < objectXY.size(); i++) {
+		rectangle(objectsRectImg, objectXY[i].tl(), objectXY[i].br(), color, 1);
+	}
+	// namedWindow("objects", CV_WINDOW_AUTOSIZE);
+	// imshow("objects", objectsRectImg);
 }
 
 void DomiSolConverter::Analysis::calculatePitch() {
@@ -308,19 +320,14 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 
 void DomiSolConverter::Analysis::recognizeText() {
 	
-	// (수정)DomiSolConverter의 straitenedImg로 바꾸세요
-	string INPUTPATH = "./inputImage/straightenedImg.jpg";
-	string OUTPUTPATH = "./outputImage/textpart";
-	string OUTPUTPATH2 = "./outputImage/Onlytextpart";
-
-	Mat src = imread(INPUTPATH, IMREAD_GRAYSCALE);
+	Mat src = this->straightenedBinaryImg;
 	int width = src.cols;
 	int height = src.rows;
 
 	// 오선 아닌 부분 잘라서 저장하기
 	
 	int ROISize = staffXY.size() - (staffXY.size() / 2 - 1);
-	Mat tempImg;
+	// 대략적인 텍스트 영역 ROI 배열 동적할당
 	Rect *ROI = (Rect*)malloc(sizeof(Rect) * ROISize);
 
 	// 1. 각 오선의 윗부분 crop
@@ -328,20 +335,14 @@ void DomiSolConverter::Analysis::recognizeText() {
 		// 처음
 		if (i == 0) {
 			ROI[i] = Rect(0, 0, width, staffXY[i].y);
-			Mat subImg = Mat(src, ROI[i]);
-			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
 		}
 		// 마지막
 		else if (i == ROISize - 1) {
 			ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, this->staffHeight * 2);
-			Mat subImg = Mat(src, ROI[i]);
-			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
 		}
 		// 중간
 		else {
-			ROI[i] = Rect(0, staffXY[2*i-1].y, width, staffXY[2 * i].y - staffXY[2 * i - 1].y);
-			Mat subImg = Mat(src, ROI[i]);
-			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
+			ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, staffXY[2 * i].y - staffXY[2 * i - 1].y);
 		}
 
 	}
@@ -356,12 +357,66 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 	
 }
 
+// 기울기 보정한 이미지의 검은색 모서리 부분을 하얀색으로 바꾸기
+void DomiSolConverter::Analysis::colorConers() {
 
-DomiSolConverter::Analysis::Analysis() {
+	Mat input = this->straightenedBinaryImg;
+	int width = input.cols;
+	int height = input.rows;
+	int bar = (int)((width / 100.0) * 20);
+
+	// 양쪽 네 곳의 모서리에 대해서 Run Length Coding 진행
+	// 검은색으로 칠하기
 	
+	for (int nr = 0; nr < height; nr++) {
+
+		uchar* pixel = input.ptr<uchar>(nr);
+
+		for (int nc = 0; nc < width; nc++) {
+			if (pixel[nc] == 255) {
+				pixel[nc] = 0;
+			}
+			else {
+				break;
+			}
+		}
+
+	}
+
+	for (int nr = 0; nr < height; nr++) {
+
+		uchar* pixel = input.ptr<uchar>(nr);
+
+		for (int nc = width-1; nc >= 0; nc--) {
+			if (pixel[nc] == 255) {
+				pixel[nc] = 0;
+			}
+			else {
+				break;
+			}
+		}
+
+	}
+	
+	this->inputCalculateStaffImg = input;
+
+}
+
+
+DomiSolConverter::Analysis::Analysis(Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY) {
+
+	// 오선 검출
+	this->straightenedBinaryImg = straightenedBinaryImg;
+	colorConers();
+	show(this->inputCalculateStaffImg, "오선인식할 이미지");
 	calculateStaffXY();
+
+	// 글자 인식
 	recognizeText();
 
+	this->objectsImg = objectsImg;
+	this->objectXY = objectXY;
+	extractFeature();
 }
 
 vector<string> DomiSolConverter::Analysis::getNote() {
@@ -377,4 +432,12 @@ vector<string> DomiSolConverter::Analysis::getNonNote() {
 vector<string> DomiSolConverter::Analysis::getText() {
 	vector<string> result;
 	return result;
+}
+
+void DomiSolConverter::Analysis::setObjectsImg(Mat objectsImg) {
+	this->objectsImg = objectsImg;
+}
+
+void DomiSolConverter::Analysis::setObjectXY(vector<Rect> objectXY) {
+	this->objectXY = objectXY;
 }
