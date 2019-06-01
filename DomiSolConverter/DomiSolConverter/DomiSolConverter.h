@@ -3,12 +3,15 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include "Symbol.h"
 
 using namespace std;
 using namespace cv;
 
+
 class DomiSolConverter {
 private:
+
 	class Preprocessing {
 	private:
 		Mat inputImg;
@@ -42,6 +45,7 @@ private:
 
 	class Analysis {
 	private:
+
 		Mat objectsImg;
 		vector<Rect> objectXY;
 		vector<Rect> noteXY;
@@ -55,12 +59,14 @@ private:
 		void calculateStaffHeight();
 		void calculateStaffSpace();
 		void calculateStaffXY();
-		void extractFeature();
+		void classifyNote();
+		void extractNoteFeature();
 		void calculatePitch();
 		void recognizeObject();
 		void recognizeGeneralSymbol();
 		void recognizeText();
 		void recognizeNoteSymbol();
+
 
 	public:
 		Analysis(Mat objectsImg, vector<Rect> objectXY);
@@ -88,6 +94,9 @@ private:
 	Mat objectsImg;
 	vector<Rect> objectXY;
 	Mat resultImg;
+	vector<Symbol> wholeSymbols;
+	vector<Note> wholeNotes;
+	vector<NonNote> wholeNonNotes;
 
 public:
 	DomiSolConverter(Mat input);

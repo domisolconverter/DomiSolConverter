@@ -7,7 +7,7 @@
 # define OUTPUTFOLDER "./outputImage/"
 
 // Change test case
-string INPUTFILE = "case1_nochar.jpg";
+string INPUTFILE = "case1.jpg";
 string OUTPUTFILE = "";
 
 
@@ -29,7 +29,7 @@ int main()
 		return -1;
 	}
 	imshow("CASE01", img);
-	
+
 	
 	DomiSolConverter domisolconverter(img);
 	
