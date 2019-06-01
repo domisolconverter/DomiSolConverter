@@ -27,8 +27,8 @@ int main()
 	{
 		cout << "[!] You can NOT open the test image!" << endl;
 		return -1;
-	}	
-	
+	}
+
 	DomiSolConverter domisolconverter(img);
 	
 	waitKey(0);

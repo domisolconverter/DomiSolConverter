@@ -17,25 +17,25 @@ int DomiSolConverter::Analysis::show(Mat img, string title) {
 
 // 오선 한 개(5개의 줄)의 높이
 void DomiSolConverter::Analysis::calculateStaffHeight(){
+
 	int sum = 0;
-	for (int i = 1; i < staffXY.size(); i+=2 ) {
+	for (int i = 1; i < staffXY.size(); i += 2) {
 		sum += staffXY[i].y - staffXY[i - 1].y;
 	}
 	if (staffXY.size() != 0) {
-		this -> staffHeight = sum / (staffXY.size() / 2);
+		this->staffHeight = sum / (staffXY.size() / 2);
 	}
 	else {
-		cout << "오선의 개수가 0개 입니다"<< endl;
+		cout << "오선의 개수가 0개 입니다" << endl;
 	}
 }
 
 // 오선에 있는 줄 사이 간격
-void DomiSolConverter::Analysis::calculateStaffSpace(){
-
+void DomiSolConverter::Analysis::calculateStaffSpace() {
+	this->staffSpace = (float)this->staffHeight / 5;
 }
 
 void DomiSolConverter::Analysis::calculateStaffXY(){
-
 
 	Mat src = this->inputCalculateStaffImg.clone();
 
@@ -68,7 +68,6 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 		// Run Length Coding
 		// 하얀줄이 끊겼는지 확인
 		for (int nc = 0; nc < width; nc++) {
-
 			if (pixel[nc]==255) {
 				if (tempX.size() != 0) {
 					space = nc - tempX.back();
@@ -172,7 +171,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 
 	}
-	
+
 	// 오선의 평균 높이 계산
 	 calculateStaffHeight();
 	 
@@ -200,23 +199,263 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	}
 	*/
 	// show(src, "오선인식한 이미지");
-	
 }
 
 void DomiSolConverter::Analysis::extractFeature() {
-	//Draw result
+
 	Mat objectsRectImg = objectsImg;
-	//Scalar color(0, 0, 0);
-	Scalar color(255, 255, 255);
-	for (int i = 0; i < objectXY.size(); i++) {
-		rectangle(objectsRectImg, objectXY[i].tl(), objectXY[i].br(), color, 1);
+
+	cvtColor(objectsRectImg, objectsRectImg, COLOR_GRAY2RGB);
+	for (int index = 0; index < objectXY.size(); index++) {
+
+		Mat object = objectsImg(objectXY[index]);
+		int width = object.cols;
+		int height = object.rows;
+		staffHeight = 34;
+		if (height > staffHeight*0.9 && height < staffHeight * 1.2) {
+
+			//rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(0, 255, 255), 1);
+
+			bool isLine = 0;
+
+			/*
+			** Hough transform line detect
+			*/
+
+			Mat objectEdge;
+			int scale = 1;
+			int delta = 0;
+			int ddepth = CV_16S;
+
+			Mat grad_x, grad_y;
+			Mat abs_grad_x, abs_grad_y;
+
+
+			// reduce the noise (kernel size=3)
+			Mat blurredImg;
+			GaussianBlur(object, object, Size(3, 3), 0, 0, BORDER_DEFAULT);
+
+
+			// calculate derivatives in x and y directions
+			Sobel(object, grad_x, ddepth, 1, 0, 3, scale, delta, BORDER_DEFAULT);
+			Sobel(object, grad_y, ddepth, 0, 1, 3, scale, delta, BORDER_DEFAULT);
+			//Scharr(blurredImg, grad_x, ddepth, 1, 0, scale, delta, BORDER_DEFAULT);
+			//Scharr(blurredImg, grad_y, ddepth, 0, 1, scale, delta, BORDER_DEFAULT);
+
+			// convert results back to CV_8U
+			convertScaleAbs(grad_x, abs_grad_x);
+			convertScaleAbs(grad_y, abs_grad_y);
+
+			// add sobel_x & sobel_y
+			addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, objectEdge);
+
+			//imshow("edgeImg", objectEdge);
+
+			Mat blank(object.rows, object.cols, CV_8UC1, Scalar(0));
+			Mat lineImg = blank.clone();
+
+			vector<Vec4i> lines;
+			//cout << height << endl;
+			HoughLinesP(objectEdge, lines, 1, CV_PI / 180, 1, height*0.55, 1);
+			if (!lines.empty()) {
+				isLine = 1;
+				//cout << "line is detected" << endl;
+				//cout << object << endl;
+				//imwrite("outputImage/lineObjects/" + to_string(index) + ".jpg", object);
+				//cout << object << endl;
+				/*
+				** 라인이 검출되면 histogram으로 음표인지 판단
+				*/
+
+				vector<int> Xhist(width, 0);
+				vector<int> Yhist(height, 0);
+				/*
+				// X histogram
+				for (int nr = 0; nr < height; nr++) {
+					uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
+
+					for (int nc = 0; nc < width; nc++) {
+						//cout << int(pixel[nc]) << endl;
+						if (pixel[nc] != 0) {
+							Xhist[nc]++;
+						}
+					}
+				}
+
+				for (int nc = 0; nc < width; nc++) {
+
+					cout << Xhist[nc] << "  ";
+					line(histogram, Point(nc, height), Point(nc, (height - Xhist[nc])), (0), 1);
+				}
+				*/
+				// Y histogram
+				int pixelCnt = 0;
+				for (int nr = 0; nr < height; nr++) {
+					uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
+
+					for (int nc = 0; nc < width; nc++) {
+						//cout << int(pixel[nc]) << endl;
+						if (pixel[nc] != 0) {
+							Yhist[nr]++;
+							pixelCnt++;
+						}
+					}
+				}
+				if (pixelCnt < height * width * 0.95) {
+					noteXY.push_back(objectXY[index]);
+					rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(0, 255, 255), 1);
+				}
+				/*
+				for (int nr = 0; nr < height; nr++) {
+					cout << Yhist[nr] << "  ";
+				}
+				*/
+				//cout << endl;
+				//cout << object << endl;
+
+			}
+			//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object);
+		}
+
 	}
 	// namedWindow("objects", CV_WINDOW_AUTOSIZE);
 	// imshow("objects", objectsRectImg);
 }
 
 void DomiSolConverter::Analysis::calculatePitch() {
+	vector<Rect>::iterator note = noteXY.begin();
+	Mat toneImg = this->objectsImg.clone();
 
+	for (note; note != noteXY.end(); note++) {
+		Rect upHead((*note).x, (*note).y, (*note).width, this->staffSpace);
+		Rect downHead((*note).x, (*note).y + (*note).height - this->staffSpace, (*note).width, this->staffSpace);
+
+		Mat up = this->objectsImg(upHead);
+		Mat down = this->objectsImg(downHead);
+
+		Rect head;
+
+		int upCnt = 0;
+		int downCnt = 0;
+
+		// For test
+		this->staffHeight = 34;
+		this->staffSpace = (float)33 / (float)4;
+		vector<int> test;
+		test.push_back(136);
+		test.push_back(135 + staffHeight);
+		test.push_back(240);
+		test.push_back(240 + 33);
+		test.push_back(344);
+		test.push_back(344 + 33);
+		test.push_back(447);
+		test.push_back(447 + 33);
+		vector<int>::iterator staff = test.begin();
+		int maxCnt = 0;
+
+		float headY = 0;
+		int headCnt = 0;
+
+		for (int row = upHead.height / 4; row <= (upHead.height / 4) * 3; row++) {
+			int upOneLine = 0;
+			int downOneLine = 0;
+			for (int pixel = 0; pixel < (*note).width; pixel++) {
+				int upVal = (int)(up.at<uchar>(row, pixel));
+				int downVal = (int)(down.at<uchar>(row, pixel));
+				if (upVal == 255) {
+					upOneLine++;
+				}
+				if (downVal == 255) {
+					downOneLine++;
+				}
+			}
+			upCnt += upOneLine;
+			downCnt += downOneLine;
+
+			if (maxCnt < upOneLine) {
+				maxCnt = upOneLine;
+			}
+
+			if (maxCnt < downOneLine) {
+				maxCnt = downOneLine;
+			}
+		}
+
+		if (upCnt > downCnt) {
+			head = upHead;
+		}
+
+		else {
+			head = downHead;
+		}
+
+		headY = head.y + (head.height / 2);
+
+		float staff_start = 0;
+		float staff_end = 0;
+		int lineNum = -1;
+
+		for (staff; staff != test.end(); staff++) {
+			int index = distance(test.begin(), staff);
+			if (index % 2 == 0) {
+				staff_start = (*staff);
+				lineNum++;
+			}
+			else {
+				staff_end = (*staff);
+				line(this->objectsImg, Point(100, staff_start), Point(700, staff_start), Scalar(255, 255, 255));
+				line(this->objectsImg, Point(100, staff_start + staffSpace), Point(700, staff_start + staffSpace), Scalar(255, 255, 255));
+				line(this->objectsImg, Point(100, staff_start + staffSpace * 2), Point(700, staff_start + staffSpace * 2), Scalar(255, 255, 255));
+				line(this->objectsImg, Point(100, staff_start + staffSpace * 3), Point(700, staff_start + staffSpace * 3), Scalar(255, 255, 255));
+				line(this->objectsImg, Point(100, staff_end), Point(700, staff_end), Scalar(255, 255, 255));
+
+				if (headY >= staff_start - (3 * this->staffSpace) && headY <= staff_end + (3 * this->staffSpace)) {
+					int octave = 0;
+
+					char tone = 'E';
+					float curStaff = staff_end + (3 * this->staffSpace);
+					const int threshold = (staffSpace / 3);
+					for (curStaff; curStaff >= staff_start - (3 * this->staffSpace); curStaff -= staffSpace) {
+						tone++;
+						if (tone == 'H') {
+							tone = 'A';
+						}
+						else if (tone == 'C') {
+							octave++;
+						}
+						if (headY < curStaff + threshold && headY > curStaff - threshold) {
+							break;
+						}
+						else if (headY > curStaff - staffSpace + threshold && headY < curStaff - threshold) {
+							tone++;
+							if (tone == 'H') {
+								tone = 'A';
+							}
+							else if (tone == 'C') {
+								octave++;
+							}
+							break;
+						}
+						tone++;
+						if (tone == 'H') {
+							tone = 'A';
+						}
+						else if (tone == 'C') {
+							octave++;
+						}
+					}
+					putText(toneImg, string(1, tone), Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
+					vector<Note>::iterator iter = noteInfo.begin();
+
+					for (iter; iter != noteInfo.end(); iter++) {
+						(*iter).setScale_Octave(tone, octave);
+						(*iter).setLineNum(lineNum);
+					}
+				}
+			}
+		}
+	}
+	imshow("Tone", toneImg);
 }
 
 void DomiSolConverter::Analysis::recognizeObject() {
@@ -226,6 +465,7 @@ void DomiSolConverter::Analysis::recognizeObject() {
 void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 
 }
+
 
 void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 
@@ -242,7 +482,7 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 	for (int i = 0; i < ROISize; i++) {
 
 		Mat src = Mat(input, ROI[i]);
-		
+
 		/* 컴포넌트 만들기 */
 		// OTSU 이진화
 		threshold(src, result, 0, 255, THRESH_BINARY | THRESH_OTSU);
@@ -268,7 +508,7 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 		//imshow("Draw Contour Image" + to_string(i), contoursResult);
 
 
-		
+
 
 		int cmax = width;
 		vector<vector<Point>>::const_iterator it = contours.begin();
@@ -286,7 +526,7 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 		//imshow("Only Text Component" + to_string(i), src);
 
 		/* 문자 영역 부분 큰 좌표 정하기 */
-		
+
 		it = contours.begin();
 		int xmin = width;
 		int ymin = height;
@@ -315,7 +555,7 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 		xmax = xmax*1.1;
 		ymin = ymin*0.9;
 		ymax = ymax*1.1;
-		
+
 		// 여백이 이미지를 넘어버리는 경우
 		if (xmax > src.cols) {
 			xmax = src.cols;
@@ -333,51 +573,50 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 			ymin = 0;
 			ymax = src.rows;
 		}
-		
+
 		ROI[i] = Rect(xmin, ymin, xmax - xmin, ymax - ymin);
-		Mat subImg = Mat(src, ROI[i]);		
+		Mat subImg = Mat(src, ROI[i]);
 		//imwrite("./outputImage/Onlytextpart" + to_string(i) + ".jpg", subImg);
 		//namedWindow("Onlytextpart" + to_string(i), WINDOW_AUTOSIZE);
 		//imshow("Onlytextpart" + to_string(i), subImg);
-		
-	}
-	
 
+
+	}
 }
 
 void DomiSolConverter::Analysis::recognizeText() {
 
-	Mat src = this->straightenedBinaryImg;
-	int width = src.cols;
-	int height = src.rows;
+		Mat src = this->straightenedBinaryImg;
+		int width = src.cols;
+		int height = src.rows;
 
-	// 오선 아닌 부분 잘라서 저장하기
+		// 오선 아닌 부분 잘라서 저장하기
+		int ROISize = staffXY.size() - (staffXY.size() / 2 - 1);
+		// 대략적인 텍스트 영역 ROI 배열 동적할당
+		Rect *ROI = (Rect*)malloc(sizeof(Rect) * ROISize);
+
+		// 1. 각 오선의 윗부분 crop
+		for (int i = 0; i < ROISize; i++) {
+			// 처음
+			if (i == 0) {
+				ROI[i] = Rect(0, 0, width, staffXY[i].y);
+			}
+			// 마지막
+			else if (i == ROISize - 1) {
+				ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, height - staffXY[2 * i - 1].y);
+			}
+			// 중간
+			else {
+				ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, staffXY[2 * i].y - staffXY[2 * i - 1].y);
+			}
+
+		}
+
+		// 문자가 존재하는 부분 자른 뒤 침식 연산 진행
+
+		cropTextArea(ROI);
 	
-	int ROISize = staffXY.size() - (staffXY.size() / 2 - 1);
-	// 대략적인 텍스트 영역 ROI 배열 동적할당
-	Rect *ROI = (Rect*)malloc(sizeof(Rect) * ROISize);
-
-	// 1. 각 오선의 윗부분 crop
-	for (int i = 0; i < ROISize; i++) {
-		// 처음
-		if (i == 0) {
-			ROI[i] = Rect(0, 0, width, staffXY[i].y);
-		}
-		// 마지막
-		else if (i == ROISize - 1) {
-			ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, height - staffXY[2*i-1].y);
-		}
-		// 중간
-		else {
-			ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, staffXY[2 * i].y - staffXY[2 * i - 1].y);
-		}
-
-	}
-
-	// 문자가 존재하는 부분 자른 뒤 침식 연산 진행
 	
-	 cropTextArea(ROI);
-
 }
 
 void DomiSolConverter::Analysis::recognizeNoteSymbol() {
@@ -445,7 +684,9 @@ DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinary
 	this->objectsImg = objectsImg;
 	this->objectXY = objectXY;
 	extractFeature();
+
 }
+
 
 vector<string> DomiSolConverter::Analysis::getNote() {
 	vector<string> result;
@@ -465,6 +706,7 @@ vector<string> DomiSolConverter::Analysis::getText() {
 void DomiSolConverter::Analysis::setObjectsImg(Mat objectsImg) {
 	this->objectsImg = objectsImg;
 }
+
 
 void DomiSolConverter::Analysis::setObjectXY(vector<Rect> objectXY) {
 	this->objectXY = objectXY;
