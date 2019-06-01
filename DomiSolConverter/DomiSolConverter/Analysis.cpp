@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
+#include "iconv.h"
 
 
 int DomiSolConverter::Analysis::show(Mat img, string title) {
@@ -589,21 +590,29 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 		ROI[i] = Rect(xmin, ymin, xmax - xmin, ymax - ymin);
 		Mat subImg = Mat(src, ROI[i]);
 		imwrite("./outputImage/Onlytextpart.jpg", subImg);
-		namedWindow("Onlytextpart" + to_string(i), WINDOW_AUTOSIZE);
-		imshow("Onlytextpart" + to_string(i), subImg);
+		//namedWindow("Onlytextpart" + to_string(i), WINDOW_AUTOSIZE);
+		//imshow("Onlytextpart" + to_string(i), subImg);
 
 		system("tesseract ./outputImage/Onlytextpart.jpg ./outputImage/text_result -l kor+eng");
 
-		// 결과 읽어와서 string vector에 저장
-
+		// 1. 결과 읽어와서 string vector에 저장
 		_setmode(_fileno(stdout), _O_U16TEXT);
 		wstring wstr = readFile("./outputImage/text_result.txt");
 
-		string result_string = "";
 		wcout << wstr << endl;
-		//cout << result_string << endl;
-		//this->text.push_back(str);
+		//(수정) wstring을 string 형변환 필요!!!!!!!!!!!!!!!!!!!!!!
+		this->text.push_back(wstr);
 	}
+
+	//(수정) 형변환 필요
+	// 글자 인식 결과 출력
+	/*
+	vector<wstring>::iterator iter;
+	for (iter = this->text.begin(); iter != this->text.end(); ++iter) {
+		wcout << *iter << endl;
+	}
+	*/
+
 }
 
 
@@ -691,7 +700,6 @@ void DomiSolConverter::Analysis::colorConers() {
 	this->inputCalculateStaffImg = input.clone();
 
 }
-
 
 DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY) {
 

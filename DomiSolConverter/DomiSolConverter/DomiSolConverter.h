@@ -7,7 +7,6 @@
 #include <sstream>
 #include <codecvt>
 #include <fstream>
-#include <iostream>
 #include <io.h>
 #include <fcntl.h>
 #include <string>
@@ -68,7 +67,8 @@ private:
 		float staffSpace;
 		vector<Note> noteInfo;
 		vector<NonNote> nonNoteInfo;
-		vector<string> text;
+		// wstring을 string으로 형변환 필요 !!!!!!!!!!!!
+		vector<wstring> text;
 
 		void calculateStaffHeight();
 		void calculateStaffSpace();
