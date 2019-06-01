@@ -173,21 +173,21 @@ void DomiSolConverter::Preprocessing::extractObject() {
 		}
 	}
 	
-	//draw result
-	Mat contourimg = Mat(objectsImg.rows, objectsImg.cols, CV_8U);
-	//scalar color(0, 0, 0);
-	Scalar color(255, 255, 255);
-	for (int i = 0; i < contours.size(); i++) {
-		drawContours(contourimg, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
-	}
-	for (int i = 0; i < objectXY.size(); i++) {
-		//printf("%d", i);
-		rectangle(contourimg, objectXY[i].tl(), objectXY[i].br(), color, 1);
-		
-		//putText(contourimg, to_string(i), objectXY[i].tl(), 0.3, 0.3, Scalar::all(255));
-	}
-	namedWindow("contours", CV_WINDOW_AUTOSIZE);
-	imshow("contours", contourimg);
+	////draw result
+	//Mat contourimg = Mat(objectsImg.rows, objectsImg.cols, CV_8U);
+	////scalar color(0, 0, 0);
+	//Scalar color(255, 255, 255);
+	//for (int i = 0; i < contours.size(); i++) {
+	//	drawContours(contourimg, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
+	//}
+	//for (int i = 0; i < objectXY.size(); i++) {
+	//	//printf("%d", i);
+	//	rectangle(contourimg, objectXY[i].tl(), objectXY[i].br(), color, 1);
+	//	
+	//	//putText(contourimg, to_string(i), objectXY[i].tl(), 0.3, 0.3, Scalar::all(255));
+	//}
+	//namedWindow("contours", CV_WINDOW_AUTOSIZE);
+	//imshow("contours", contourimg);
 	
 }
 
