@@ -1,9 +1,12 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
-DomiSolConverter::Analysis::Analysis(Mat objectsImg, vector<Rect> objectXY) {
+DomiSolConverter::Analysis::Analysis(Mat objectsImg, vector<Rect> objectXY, vector<Note> note, vector<NonNote> nonNote, vector<string> text) {
 	this->objectsImg = objectsImg;
 	this->objectXY = objectXY;
+	this->nonNoteInfo = nonNote;
+	this->noteInfo = note;
+	this->text = text;
 
 	extractFeature();
 	recognizeGeneralSymbol();
@@ -58,7 +61,7 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 				}
 				cout << output << "\n";
 				NonNote nn(1, 1, 1, output, objectXY[idx].x + (objectXY[idx].width / 2), objectXY[idx].y + (objectXY[idx].height / 2));
-				this->nonNote.push_back(nn);
+				this->nonNoteInfo.push_back(nn);
 			}
 			idx++;
 		}
@@ -71,21 +74,6 @@ void DomiSolConverter::Analysis::recognizeText() {
 
 void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 
-}
-
-vector<string> DomiSolConverter::Analysis::getNote() {
-	vector<string> result;
-	return result;
-}
-
-vector<string> DomiSolConverter::Analysis::getNonNote() {
-	vector<string> result;
-	return result;
-}
-
-vector<string> DomiSolConverter::Analysis::getText() {
-	vector<string> result;
-	return result;
 }
 
 void DomiSolConverter::Analysis::setObjectsImg(Mat objectsImg) {

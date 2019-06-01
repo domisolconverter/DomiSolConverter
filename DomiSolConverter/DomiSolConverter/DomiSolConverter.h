@@ -48,8 +48,8 @@ private:
 		vector<Point> staffXY;
 		int staffHeight;
 		int staffSpace;
-		vector<string> note;
-		vector<Symbol> nonNote;
+		vector<Note> noteInfo;
+		vector<NonNote> nonNoteInfo;
 		vector<string> text;
 
 		void calculateStaffHeight();
@@ -63,10 +63,7 @@ private:
 		void recognizeNoteSymbol();
 
 	public:
-		Analysis(Mat objectsImg, vector<Rect> objectXY);
-		vector<string> getNote();
-		vector<string> getNonNote();
-		vector<string> getText();
+		Analysis(Mat objectsImg, vector<Rect> objectXY, vector<Note> note, vector<NonNote> nonNote, vector<string> text);
 		void setObjectsImg(Mat objectsImg);
 		void setObjectXY(vector<Rect> objectXY);
 	};
@@ -88,6 +85,9 @@ private:
 	Mat objectsImg;
 	vector<Rect> objectXY;
 	Mat resultImg;
+	vector<Note> note;
+	vector<NonNote> nonNote;
+	vector<string> text;
 
 public:
 	DomiSolConverter(Mat input);

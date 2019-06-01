@@ -14,5 +14,5 @@ DomiSolConverter::DomiSolConverter(Mat input) {
 	int width = inputImg.cols;
 	int height = inputImg.rows;
 	Rect tmp = Rect(0, 0, width, height);
-	Analysis A = Analysis(inputImg, objectXY);
+	Analysis A = Analysis(inputImg, objectXY, this->note, this->nonNote, this->text);
 }
