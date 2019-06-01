@@ -27,9 +27,7 @@ int main()
 	{
 		cout << "[!] You can NOT open the test image!" << endl;
 		return -1;
-	}
-	imshow("CASE01", img);
-	
+	}	
 	
 	DomiSolConverter domisolconverter(img);
 	

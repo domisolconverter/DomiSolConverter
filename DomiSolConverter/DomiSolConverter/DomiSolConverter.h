@@ -37,13 +37,21 @@ private:
 	public:
 		Preprocessing(Mat inputImg);
 		Mat getObjectsImg();
+		Mat getStraightenedImg();
+		Mat getStraightenedBinaryImg();
 		vector<Rect> getObjectXY();
 	};
-
+	
 	class Analysis {
 	private:
+
+
+		Mat straightenedImg;
+		Mat straightenedBinaryImg;
+		Mat inputCalculateStaffImg;
 		Mat objectsImg;
 		vector<Rect> objectXY;
+
 		vector<Point> staffXY;
 		int staffHeight;
 		int staffSpace;
@@ -58,17 +66,24 @@ private:
 		void calculatePitch();
 		void recognizeObject();
 		void recognizeGeneralSymbol();
+		void cropTextArea(Rect*);
 		void recognizeText();
 		void recognizeNoteSymbol();
+		void colorConers();
+		int show(Mat img, string title);
 
 	public:
-		Analysis(Mat objectsImg, vector<Rect> objectXY);
+
+		Analysis(Mat straightenedImg, Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY);
+
 		vector<string> getNote();
 		vector<string> getNonNote();
 		vector<string> getText();
 		void setObjectsImg(Mat objectsImg);
 		void setObjectXY(vector<Rect> objectXY);
 	};
+
+
 
 	class Postproecessing{
 	private:
@@ -83,6 +98,7 @@ private:
 	Mat inputImg;
 	Mat binaryImg;
 	Mat straightenedImg;
+	Mat straightenedBinaryImg;
 	Mat staffImg;
 	Mat objectsImg;
 	vector<Rect> objectXY;
