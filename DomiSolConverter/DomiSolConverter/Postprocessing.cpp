@@ -2,89 +2,61 @@
 #include <windows.h>
 #include "DomiSolConverter.h"
 #include <fstream>
+#include <ctime>
 
 DomiSolConverter::Postproecessing::Postproecessing(vector<Note> notes, vector<NonNote> nonNotes) {
-	char tone = 'E';
-	for (int i = 0; i < 10; i++) {
-		Note note = Note(1, 1, i);
-		tone++;
-		if (tone == 'H') {
-			tone = 'A';
-		}
-		if (i % 2 == 1) {
-			note.setFlag_Head(1, false);
-			note.setScale_Octave(tone, 1);
-			note.setDot(false);
-		}
-		else if (i % 3 == 0) {
-			note.setFlag_Head(0, false);
-			note.setScale_Octave('C', 2);
-			note.setDot(false);
+	srand((unsigned int)time(0));
+
+	for (int i = 0; i < 3; i++) {
+		Note note = Note();
+		char tone = 'A' + (rand() % 7);
+		int octave = rand() % 2 + 1;
+		int flag = rand() % 3;
+		int dot = rand() % 2;
+
+		if (flag == 0) {
+			note.setFlag_Head(flag, true);
 		}
 		else {
-			note.setFlag_Head(1, true);
-			note.setScale_Octave(tone, 0);
-			note.setDot(true);
+			note.setFlag_Head(flag, false);
 		}
+
+		note.setScale_Octave(tone, octave);
+		note.setDot(dot);
 		note.setIsWholeNote(false);
 		this->notes.push_back(note);
 	}
-	
-	saveFile(combineInfo());
+
+	combineInfo();
+	saveFile(makeCode());
 }
 
-string DomiSolConverter::Postproecessing::combineInfo() {
-	vector<Note>::iterator iter;
+void DomiSolConverter::Postproecessing::combineInfo() {
+	vector<Note>::iterator note = notes.begin();
+	vector<NonNote>::iterator nonNote = nonNotes.begin();
+
+	for (int i = 0; i < notes.size(); i++) {
+		this->wholeSign.push_back(&(notes[i]));
+	}
+
+	for (int i = 0; i < nonNotes.size(); i++) {
+		this->wholeSign.push_back(&(nonNotes[i]));
+	}
+}
+
+string DomiSolConverter::Postproecessing::makeCode() {
+	vector<Symbol*>::iterator iter = wholeSign.begin();
+
 	string code = "{\n";
 
-	for (iter = notes.begin(); iter != notes.end(); iter++) {
-		switch ((*iter).getScale()) {
-		case 'C': {
-			code += 'c';
-			break;
+	for (int i = 0; i < wholeSign.size(); i++) {
+		if (wholeSign[i]->getType().compare("note") == 0) {
+			Note *note = (Note*)(wholeSign[i]);
+			code += this->makeNoteCode(note);
 		}
-		case 'D': {
-			code += 'd';
-			break;
-		}
-		case 'E': {
-			code += 'e';
-			break;
-		}
-		case 'F': {
-			code += 'f';
-			break;
-		}
-		case 'G': {
-			code += 'g';
-			break;
-		}
-		case 'A': {
-			code += 'a';
-			break;
-		}
-		case 'B': {
-			code += 'b';
-			break;
-		}
-		}
-
-		for (int oct = 0; oct < (*iter).getOctave(); oct++) {
-			code += '\'';
-		}
-
-		switch ((*iter).getFlag()) {
-		case 0: {
-			if ((*iter).getIsEmptyHead()) {
-				code += '2';
-			}
-			else {
-				code += '4';
-			}
-			break;
-		}
-		case 1: code += '8'; break;
-		case 2: code += '16'; break;
+		if (wholeSign[i]->getType().compare("nonNote") == 0) {
+			NonNote *nonNote = (NonNote*)(wholeSign[i]);
+			code += this->makeNonNoteCode(nonNote);
 		}
 		code += " ";
 	}
@@ -93,8 +65,57 @@ string DomiSolConverter::Postproecessing::combineInfo() {
 	return code;
 }
 
-void DomiSolConverter::Postproecessing::transposeKey() {
+string DomiSolConverter::Postproecessing::makeNonNoteCode(NonNote *nonNote) {
+}
 
+string DomiSolConverter::Postproecessing::makeNoteCode(Note *note) {
+	string code = "";
+
+	switch (note->getScale()) {
+	case 'C': {
+		code += 'c';
+		break;
+	}
+	case 'D': {
+		code += 'd';
+		break;
+	}
+	case 'E': {
+		code += 'e';
+		break;
+	}
+	case 'F': {
+		code += 'f';
+		break;
+	}
+	case 'G': {
+		code += 'g';
+		break;
+	}
+	case 'A': {
+		code += 'a';
+		break;
+	}
+	case 'B': {
+		code += 'b';
+		break;
+	}
+	}
+
+	for (int oct = 0; oct < note->getOctave(); oct++) {
+		code += '\'';
+	}
+
+	string bit = note->transposeNote();
+	if (bit.compare(string("0")) != 0) {
+		code += bit;
+	}
+
+	if (note->getDot()) {
+		code += ".";
+	}
+
+	return code;
 }
 
 void DomiSolConverter::Postproecessing::saveFile(string code) {

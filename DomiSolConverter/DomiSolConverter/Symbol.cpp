@@ -1,22 +1,42 @@
 #include "pch.h"
 #include "Symbol.h"
 
-Symbol::Symbol(int lineNum, int barNum, int orderNum) {
-	this->lineNum = lineNum;
+string Symbol::getType() {
+	return this->type;
+}
+
+void Symbol::setbarNum(int barNum) {
 	this->barNum = barNum;
+}
+
+void Symbol::setLineNum(int lineNum) {
+	this->lineNum = lineNum;
+}
+
+void Symbol::setOrderNum(int orderNum) {
 	this->orderNum = orderNum;
 }
 
-int Symbol::getLineNum() {
-	return this->lineNum;
+int Symbol::getFlag() {
+	return 0;
 }
-
-int Symbol::getBarNum() {
-	return this->barNum;
+bool Symbol::getIsEmptyHead() {
+	return true;
 }
-
-int Symbol::getOrderNum() {
-	return this->orderNum;
+bool Symbol::getDot() {
+	return true;
+}
+bool Symbol::getIsWholeNote() {
+	return false;
+}
+char Symbol::getScale() {
+	return 'C';
+}
+int Symbol::getOctave() {
+	return 1;
+}
+string Symbol::transposeNote() {
+	return "2";
 }
 
 int Note::getFlag() {
@@ -43,10 +63,6 @@ int Note::getOctave() {
 	return this->octave;
 }
 
-//hash_map<string, bool> Note::getNonNotes() {
-//	return this->nonNotes;
-//}
-
 void Note::setFlag_Head(int flag, bool isEmptyHead) {
 	this->flag = flag;
 	this->isEmptyHead = isEmptyHead;
@@ -65,9 +81,6 @@ void Note::setScale_Octave(char scale, int octave) {
 	this->octave = octave;
 }
 
-//void Note::setNonNotes(hash_map<string, bool> nonNotes) {
-//	this->nonNotes = nonNotes;
-//}
 
 void Note::setResult(string result) {
 	this->result = result;
@@ -83,36 +96,24 @@ void NonNote::setNonNoteType() {
 	this->nonNoteType = nonNoteType;
 }
 
-
-
-enum {
-	TWO = 2,
-	TWO_DOT,
-	FOUR,
-	FOUR_DOT,
-	EIEGHT = 8,
-	EIEGHT_DOT,
-	WHOLE,
-	SIXT = 16,
-	SIXT_DOT
-};
-
-int Note::transposeNote() {
+string Note::transposeNote() {
 	if (isWholeNote) {
-		return WHOLE;
+		return string("4");
 	}
-	else if (flag == 0 && isEmptyHead && !dot) {
-		return TWO;
+	else if (flag == 0 && isEmptyHead) {
+		return string("2");
 	}
-	else if (flag == 0 && isEmptyHead && dot) {
-		return TWO_DOT;
+
+	else if (flag == 0 && !isEmptyHead) {
+		return string("4");
 	}
-	else if (flag == 0 && !isEmptyHead && dot) {
-		return FOUR;
+	else if (flag == 1 && !isEmptyHead) {
+		return string("8");
 	}
-	else if (flag == 0 && !isEmptyHead && dot) {
-		return FOUR_DOT;
+	else if (flag == 2 && !isEmptyHead) {
+		return string("16");
+	}
+	else {
+		return "x";
 	}
 }
-
-

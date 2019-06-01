@@ -76,11 +76,14 @@ private:
 
 	class Postproecessing{
 	private:
-		string combineInfo();
-		void transposeKey();
+		void combineInfo();
+		string makeCode();
 		void saveFile(string code);
 		vector<Note> notes;
 		vector<NonNote> nonNotes;
+		vector<Symbol*> wholeSign;
+		string makeNoteCode(Note *note);
+		string makeNonNoteCode(NonNote *nonNote);
 
 	public:
 		Postproecessing(vector<Note> notes, vector<NonNote> nonNotes);
