@@ -4,6 +4,16 @@
 #include <opencv2/opencv.hpp>
 #include "Symbol.h"
 #include <vector>
+#include <sstream>
+#include <codecvt>
+#include <fstream>
+#include <iostream>
+#include <io.h>
+#include <fcntl.h>
+#include <string>
+#include <codecvt>
+
+
 
 using namespace std;
 using namespace cv;

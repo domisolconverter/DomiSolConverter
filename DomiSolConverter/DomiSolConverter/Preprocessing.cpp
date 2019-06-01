@@ -177,8 +177,8 @@ void DomiSolConverter::Preprocessing::extractObject() {
 		//printf("%d", i);
 		rectangle(contourImg, objectXY[i].tl(), objectXY[i].br(), color, 1);
 	}
-	namedWindow("contours", CV_WINDOW_AUTOSIZE);
-	imshow("contours", contourImg);
+	//namedWindow("contours", CV_WINDOW_AUTOSIZE);
+	//imshow("contours", contourImg);
 	
 }
 

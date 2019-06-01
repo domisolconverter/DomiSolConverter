@@ -467,6 +467,18 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 }
 
 
+// UTF-8 인코딩된 파일 읽어오는 함수
+wstring readFile(const char* filename)
+{
+	wifstream wif(filename);
+	wif.imbue(locale(locale::empty(), new codecvt_utf8<wchar_t>));
+	wstringstream wss;
+
+	wss << wif.rdbuf();
+	return wss.str();
+}
+
+
 void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 
 
@@ -576,13 +588,25 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 
 		ROI[i] = Rect(xmin, ymin, xmax - xmin, ymax - ymin);
 		Mat subImg = Mat(src, ROI[i]);
-		//imwrite("./outputImage/Onlytextpart" + to_string(i) + ".jpg", subImg);
-		//namedWindow("Onlytextpart" + to_string(i), WINDOW_AUTOSIZE);
-		//imshow("Onlytextpart" + to_string(i), subImg);
+		imwrite("./outputImage/Onlytextpart.jpg", subImg);
+		namedWindow("Onlytextpart" + to_string(i), WINDOW_AUTOSIZE);
+		imshow("Onlytextpart" + to_string(i), subImg);
 
+		system("tesseract ./outputImage/Onlytextpart.jpg ./outputImage/text_result -l kor+eng");
 
+		// 결과 읽어와서 string vector에 저장
+
+		_setmode(_fileno(stdout), _O_U16TEXT);
+		wstring wstr = readFile("./outputImage/text_result.txt");
+
+		string result_string = "";
+		wcout << wstr << endl;
+		//cout << result_string << endl;
+		//this->text.push_back(str);
 	}
 }
+
+
 
 void DomiSolConverter::Analysis::recognizeText() {
 
