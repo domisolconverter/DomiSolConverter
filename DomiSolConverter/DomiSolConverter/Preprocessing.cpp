@@ -107,6 +107,10 @@ void DomiSolConverter::Preprocessing::extractObject() {
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
 
+	// morphology
+	Mat closingStructure = getStructuringElement(MORPH_ELLIPSE, Size(2, 4));
+	morphologyEx(objectsImg, objectsImg, MORPH_CLOSE, closingStructure);
+
 	// find contours
 	findContours(objectsImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 	//vector<vector<Point>> contours_poly(contours.size());
@@ -135,9 +139,10 @@ void DomiSolConverter::Preprocessing::extractObject() {
 		//cout << i << "th   " << objectXY[i] << endl;
 		int c = 1;
 		while (1) {
-			if (i + c > objectsCnt - 1 || objectXY[i + c].y > objectXY[i].y + objectXY[i].height) {
+			if (i + c > objectsCnt - 1) {
 				break;
 			}
+			//cout << "c: " << c << "  " << objectXY[i+c] << endl;
 			// i번째 사각형보다 i+c번째 사각형이 작을때
 			if (objectXY[i].width > objectXY[i + c].width) {
 				// i+c번째 사각형이 내포돼있을때
@@ -148,6 +153,7 @@ void DomiSolConverter::Preprocessing::extractObject() {
 					) {
 					objectXY.erase(objectXY.begin() + i + c);
 					objectsCnt--;
+					i--;
 				}
 			}
 			// i번째 사각형보다 i+c번째 사각형이 클때
@@ -160,25 +166,28 @@ void DomiSolConverter::Preprocessing::extractObject() {
 					) {
 					objectXY.erase(objectXY.begin() + i);
 					objectsCnt--;
+					i--;
 				}
 			}
 			c++;
 		}
 	}
 	
-	//Draw result
-	Mat contourImg = Mat(objectsImg.rows, objectsImg.cols, CV_8U);
-	//Scalar color(0, 0, 0);
+	//draw result
+	Mat contourimg = Mat(objectsImg.rows, objectsImg.cols, CV_8U);
+	//scalar color(0, 0, 0);
 	Scalar color(255, 255, 255);
 	for (int i = 0; i < contours.size(); i++) {
-		drawContours(contourImg, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
+		drawContours(contourimg, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
 	}
 	for (int i = 0; i < objectXY.size(); i++) {
 		//printf("%d", i);
-		rectangle(contourImg, objectXY[i].tl(), objectXY[i].br(), color, 1);
+		rectangle(contourimg, objectXY[i].tl(), objectXY[i].br(), color, 1);
+		
+		//putText(contourimg, to_string(i), objectXY[i].tl(), 0.3, 0.3, Scalar::all(255));
 	}
 	namedWindow("contours", CV_WINDOW_AUTOSIZE);
-	imshow("contours", contourImg);
+	imshow("contours", contourimg);
 	
 }
 
@@ -195,18 +204,18 @@ DomiSolConverter::Preprocessing::Preprocessing(Mat inputImg) {
 	this->inputImg = inputImg;
 	
 	binarization();
-	//show(binaryImg, "binaryImg", 700, 0);
+	//show(binaryImg, "binaryImg");
 	detectEdge();
 	//show(edgeImg, "edgeImg");
 	straightenImg();
 	//show(straightenedImg, "straightenedImg");
-	straightenedImg = inputImg;
+	//straightenedImg = inputImg;
 	threshold(~straightenedImg, straightenedBinaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
 	//show(straightenedBinaryImg, "straightenedBinaryImg");
 	extractStaff();
 	//show(staffImg, "staffImg");
 	removeStaff();
-	//show(objectsImg, "objectsImg");
+	show(objectsImg, "objectsImg");
 	extractObject();
 	
 }
