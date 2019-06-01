@@ -4,11 +4,16 @@
 #include <fstream>
 
 DomiSolConverter::Postproecessing::Postproecessing(vector<Note> notes, vector<NonNote> nonNotes) {
-	for (int i = 0; i < 2; i++) {
+	char tone = 'E';
+	for (int i = 0; i < 10; i++) {
 		Note note = Note(1, 1, i);
+		tone++;
+		if (tone == 'H') {
+			tone = 'A';
+		}
 		if (i % 2 == 1) {
 			note.setFlag_Head(1, false);
-			note.setScale_Octave('E' + i, 1);
+			note.setScale_Octave(tone, 1);
 			note.setDot(false);
 		}
 		else if (i % 3 == 0) {
@@ -18,13 +23,13 @@ DomiSolConverter::Postproecessing::Postproecessing(vector<Note> notes, vector<No
 		}
 		else {
 			note.setFlag_Head(1, true);
-			note.setScale_Octave('E' + i, 0);
+			note.setScale_Octave(tone, 0);
 			note.setDot(true);
 		}
 		note.setIsWholeNote(false);
 		this->notes.push_back(note);
 	}
-
+	
 	saveFile(combineInfo());
 }
 
@@ -85,7 +90,7 @@ string DomiSolConverter::Postproecessing::combineInfo() {
 	}
 	code += "\n}";
 
-	return code
+	return code;
 }
 
 void DomiSolConverter::Postproecessing::transposeKey() {
