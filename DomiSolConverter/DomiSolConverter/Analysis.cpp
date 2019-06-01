@@ -15,7 +15,7 @@ int DomiSolConverter::Analysis::show(Mat img, string title) {
 	imshow(title, img);
 }
 
-// ¿À¼± ÇÑ °³(5°³ÀÇ ÁÙ)ÀÇ ³ôÀÌ
+// ì˜¤ì„  í•œ ê°œ(5ê°œì˜ ì¤„)ì˜ ë†’ì´
 void DomiSolConverter::Analysis::calculateStaffHeight(){
 	int sum = 0;
 	for (int i = 1; i < staffXY.size(); i+=2 ) {
@@ -25,11 +25,11 @@ void DomiSolConverter::Analysis::calculateStaffHeight(){
 		this -> staffHeight = sum / (staffXY.size() / 2);
 	}
 	else {
-		cout << "¿À¼±ÀÇ °³¼ö°¡ 0°³ ÀÔ´Ï´Ù"<< endl;
+		cout << "ì˜¤ì„ ì˜ ê°œìˆ˜ê°€ 0ê°œ ì…ë‹ˆë‹¤"<< endl;
 	}
 }
 
-// ¿À¼±¿¡ ÀÖ´Â ÁÙ »çÀÌ °£°İ
+// ì˜¤ì„ ì— ìˆëŠ” ì¤„ ì‚¬ì´ ê°„ê²©
 void DomiSolConverter::Analysis::calculateStaffSpace(){
 
 }
@@ -37,22 +37,25 @@ void DomiSolConverter::Analysis::calculateStaffSpace(){
 void DomiSolConverter::Analysis::calculateStaffXY(){
 
 
-	Mat src = this->inputCalculateStaffImg;
+	Mat src = this->inputCalculateStaffImg.clone();
 
 	int width = src.cols;
 	int height = src.rows;
-	int oneBar = (int)((width / 100.0) * 10);    // 140
+	int oneBar = (int)((width / 100.0) * 10);    
+	int missingLine = (int)((width / 100.0) * 2);
 	int colCnt = 0;
 	int staffNum = 0;
 
 	vector<int> Y;
 	vector<int> X;
 
-	//* YÃà È÷½ºÅä±×·¥ ±×¸®±â *//
+	//* Yì¶• íˆìŠ¤í† ê·¸ë¨ ê·¸ë¦¬ê¸° *//
 
-	// ÇÏ¾áÁÙÀÌ (20%)°¡ µÇ°í
-	// ²÷±âÁö ¾ÊÀ¸¸é
-	// ¿À¼±ÀÌ¶ó ÆÇ´Ü
+	// í•˜ì–€ì¤„ì´ (10%)ê°€ ë˜ê³ 
+	// ëŠê¸°ì§€ ì•Šìœ¼ë©´
+	// ì˜¤ì„ ì´ë¼ íŒë‹¨
+
+	// cout << missingLine << endl;
 
 	for (int nr = 0; nr < height; nr++) {
 
@@ -63,13 +66,13 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 		int space = 0;
 
 		// Run Length Coding
-		// ÇÏ¾áÁÙÀÌ ²÷°å´ÂÁö È®ÀÎ
+		// í•˜ì–€ì¤„ì´ ëŠê²¼ëŠ”ì§€ í™•ì¸
 		for (int nc = 0; nc < width; nc++) {
 
 			if (pixel[nc]==255) {
 				if (tempX.size() != 0) {
 					space = nc - tempX.back();
-					if (space < 10) {
+					if (space < missingLine) {
 						tempX.push_back(nc);
 						colCnt++;
 					}
@@ -84,7 +87,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 			}
 		}
 				
-		// ÇÑ ¸¶µğ ÀÌ»óÀÎÁö
+		// í•œ ë§ˆë”” ì´ìƒì¸ì§€
 		if (colCnt >= oneBar) {
 
 			Y.push_back(nr);
@@ -92,14 +95,14 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 			X.push_back(tempX.back());
 		}
 
-		// YÃà È÷½ºÅä±×·¥ ¿Ï¼º
+		// Yì¶• íˆìŠ¤í† ê·¸ë¨ ì™„ì„±
 		for (int nc = 0; nc < colCnt; nc++) {
 			pixel[nc] = pixel[nc] / 64 * 64 + 128 / 2;
 		}
 
 	}
 
-	// * ¶óÀÎº¸Á¤ * //
+	// * ë¼ì¸ë³´ì • * //
 	for (int i = 1; i < Y.size();) {
 		if (Y[i] - Y[i - 1] <= 2) {
 			Y.erase(Y.begin() + i);
@@ -110,8 +113,8 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 		}
 	}
 
-	// ÃÖ¼Ò3°³ ¾Çº¸ °£°İº¸´Ù 2¹è ÀÌ»ó Ä¿Áö¸é
-	// ´ÙÀ½ ¿À¼±À¸·Î ÆÇ´Ü
+	// ìµœì†Œ3ê°œ ì•…ë³´ ê°„ê²©ë³´ë‹¤ 2ë°° ì´ìƒ ì»¤ì§€ë©´
+	// ë‹¤ìŒ ì˜¤ì„ ìœ¼ë¡œ íŒë‹¨
 	int lineCnt = 0;
 	int spaceCnt = 0;
 	int diff = 0;
@@ -124,31 +127,31 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 		}
 		else {
-			// Æò±Õ ±¸ÇÏ±â
+			// í‰ê·  êµ¬í•˜ê¸°
 			diffAvg = diff / spaceCnt;
-			// Æò±ÕÀÇ 200%º¸´Ù Â÷ÀÌ°¡ Å©Áö ¾Ê´Ù¸é Ãß°¡
+			// í‰ê· ì˜ 200%ë³´ë‹¤ ì°¨ì´ê°€ í¬ì§€ ì•Šë‹¤ë©´ ì¶”ê°€
 			if (diffAvg * 2.5 >= Y[i] - Y[i - 1]) {
 				diff += Y[i] - Y[i - 1];
 				spaceCnt++;
 
 			}
-			// Å©´Ù ±×¸®°í ¸¸¾à ±×°Ô 3ÁÙ ÀÌ»óÀÌ¸é ±× Àü±îÁö¸¦ staff ÇÏ³ª¶ó°í »ı°¢ÇÏ±â!
+			// í¬ë‹¤ ê·¸ë¦¬ê³  ë§Œì•½ ê·¸ê²Œ 3ì¤„ ì´ìƒì´ë©´ ê·¸ ì „ê¹Œì§€ë¥¼ staff í•˜ë‚˜ë¼ê³  ìƒê°í•˜ê¸°!
 			else {
 
-				//cout << "ÇöÀç Æò±Õ " << diffAvg << endl;
-				//cout << "°£°İ " << spaceCnt << endl;
+				//cout << "í˜„ì¬ í‰ê·  " << diffAvg << endl;
+				//cout << "ê°„ê²© " << spaceCnt << endl;
 
 				if (spaceCnt >= 3) {
 					lineCnt++;
-					//cout << lineCnt << "¹ø Â° ¿À¼±ÀÌ³×¿ä Ã¹¹øÂ° ÁÙ y´Â " << Y[i - 1 - spaceCnt] << endl;
-					//cout << lineCnt << "¹ø Â° ¿À¼±ÀÌ³×¿ä ¸¶Áö¸· ÁÙ y´Â " << Y[i] << endl;
+					//cout << lineCnt << "ë²ˆ ì§¸ ì˜¤ì„ ì´ë„¤ìš” ì²«ë²ˆì§¸ ì¤„ yëŠ” " << Y[i - 1 - spaceCnt] << endl;
+					//cout << lineCnt << "ë²ˆ ì§¸ ì˜¤ì„ ì´ë„¤ìš” ë§ˆì§€ë§‰ ì¤„ yëŠ” " << Y[i] << endl;
 
 					this->staffXY.push_back(Point(X[(i - 1 - spaceCnt) * 2], Y[i - 1 - spaceCnt]));
 					this->staffXY.push_back(Point(X[(i - 1) * 2 + 1], Y[i - 1]));
 
 				}
 				else {
-					//cout << "¾ê´Â ¿À¼±ÀÌ ¾Æ´Ï¿¡¿ä" << endl;
+					//cout << "ì–˜ëŠ” ì˜¤ì„ ì´ ì•„ë‹ˆì—ìš”" << endl;
 
 				}
 				spaceCnt = 0;
@@ -157,10 +160,10 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 			}
 
-			// ¹è¿­ÀÌ ³¡³ª°í ¸¶Áö¸· staff Ã¼Å©
+			// ë°°ì—´ì´ ëë‚˜ê³  ë§ˆì§€ë§‰ staff ì²´í¬
 			if (i == Y.size() - 1 && spaceCnt >= 3) {
 				lineCnt++;
-				//cout << lineCnt << "¹ø Â° ¿À¼±ÀÌ³×¿ä" << endl;
+				//cout << lineCnt << "ë²ˆ ì§¸ ì˜¤ì„ ì´ë„¤ìš”" << endl;
 				this->staffXY.push_back(Point(X[(i - spaceCnt) * 2], Y[i - spaceCnt]));
 				this->staffXY.push_back(Point(X[i * 2 + 1], Y[i]));
 			}
@@ -170,32 +173,34 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 	}
 	
-	// ¿À¼±ÀÇ Æò±Õ ³ôÀÌ °è»ê
+	// ì˜¤ì„ ì˜ í‰ê·  ë†’ì´ ê³„ì‚°
 	 calculateStaffHeight();
 	 
 
-	//* ¿À¼± °ËÃâ °á°ú Å×½ºÆ® ÇÁ¸°Æ® *//
-	/*	
+	//* ì˜¤ì„  ê²€ì¶œ ê²°ê³¼ í…ŒìŠ¤íŠ¸ í”„ë¦°íŠ¸ *//
+		
 	for (int i = 0; i < staffXY.size(); i++) {
 		cout << "( " << this->staffXY[i].x << " , " << this->staffXY[i].y << " )" << endl;
 	}
-	*/
 	
-	//* ¿À¼± ROI Å×½ºÆ® ÇÁ¸°Æ® *//
 	
+	//* ì˜¤ì„  ROI í…ŒìŠ¤íŠ¸ í”„ë¦°íŠ¸ *//
+	/*
+
 	Rect ROI;
 
 	if (staffXY.size() >= 2) {
 		for (int i = 0; i < staffXY.size(); i+=2) {
-			// Ã³À½
-			ROI = Rect(staffXY[i].x, staffXY[i].y, staffXY[i+1].x - staffXY[i].x, staffXY[i + 1].y - staffXY[i].y);
-			Mat subImg = Mat(src, ROI);
-			show(subImg, to_string(i/2) + "¹ø Â° ¿À¼±");
+			// ì²˜ìŒ
+			ROI = Rect(staffXY[i].x, staffXY[i].y, width - staffXY[i].x, staffXY[i + 1].y - staffXY[i].y);
+			Mat subImg = src(ROI);
+			show(subImg, to_string(i/2) + "ë²ˆ ì§¸ ì˜¤ì„ ");
 
 		}
 	}
+	*/
+	// show(src, "ì˜¤ì„ ì¸ì‹í•œ ì´ë¯¸ì§€");
 	
-	show(src, "¿À¼±ÀÎ½ÄÇÑ ÀÌ¹ÌÁö");
 }
 
 void DomiSolConverter::Analysis::extractFeature() {
@@ -222,46 +227,156 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 
 }
 
-void DomiSolConverter::Analysis::recognizeText() {
-	
-	// (¼öÁ¤)DomiSolConverterÀÇ straitenedImg·Î ¹Ù²Ù¼¼¿ä
-	string INPUTPATH = "./inputImage/straightenedImg.jpg";
-	string OUTPUTPATH = "./outputImage/textpart";
+void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 
-	Mat src = imread(INPUTPATH, IMREAD_GRAYSCALE);
+
+	Mat input = this->straightenedImg.clone();
+	Mat binaryImg;
+	Mat opened;
+	Mat closed;
+	Mat result;
+	int width = input.cols;
+	int height = input.rows;
+	int ROISize = staffXY.size() - (staffXY.size() / 2 - 1);
+
+	for (int i = 0; i < ROISize; i++) {
+
+		Mat src = Mat(input, ROI[i]);
+		
+		/* ì»´í¬ë„ŒíŠ¸ ë§Œë“¤ê¸° */
+		// OTSU ì´ì§„í™”
+		threshold(src, result, 0, 255, THRESH_BINARY | THRESH_OTSU);
+		Mat element(width*0.012, height*0.012, CV_8U, Scalar(1)); // í•„í„° í¬ê¸° ì¤‘ìš”
+		// ì—´ë¦¼ ì—°ì‚°
+		morphologyEx(result, result, MORPH_OPEN, element);
+		// ë‹«í˜ ì—°ì‚°
+		morphologyEx(result, result, MORPH_CLOSE, element);
+		// íŒ½ì°½ ì—°ì‚°
+		//dilate(result, result, Mat());
+		// ì¹¨ì‹ ì—°ì‚°
+		erode(result, result, Mat());
+		//namedWindow("Component Image" + to_string(i));
+		//imshow("Component Image" + to_string(i), result);
+
+		/* ì»´í¬ë„ŒíŠ¸ì˜ ì™¸ê³½ì„  ê²€ì¶œ */
+
+		vector<vector<Point>> contours;
+		findContours(result, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+		Mat contoursResult(result.size(), CV_8U, Scalar(255));
+		//drawContours(contoursResult, contours, -1, Scalar(150), 2);
+		//namedWindow("Draw Contour Image" + to_string(i));
+		//imshow("Draw Contour Image" + to_string(i), contoursResult);
+
+
+		
+
+		int cmax = width;
+		vector<vector<Point>>::const_iterator it = contours.begin();
+
+		/* ì™¸ê³½ì„  ì¤‘ ì•…ë³´ ì™¸ê³½ì„ ì€ ì œê±° */
+		while (it != contours.end()) {
+			if (it->size() > cmax)
+				it = contours.erase(it);
+			else
+				++it;
+		}
+
+		//drawContours(src, contours, -1, Scalar(100, 255, 0), 2);
+		//namedWindow("Only Text Component" + to_string(i));
+		//imshow("Only Text Component" + to_string(i), src);
+
+		/* ë¬¸ì ì˜ì—­ ë¶€ë¶„ í° ì¢Œí‘œ ì •í•˜ê¸° */
+		
+		it = contours.begin();
+		int xmin = width;
+		int ymin = height;
+		int xmax = 0;
+		int ymax = 0;
+
+		for (int i = 0; i < contours.size(); i++) {
+			for (int j = 0; j < it->size(); j++) {
+				if (contours[i][j].x < xmin) {
+					xmin = contours[i][j].x;
+				}
+				if (contours[i][j].y < ymin) {
+					ymin = contours[i][j].y;
+				}
+				if (contours[i][j].x > xmax) {
+					xmax = contours[i][j].x;
+				}
+				if (contours[i][j].y > ymax) {
+					ymax = contours[i][j].y;
+				}
+			}
+			++it;
+		}
+
+		xmin = xmin*0.9;
+		xmax = xmax*1.1;
+		ymin = ymin*0.9;
+		ymax = ymax*1.1;
+		
+		// ì—¬ë°±ì´ ì´ë¯¸ì§€ë¥¼ ë„˜ì–´ë²„ë¦¬ëŠ” ê²½ìš°
+		if (xmax > src.cols) {
+			xmax = src.cols;
+
+		}
+		if (ymax > src.rows) {
+			ymax = src.rows;
+
+		}
+
+		// í…ìŠ¤íŠ¸ ì˜ì—­ì„ ì¶”ì¶œí•˜ì§€ ëª»í•œ ê²½ìš°
+		if (xmin == width || xmax == 0 || ymin == height || ymax == 0) {
+			xmin = 0;
+			xmax = src.cols;
+			ymin = 0;
+			ymax = src.rows;
+		}
+		
+		ROI[i] = Rect(xmin, ymin, xmax - xmin, ymax - ymin);
+		Mat subImg = Mat(src, ROI[i]);		
+		//imwrite("./outputImage/Onlytextpart" + to_string(i) + ".jpg", subImg);
+		//namedWindow("Onlytextpart" + to_string(i), WINDOW_AUTOSIZE);
+		//imshow("Onlytextpart" + to_string(i), subImg);
+		
+	}
+	
+
+}
+
+void DomiSolConverter::Analysis::recognizeText() {
+
+	Mat src = this->straightenedBinaryImg;
 	int width = src.cols;
 	int height = src.rows;
 
-	// ¿À¼± ¾Æ´Ñ ºÎºĞ Àß¶ó¼­ ÀúÀåÇÏ±â
+	// ì˜¤ì„  ì•„ë‹Œ ë¶€ë¶„ ì˜ë¼ì„œ ì €ì¥í•˜ê¸°
 	
-	Rect ROI;
-	Mat tempImg;
+	int ROISize = staffXY.size() - (staffXY.size() / 2 - 1);
+	// ëŒ€ëµì ì¸ í…ìŠ¤íŠ¸ ì˜ì—­ ROI ë°°ì—´ ë™ì í• ë‹¹
+	Rect *ROI = (Rect*)malloc(sizeof(Rect) * ROISize);
 
-	// 1. °¢ ¿À¼±ÀÇ À­ºÎºĞ crop
-	for (int i = 0; i < staffXY.size(); i++) {
-		// Ã³À½
+	// 1. ê° ì˜¤ì„ ì˜ ìœ—ë¶€ë¶„ crop
+	for (int i = 0; i < ROISize; i++) {
+		// ì²˜ìŒ
 		if (i == 0) {
-			ROI = Rect(0, 0, width, staffXY[i].y);
-			Mat subImg = Mat(src, ROI);
-			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
+			ROI[i] = Rect(0, 0, width, staffXY[i].y);
 		}
-		// ¸¶Áö¸·
-		else if (i == staffXY.size() - 1) {
-			ROI = Rect(0, staffXY[i].y, width, this->staffHeight * 2);
-			Mat subImg = Mat(src, ROI);
-			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
+		// ë§ˆì§€ë§‰
+		else if (i == ROISize - 1) {
+			ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, height - staffXY[2*i-1].y);
 		}
-		// Áß°£
+		// ì¤‘ê°„
 		else {
-			ROI = Rect(0, staffXY[i].y, width, staffXY[i+1].y - staffXY[i].y);
-			Mat subImg = Mat(src, ROI);
-			imwrite(OUTPUTPATH + to_string(i) + ".jpg", subImg);
-			i++;
+			ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, staffXY[2 * i].y - staffXY[2 * i - 1].y);
 		}
 
 	}
 
-
+	// ë¬¸ìê°€ ì¡´ì¬í•˜ëŠ” ë¶€ë¶„ ìë¥¸ ë’¤ ì¹¨ì‹ ì—°ì‚° ì§„í–‰
+	
+	 cropTextArea(ROI);
 
 }
 
@@ -269,7 +384,7 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 	
 }
 
-// ±â¿ï±â º¸Á¤ÇÑ ÀÌ¹ÌÁöÀÇ °ËÀº»ö ¸ğ¼­¸® ºÎºĞÀ» ÇÏ¾á»öÀ¸·Î ¹Ù²Ù±â
+// ê¸°ìš¸ê¸° ë³´ì •í•œ ì´ë¯¸ì§€ì˜ ê²€ì€ìƒ‰ ëª¨ì„œë¦¬ ë¶€ë¶„ì„ í•˜ì–€ìƒ‰ìœ¼ë¡œ ë°”ê¾¸ê¸°
 void DomiSolConverter::Analysis::colorConers() {
 
 	Mat input = this->straightenedBinaryImg;
@@ -277,8 +392,8 @@ void DomiSolConverter::Analysis::colorConers() {
 	int height = input.rows;
 	int bar = (int)((width / 100.0) * 20);
 
-	// ¾çÂÊ ³× °÷ÀÇ ¸ğ¼­¸®¿¡ ´ëÇØ¼­ Run Length Coding ÁøÇà
-	// °ËÀº»öÀ¸·Î Ä¥ÇÏ±â
+	// ì–‘ìª½ ë„¤ ê³³ì˜ ëª¨ì„œë¦¬ì— ëŒ€í•´ì„œ Run Length Coding ì§„í–‰
+	// ê²€ì€ìƒ‰ìœ¼ë¡œ ì¹ í•˜ê¸°
 	
 	for (int nr = 0; nr < height; nr++) {
 
@@ -310,21 +425,22 @@ void DomiSolConverter::Analysis::colorConers() {
 
 	}
 	
-	this->inputCalculateStaffImg = input;
+	this->inputCalculateStaffImg = input.clone();
 
 }
 
 
-DomiSolConverter::Analysis::Analysis(Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY) {
+DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY) {
 
-	// ¿À¼± °ËÃâ
+	// ì˜¤ì„  ê²€ì¶œ
+	this->straightenedImg = straightenedImg;
 	this->straightenedBinaryImg = straightenedBinaryImg;
 	colorConers();
-	show(this->inputCalculateStaffImg, "¿À¼±ÀÎ½ÄÇÒ ÀÌ¹ÌÁö");
+	//show(this->inputCalculateStaffImg, "ì˜¤ì„ ì¸ì‹í•  ì´ë¯¸ì§€");
 	calculateStaffXY();
 
-	// ±ÛÀÚ ÀÎ½Ä
-	//recognizeText();
+	// ê¸€ì ì¸ì‹
+	recognizeText();
 
 	this->objectsImg = objectsImg;
 	this->objectXY = objectXY;
