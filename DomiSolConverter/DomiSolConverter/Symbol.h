@@ -16,9 +16,9 @@ public:
 	void setLineNum(int lineNum);
 	void setbarNum(int barNum);
 	void setOrderNum(int orderNum);
-	int getLineNum();
-	int getBarNum();
-	int getOrderNum();
+
+	int x;
+	int y;
 };
 
 class Note : public Symbol {
@@ -31,6 +31,7 @@ private:
 	int octave; // 음역대
 	//hash_map<string, bool> nonNotes; // 음표에 붙은 비음표들
 	string result;	// 음표 종류 판단 결과 저장
+
 public:
 	Note(): Symbol() {}
 	int getFlag();
@@ -48,14 +49,15 @@ public:
 	//void setNonNotes(hash_map<string, bool> nonNotes);
 	void setResult(string result);
 	int transposeNote();
+
 };
 
 class NonNote : public Symbol {
 private:
 	string nonNoteType;
+
 public:
 	NonNote(string nonNoteType) : Symbol() { this->nonNoteType = nonNoteType; }
 	string getNonNoteType();
 	void setNonNoteType();
-	
 };

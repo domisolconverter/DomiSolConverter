@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include "Symbol.h"
 #include <vector>
+#include "Symbol.h"
 
 using namespace std;
 using namespace cv;
@@ -47,7 +48,6 @@ private:
 	
 	class Analysis {
 	private:
-
 		Mat straightenedImg;
 		Mat straightenedBinaryImg;
 		Mat inputCalculateStaffImg;
@@ -66,7 +66,7 @@ private:
 		void calculateStaffSpace();
 		void calculateStaffXY();
 		void classifyNote();
-		void extractNoteFeature();
+		void extractFeature();
 		void calculatePitch();
 		void recognizeObject();
 		void recognizeGeneralSymbol();
@@ -78,12 +78,12 @@ private:
 
 
 	public:
-
-		Analysis(Mat straightenedImg, Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY);
+		Analysis(Mat straightenedImg, Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY, vector<Note> note, vector<NonNote> nonNote, vector<string> text);
 
 		vector<string> getNote();
 		vector<string> getNonNote();
 		vector<string> getText();
+
 		void setObjectsImg(Mat objectsImg);
 		void setObjectXY(vector<Rect> objectXY);
 	};
@@ -111,6 +111,7 @@ private:
 	vector<Symbol> wholeSymbols;
 	vector<Note> wholeNotes;
 	vector<NonNote> wholeNonNotes;
+	vector<string> text;
 
 public:
 	DomiSolConverter(Mat input);

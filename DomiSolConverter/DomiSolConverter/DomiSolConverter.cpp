@@ -10,8 +10,6 @@ DomiSolConverter::DomiSolConverter(Mat input) {
 	this->objectXY = P.getObjectXY();
 	this->straightenedImg = P.getStraightenedImg();
 	this->straightenedBinaryImg = P.getStraightenedBinaryImg();
-	Analysis A = Analysis(straightenedImg, straightenedBinaryImg, objectsImg, objectXY);
-	//A.setObjectsImg(this->objectsImg);
-	//A.setObjectXY(this->objectsImg);
 
+	Analysis A = Analysis(straightenedImg, straightenedBinaryImg, objectsImg, objectXY, this->wholeNotes, this->wholeNonNotes, this->text);
 }

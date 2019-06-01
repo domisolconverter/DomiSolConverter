@@ -1,6 +1,23 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
+DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY, vector<Note> note, vector<NonNote> nonNote, vector<string> text) {
+	this->objectsImg = objectsImg;
+	this->objectXY = objectXY;
+	this->nonNoteInfo = nonNote;
+	this->noteInfo = note;
+	this->text = text;
+	this->straightenedImg = straightenedImg;
+	this->straightenedBinaryImg = straightenedBinaryImg;
+
+	colorConers();
+	calculateStaffXY();
+	calculatePitch();
+	recognizeText();
+	classifyNote();
+	//extractFeature();
+	//recognizeGeneralSymbol();
+}
 
 int DomiSolConverter::Analysis::show(Mat img, string title) {
 	// cout << "OpenCV Version : " << CV_VERSION << endl;
@@ -11,7 +28,6 @@ int DomiSolConverter::Analysis::show(Mat img, string title) {
 		cout << "There's no sheet file!" << endl;
 		return -1;
 	}
-
 	imshow(title, img);
 }
 
@@ -35,7 +51,7 @@ void DomiSolConverter::Analysis::calculateStaffSpace() {
 	this->staffSpace = (float)this->staffHeight / 5;
 }
 
-void DomiSolConverter::Analysis::calculateStaffXY(){
+void DomiSolConverter::Analysis::calculateStaffXY() {
 
 	Mat src = this->inputCalculateStaffImg.clone();
 
@@ -258,7 +274,7 @@ void DomiSolConverter::Analysis::classifyNote() {
 					//imwrite("outputImage/splits/" + to_string(i) + "_" + to_string(n) + ".jpg", splited(boundingRect(splited)));
 				}
 				objectCnt = objectCnt + num - 1;
-				imwrite("outputImage/splits/" + to_string(i) + ".jpg", object);
+				//imwrite("outputImage/splits/" + to_string(i) + ".jpg", object);
 			}
 		}
 	}
@@ -398,8 +414,18 @@ void DomiSolConverter::Analysis::classifyNote() {
 }
 
 
-void DomiSolConverter::Analysis::extractNoteFeature() {
-
+void DomiSolConverter::Analysis::extractFeature() {
+	//Draw result
+	Mat objectsRectImg = objectsImg;
+	//Scalar color(0, 0, 0);
+	Scalar color(255, 255, 255);
+	for (int i = 0; i < objectXY.size(); i++) {
+		rectangle(objectsRectImg, objectXY[i].tl(), objectXY[i].br(), color, 1);
+		Mat extractOject = ~objectsRectImg(Rect(objectXY[i]));
+		// assume that it's work
+		string fname = "symbols\\object" + to_string(i) + ".jpg";
+		imwrite(fname, extractOject);
+	}
 }
 
 void DomiSolConverter::Analysis::calculatePitch() {
@@ -421,16 +447,8 @@ void DomiSolConverter::Analysis::calculatePitch() {
 		// For test
 		this->staffHeight = 34;
 		this->staffSpace = (float)33 / (float)4;
-		vector<int> test;
-		test.push_back(136);
-		test.push_back(135 + staffHeight);
-		test.push_back(240);
-		test.push_back(240 + 33);
-		test.push_back(344);
-		test.push_back(344 + 33);
-		test.push_back(447);
-		test.push_back(447 + 33);
-		vector<int>::iterator staff = test.begin();
+
+		vector<Point>::iterator staff = staffXY.begin();
 		int maxCnt = 0;
 
 		float headY = 0;
@@ -475,14 +493,14 @@ void DomiSolConverter::Analysis::calculatePitch() {
 		float staff_end = 0;
 		int lineNum = -1;
 
-		for (staff; staff != test.end(); staff++) {
-			int index = distance(test.begin(), staff);
+		for (staff; staff != staffXY.end(); staff++) {
+			int index = distance(staffXY.begin(), staff);
 			if (index % 2 == 0) {
-				staff_start = (*staff);
+				staff_start = (*staff).y;
 				lineNum++;
 			}
 			else {
-				staff_end = (*staff);
+				staff_end = (*staff).y;
 				line(this->objectsImg, Point(100, staff_start), Point(700, staff_start), Scalar(255, 255, 255));
 				line(this->objectsImg, Point(100, staff_start + staffSpace), Point(700, staff_start + staffSpace), Scalar(255, 255, 255));
 				line(this->objectsImg, Point(100, staff_start + staffSpace * 2), Point(700, staff_start + staffSpace * 2), Scalar(255, 255, 255));
@@ -543,7 +561,28 @@ void DomiSolConverter::Analysis::recognizeObject() {
 }
 
 void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
+	char output[100];
+	FILE *p = _popen("python label_image.py symbols", "r");
+	
+	if (p != NULL) {
+		int idx = 0;
+		while (fgets(output, sizeof(output), p) != NULL) {
+			if (strlen(output) > 0) {
+				for (int i = 0; i < 100; i++) {
+					if (output[i] == '\n') {
+						output[i] = '\0';
+					}
+				}
+				cout << output << "\n";
 
+				NonNote nn(output);
+				nn.x = objectXY[idx].x + (objectXY[idx].width / 2);
+				nn.y = objectXY[idx].y + (objectXY[idx].height / 2);
+				this->nonNoteInfo.push_back(nn);
+			}
+			idx++;
+		}
+	}
 }
 
 
@@ -748,45 +787,9 @@ void DomiSolConverter::Analysis::colorConers() {
 
 }
 
-
-DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY) {
-
-	// 오선 검출
-	this->straightenedImg = straightenedImg;
-	this->straightenedBinaryImg = straightenedBinaryImg;
-	colorConers();
-	//show(this->inputCalculateStaffImg, "오선인식할 이미지");
-	calculateStaffXY();
-
-	// 글자 인식
-	recognizeText();
-
-	this->objectsImg = objectsImg;
-	this->objectXY = objectXY;
-
-	classifyNote();
-}
-
-
-vector<string> DomiSolConverter::Analysis::getNote() {
-	vector<string> result;
-	return result;
-}
-
-vector<string> DomiSolConverter::Analysis::getNonNote() {
-	vector<string> result;
-	return result;
-}
-
-vector<string> DomiSolConverter::Analysis::getText() {
-	vector<string> result;
-	return result;
-}
-
 void DomiSolConverter::Analysis::setObjectsImg(Mat objectsImg) {
 	this->objectsImg = objectsImg;
 }
-
 
 void DomiSolConverter::Analysis::setObjectXY(vector<Rect> objectXY) {
 	this->objectXY = objectXY;
