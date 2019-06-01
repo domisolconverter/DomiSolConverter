@@ -76,9 +76,9 @@ private:
 
 	class Postproecessing{
 	private:
-		void combineInfo();
+		string combineInfo();
 		void transposeKey();
-		void saveFile();
+		void saveFile(string code);
 		vector<Note> notes;
 		vector<NonNote> nonNotes;
 

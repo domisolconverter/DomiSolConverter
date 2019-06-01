@@ -4,7 +4,7 @@
 #include <fstream>
 
 DomiSolConverter::Postproecessing::Postproecessing(vector<Note> notes, vector<NonNote> nonNotes) {
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 2; i++) {
 		Note note = Note(1, 1, i);
 		if (i % 2 == 1) {
 			note.setFlag_Head(1, false);
@@ -25,10 +25,10 @@ DomiSolConverter::Postproecessing::Postproecessing(vector<Note> notes, vector<No
 		this->notes.push_back(note);
 	}
 
-	combineInfo();
+	saveFile(combineInfo());
 }
 
-void DomiSolConverter::Postproecessing::combineInfo() {
+string DomiSolConverter::Postproecessing::combineInfo() {
 	vector<Note>::iterator iter;
 	string code = "{\n";
 
@@ -85,17 +85,17 @@ void DomiSolConverter::Postproecessing::combineInfo() {
 	}
 	code += "\n}";
 
-	ofstream out("output.ly");
-
-	out << code;
-	out.close();
-	system("lilypond output.ly");
+	return code
 }
 
 void DomiSolConverter::Postproecessing::transposeKey() {
 
 }
 
-void DomiSolConverter::Postproecessing::saveFile() {
+void DomiSolConverter::Postproecessing::saveFile(string code) {
+	ofstream out("output.ly");
 
+	out << code;
+	out.close();
+	system("\"C:\\Program Files (x86)\\LilyPond\\usr\\bin\\lilypond\" output.ly");
 }
