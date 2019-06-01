@@ -7,7 +7,7 @@
 # define OUTPUTFOLDER "./outputImage/"
 
 // Change test case
-string INPUTFILE = "case1.jpg";
+string INPUTFILE = "case1_nochar.jpg";
 string OUTPUTFILE = "";
 
 
@@ -28,11 +28,11 @@ int main()
 		cout << "[!] You can NOT open the test image!" << endl;
 		return -1;
 	}
+
+	DomiSolConverter dm(img);
+
 	imshow("CASE01", img);
-	
-	
-	DomiSolConverter domisolconverter(img);
-	
+		
 	waitKey(0);
 	destroyWindow("CASE01");
 	return 0;

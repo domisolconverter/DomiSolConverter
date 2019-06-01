@@ -23,7 +23,7 @@
     <ProjectGuid>{3594FDAE-1666-4419-AE2C-0E8AA950AA94}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DomiSolConverter</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClInclude Include="DomiSolConverter.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Symbol.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Analysis.cpp" />
@@ -178,6 +179,7 @@
     </ClCompile>
     <ClCompile Include="Postprocessing.cpp" />
     <ClCompile Include="Preprocessing.cpp" />
+    <ClCompile Include="Symbol.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

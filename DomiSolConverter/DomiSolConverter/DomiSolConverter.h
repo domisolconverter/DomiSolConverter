@@ -2,6 +2,7 @@
 #include "pch.h"
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include "Symbol.h"
 #include <vector>
 
 using namespace std;
@@ -44,11 +45,12 @@ private:
 	private:
 		Mat objectsImg;
 		vector<Rect> objectXY;
+		vector<Rect> noteXY;
 		vector<Point> staffXY;
 		int staffHeight;
-		int staffSpace;
-		vector<string> note;
-		vector<string> nonNote;
+		float staffSpace;
+		vector<Note> noteInfo;
+		vector<NonNote> nonNoteInfo;
 		vector<string> text;
 
 		void calculateStaffHeight();
@@ -69,6 +71,8 @@ private:
 		void setObjectsImg(Mat objectsImg);
 		void setObjectXY(vector<Rect> objectXY);
 	};
+
+
 
 	class Postproecessing{
 	private:
