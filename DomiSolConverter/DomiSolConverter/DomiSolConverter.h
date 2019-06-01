@@ -37,6 +37,7 @@ private:
 	public:
 		Preprocessing(Mat inputImg);
 		Mat getObjectsImg();
+		Mat getStraightenedImg();
 		Mat getStraightenedBinaryImg();
 		vector<Rect> getObjectXY();
 	};
@@ -44,7 +45,8 @@ private:
 	class Analysis {
 	private:
 
-		
+
+		Mat straightenedImg;
 		Mat straightenedBinaryImg;
 		Mat inputCalculateStaffImg;
 		Mat objectsImg;
@@ -72,7 +74,7 @@ private:
 
 	public:
 
-		Analysis(Mat straightenedImg, Mat objectsImg, vector<Rect> objectXY);
+		Analysis(Mat straightenedImg, Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY);
 
 		vector<string> getNote();
 		vector<string> getNonNote();
@@ -95,6 +97,7 @@ private:
 
 	Mat inputImg;
 	Mat binaryImg;
+	Mat straightenedImg;
 	Mat straightenedBinaryImg;
 	Mat staffImg;
 	Mat objectsImg;

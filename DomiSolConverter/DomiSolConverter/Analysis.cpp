@@ -37,11 +37,12 @@ void DomiSolConverter::Analysis::calculateStaffSpace(){
 void DomiSolConverter::Analysis::calculateStaffXY(){
 
 
-	Mat src = this->inputCalculateStaffImg;
+	Mat src = this->inputCalculateStaffImg.clone();
 
 	int width = src.cols;
 	int height = src.rows;
-	int oneBar = (int)((width / 100.0) * 10);    // 140
+	int oneBar = (int)((width / 100.0) * 10);    
+	int missingLine = (int)((width / 100.0) * 2);
 	int colCnt = 0;
 	int staffNum = 0;
 
@@ -50,9 +51,11 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 
 	//* Y축 히스토그램 그리기 *//
 
-	// 하얀줄이 (20%)가 되고
+	// 하얀줄이 (10%)가 되고
 	// 끊기지 않으면
 	// 오선이라 판단
+
+	// cout << missingLine << endl;
 
 	for (int nr = 0; nr < height; nr++) {
 
@@ -69,7 +72,7 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 			if (pixel[nc]==255) {
 				if (tempX.size() != 0) {
 					space = nc - tempX.back();
-					if (space < 10) {
+					if (space < missingLine) {
 						tempX.push_back(nc);
 						colCnt++;
 					}
@@ -175,27 +178,29 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	 
 
 	//* 오선 검출 결과 테스트 프린트 *//
-	/*	
+		
 	for (int i = 0; i < staffXY.size(); i++) {
 		cout << "( " << this->staffXY[i].x << " , " << this->staffXY[i].y << " )" << endl;
 	}
-	*/
+	
 	
 	//* 오선 ROI 테스트 프린트 *//
-	
+	/*
+
 	Rect ROI;
 
 	if (staffXY.size() >= 2) {
 		for (int i = 0; i < staffXY.size(); i+=2) {
 			// 처음
-			ROI = Rect(staffXY[i].x, staffXY[i].y, staffXY[i+1].x - staffXY[i].x, staffXY[i + 1].y - staffXY[i].y);
-			Mat subImg = Mat(src, ROI);
+			ROI = Rect(staffXY[i].x, staffXY[i].y, width - staffXY[i].x, staffXY[i + 1].y - staffXY[i].y);
+			Mat subImg = src(ROI);
 			show(subImg, to_string(i/2) + "번 째 오선");
 
 		}
 	}
+	*/
+	// show(src, "오선인식한 이미지");
 	
-	show(src, "오선인식한 이미지");
 }
 
 void DomiSolConverter::Analysis::extractFeature() {
@@ -223,10 +228,9 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 }
 
 void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
-	// (수정)recognizeText의 ROI들로 바꾸기
-	// (수정) src
-	string INPUTPATH = "./inputImage/straightenedImg.jpg";
-	Mat input = imread(INPUTPATH, IMREAD_GRAYSCALE);
+
+
+	Mat input = this->straightenedImg.clone();
 	Mat binaryImg;
 	Mat opened;
 	Mat closed;
@@ -241,14 +245,16 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 		
 		/* 컴포넌트 만들기 */
 		// OTSU 이진화
-		threshold(src, binaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
-		Mat element(width*0.012, width*0.012, CV_8U, Scalar(1)); // 필터 크기 중요
-																 // 닫힘 연산
-		morphologyEx(binaryImg, opened, MORPH_OPEN, element);
+		threshold(src, result, 0, 255, THRESH_BINARY | THRESH_OTSU);
+		Mat element(width*0.012, height*0.012, CV_8U, Scalar(1)); // 필터 크기 중요
 		// 열림 연산
-		morphologyEx(opened, closed, MORPH_CLOSE, element);
+		morphologyEx(result, result, MORPH_OPEN, element);
+		// 닫힘 연산
+		morphologyEx(result, result, MORPH_CLOSE, element);
+		// 팽창 연산
+		//dilate(result, result, Mat());
 		// 침식 연산
-		erode(closed, result, Mat());
+		erode(result, result, Mat());
 		//namedWindow("Component Image" + to_string(i));
 		//imshow("Component Image" + to_string(i), result);
 
@@ -257,12 +263,16 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 		vector<vector<Point>> contours;
 		findContours(result, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 		Mat contoursResult(result.size(), CV_8U, Scalar(255));
-		drawContours(contoursResult, contours, -1, Scalar(150), 2);
+		//drawContours(contoursResult, contours, -1, Scalar(150), 2);
 		//namedWindow("Draw Contour Image" + to_string(i));
 		//imshow("Draw Contour Image" + to_string(i), contoursResult);
 
+
+		
+
 		int cmax = width;
 		vector<vector<Point>>::const_iterator it = contours.begin();
+
 		/* 외곽선 중 악보 외곽선은 제거 */
 		while (it != contours.end()) {
 			if (it->size() > cmax)
@@ -276,7 +286,7 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 		//imshow("Only Text Component" + to_string(i), src);
 
 		/* 문자 영역 부분 큰 좌표 정하기 */
-
+		
 		it = contours.begin();
 		int xmin = width;
 		int ymin = height;
@@ -305,21 +315,38 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 		xmax = xmax*1.1;
 		ymin = ymin*0.9;
 		ymax = ymax*1.1;
+		
+		// 여백이 이미지를 넘어버리는 경우
+		if (xmax > src.cols) {
+			xmax = src.cols;
 
+		}
+		if (ymax > src.rows) {
+			ymax = src.rows;
+
+		}
+
+		// 텍스트 영역을 추출하지 못한 경우
+		if (xmin == width || xmax == 0 || ymin == height || ymax == 0) {
+			xmin = 0;
+			xmax = src.cols;
+			ymin = 0;
+			ymax = src.rows;
+		}
+		
 		ROI[i] = Rect(xmin, ymin, xmax - xmin, ymax - ymin);
-		Mat subImg = Mat(src, ROI[i]);
-		erode(subImg, subImg, Mat());
-		imwrite("./outputImage/Onlytextpart" + to_string(i) + ".jpg", subImg);
-		namedWindow("Onlytextpart" + to_string(i), WINDOW_AUTOSIZE);
-		imshow("Onlytextpart" + to_string(i), Mat(src, ROI[i]));
-
+		Mat subImg = Mat(src, ROI[i]);		
+		//imwrite("./outputImage/Onlytextpart" + to_string(i) + ".jpg", subImg);
+		//namedWindow("Onlytextpart" + to_string(i), WINDOW_AUTOSIZE);
+		//imshow("Onlytextpart" + to_string(i), subImg);
+		
 	}
 	
 
 }
 
 void DomiSolConverter::Analysis::recognizeText() {
-	
+
 	Mat src = this->straightenedBinaryImg;
 	int width = src.cols;
 	int height = src.rows;
@@ -338,7 +365,7 @@ void DomiSolConverter::Analysis::recognizeText() {
 		}
 		// 마지막
 		else if (i == ROISize - 1) {
-			ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, this->staffHeight * 2);
+			ROI[i] = Rect(0, staffXY[2 * i - 1].y, width, height - staffXY[2*i-1].y);
 		}
 		// 중간
 		else {
@@ -349,7 +376,7 @@ void DomiSolConverter::Analysis::recognizeText() {
 
 	// 문자가 존재하는 부분 자른 뒤 침식 연산 진행
 	
-	cropTextArea(ROI);
+	 cropTextArea(ROI);
 
 }
 
@@ -398,17 +425,18 @@ void DomiSolConverter::Analysis::colorConers() {
 
 	}
 	
-	this->inputCalculateStaffImg = input;
+	this->inputCalculateStaffImg = input.clone();
 
 }
 
 
-DomiSolConverter::Analysis::Analysis(Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY) {
+DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY) {
 
 	// 오선 검출
+	this->straightenedImg = straightenedImg;
 	this->straightenedBinaryImg = straightenedBinaryImg;
 	colorConers();
-	show(this->inputCalculateStaffImg, "오선인식할 이미지");
+	//show(this->inputCalculateStaffImg, "오선인식할 이미지");
 	calculateStaffXY();
 
 	// 글자 인식
