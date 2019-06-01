@@ -201,125 +201,205 @@ void DomiSolConverter::Analysis::calculateStaffXY(){
 	// show(src, "오선인식한 이미지");
 }
 
-void DomiSolConverter::Analysis::extractFeature() {
+void DomiSolConverter::Analysis::classifyNote() {
 
 	Mat objectsRectImg = objectsImg;
 
-	cvtColor(objectsRectImg, objectsRectImg, COLOR_GRAY2RGB);
-	for (int index = 0; index < objectXY.size(); index++) {
+	/*
+	* 여러 음표가 붙은 경우 잘라서 각각의 object저장
+	* TODO: 바꿔야할 임의 값 : staffHeight, staffThickness 
+	*/
+	staffHeight = 34;
+	int staffThickness = 2;
+	//cout << objectXY.size() << endl;
 
+	int objectCnt = objectXY.size();
+	for (int i = 0; i < objectCnt; i++) {
+		Mat object = objectsImg(objectXY[i]);
+		int width = object.cols;
+		int height = object.rows;
+		int noteHeight = (staffHeight + staffThickness * 3) / 4;
+
+		if (height < staffHeight*1.2) {
+
+			// 여러 음표가 붙은 경우인가
+			if ((width / noteHeight) > 2) {
+				Rect tmp = objectXY[i];
+				Point tl = tmp.tl();
+				Point br = tmp.br();
+				//cout << tl << br << endl;
+				objectXY.erase(objectXY.begin() + i); // 붙은 음표는 벡터에서 제거한다.
+				int num = width / (noteHeight*1.5); // 이어진 음표가 몇개인지는 어떻게 계산하지?
+				int splitWidth = width / num;
+				int remainder = width % num;
+				int start = 0;
+				int end = 0;
+				//cout << "width: " << width << "num: " << num << endl;
+				for (int n = 0; n < num; n++) {
+					Rect splitRect;
+					if (n == 0) {
+						end = start + splitWidth + remainder - 1;
+						splitRect = Rect(Point(start, 0), Point(end, height));
+						//cout << splitRect << endl;
+						Mat splited = object(splitRect);
+						splitRect = boundingRect(splited);
+						objectXY.insert(objectXY.begin() + i + n, Rect(Point(tl.x + start, tl.y), Point(tl.x + end, tl.y + splitRect.br().y))); // 잘린 음표들을 벡터에 추가시킨다.
+						start += splitWidth + remainder;
+					}
+					else {
+						end = start + splitWidth - 1;
+						splitRect = Rect(Point(start, 0), Point(end, height));
+						//cout << splitRect << endl;
+						Mat splited = object(splitRect);
+						splitRect = boundingRect(splited);
+						objectXY.insert(objectXY.begin() + i + n, Rect(Point(tl.x + start, tl.y), Point(tl.x + end, tl.y + splitRect.br().y))); // 잘린 음표들을 벡터에 추가시킨다.
+						start += splitWidth;
+					}
+					//imwrite("outputImage/splits/" + to_string(i) + "_" + to_string(n) + ".jpg", splited(boundingRect(splited)));
+				}
+				objectCnt = objectCnt + num - 1;
+				imwrite("outputImage/splits/" + to_string(i) + ".jpg", object);
+			}
+		}
+	}
+	//cout << objectXY.size() << endl;
+
+
+	/*
+	* 추출된 오브젝트 중 음표 분류 & 머리와 꼬리 인식
+	* TODO: 바꿔야할 임의값: staffHeight, staffInterval && 합칠때 vector<Note>에 flag, isEmptyHead 저장
+	*/
+	int staffInterval = 10; // 오선간격 10으로 가정
+	for (int index = 0; index < objectXY.size(); index++) {
+		//rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
 		Mat object = objectsImg(objectXY[index]);
 		int width = object.cols;
 		int height = object.rows;
 		staffHeight = 34;
-		if (height > staffHeight*0.9 && height < staffHeight * 1.2) {
+		int flag = 0;
+		bool isEmptyHead = false;
 
-			//rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(0, 255, 255), 1);
+		//cout << "width: " << width << "height: " << height << endl;
+		// 오브젝트 길이&너비로 1차 선별
+		if (height > staffHeight*0.9 && height < staffHeight*1.3 && width>staffInterval/3) {
 
-			bool isLine = 0;
-
-			/*
-			** Hough transform line detect
-			*/
-
-			Mat objectEdge;
-			int scale = 1;
-			int delta = 0;
-			int ddepth = CV_16S;
-
-			Mat grad_x, grad_y;
-			Mat abs_grad_x, abs_grad_y;
-
-
-			// reduce the noise (kernel size=3)
-			Mat blurredImg;
-			GaussianBlur(object, object, Size(3, 3), 0, 0, BORDER_DEFAULT);
-
-
-			// calculate derivatives in x and y directions
-			Sobel(object, grad_x, ddepth, 1, 0, 3, scale, delta, BORDER_DEFAULT);
-			Sobel(object, grad_y, ddepth, 0, 1, 3, scale, delta, BORDER_DEFAULT);
-			//Scharr(blurredImg, grad_x, ddepth, 1, 0, scale, delta, BORDER_DEFAULT);
-			//Scharr(blurredImg, grad_y, ddepth, 0, 1, scale, delta, BORDER_DEFAULT);
-
-			// convert results back to CV_8U
-			convertScaleAbs(grad_x, abs_grad_x);
-			convertScaleAbs(grad_y, abs_grad_y);
-
-			// add sobel_x & sobel_y
-			addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, objectEdge);
-
-			//imshow("edgeImg", objectEdge);
-
-			Mat blank(object.rows, object.cols, CV_8UC1, Scalar(0));
-			Mat lineImg = blank.clone();
-
-			vector<Vec4i> lines;
-			//cout << height << endl;
-			HoughLinesP(objectEdge, lines, 1, CV_PI / 180, 1, height*0.55, 1);
-			if (!lines.empty()) {
-				isLine = 1;
-				//cout << "line is detected" << endl;
-				//cout << object << endl;
-				//imwrite("outputImage/lineObjects/" + to_string(index) + ".jpg", object);
-				//cout << object << endl;
-				/*
-				** 라인이 검출되면 histogram으로 음표인지 판단
-				*/
-
-				vector<int> Xhist(width, 0);
-				vector<int> Yhist(height, 0);
-				/*
-				// X histogram
-				for (int nr = 0; nr < height; nr++) {
-					uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
-
-					for (int nc = 0; nc < width; nc++) {
-						//cout << int(pixel[nc]) << endl;
-						if (pixel[nc] != 0) {
-							Xhist[nc]++;
-						}
-					}
-				}
+			// Y histogram
+			vector<int> Yhist(height, 0);
+			int pixelCnt = 0;
+			for (int nr = 0; nr < height; nr++) {
+				uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
 
 				for (int nc = 0; nc < width; nc++) {
-
-					cout << Xhist[nc] << "  ";
-					line(histogram, Point(nc, height), Point(nc, (height - Xhist[nc])), (0), 1);
-				}
-				*/
-				// Y histogram
-				int pixelCnt = 0;
-				for (int nr = 0; nr < height; nr++) {
-					uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
-
-					for (int nc = 0; nc < width; nc++) {
-						//cout << int(pixel[nc]) << endl;
-						if (pixel[nc] != 0) {
-							Yhist[nr]++;
-							pixelCnt++;
-						}
+					if (pixel[nc] != 0) {
+						Yhist[nr]++;
+						pixelCnt++;
 					}
 				}
-				if (pixelCnt < height * width * 0.95) {
-					noteXY.push_back(objectXY[index]);
-					rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(0, 255, 255), 1);
-				}
-				/*
-				for (int nr = 0; nr < height; nr++) {
-					cout << Yhist[nr] << "  ";
-				}
-				*/
-				//cout << endl;
-				//cout << object << endl;
-
 			}
-			//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object);
+
+
+		/* 가로로 반을 잘라서 위 아래 흑화소 분포를 비교해 음표 위치를 판단한다.*/
+			bool headLocation = true; // true이면 음표머리 하단에 위치. false이면 음표머리 상단에 위치
+			int blackUp = 0;
+			int blackDown = 0;
+			for (int y = 0; y < staffInterval; y++) {
+				blackUp += Yhist[y];
+			}
+			for (int y = Yhist.size() - staffInterval; y < Yhist.size(); y++) {
+				blackDown += Yhist[y];
+			}
+
+			if (blackUp > blackDown * 1.2) { // 음표 머리가 상단에 위치 (흑화소의 분포가 1.2배 이상 차이남)
+				noteXY.push_back(objectXY[index]);	// noteXY에 Rect정보 추가
+
+				// 흑화소 개수가 일정 범위 이상일 경우 머리로 판단. 
+				// --> 타원의 넓이 공식 (2*pi*가로반지름*세로반지름). 이 값보다 크면 머리로 판단한다.
+				//cout << staffInterval / 2 * staffInterval*1.25 / 2 * 3.14 << endl;
+				if (blackUp > staffInterval / 2 * staffInterval / 2 * 3) {
+					isEmptyHead = false;
+					// cout << index << "th object: Head is full" << endl;
+				}
+				else {
+					isEmptyHead = true;
+					// cout << index << "th object: Head is empty" << endl;
+				}
+
+				// 꼬리 있는지 인식
+				int checkpoint;
+				if (width > staffInterval * 1.2) {
+					checkpoint = width / 7;
+				}
+				else {
+					checkpoint = width / 3;
+				}
+				bool pre = false;
+				for (int nr = height-1; nr > height - staffInterval; nr--) {
+					uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
+					if (pre == false && pixel[checkpoint] != 0) {
+						flag += 1;
+						pre = true;
+					}
+					else if (pre == true && pixel[checkpoint] == 0) {
+						pre = false;
+					}
+				}
+				// cout << index << "th object: flag: " << flag << endl;
+
+				//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
+				rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
+			}
+			else if (blackUp *1.2 < blackDown) { // 음표 머리가 하단에 위치
+				noteXY.push_back(objectXY[index]);	// noteXY에 Rect정보 추가
+
+				// 흑화소 개수가 일정 범위 이상일 경우 머리가 꽉 차있다. 
+				// --> 타원의 넓이 공식 (2*pi*가로반지름*세로반지름). 이 값보다 크면 머리가 차있다.
+				//cout << staffInterval / 2 * staffInterval*1.25 / 2 * 3.14 << endl;
+				if (blackDown > staffInterval / 2 * staffInterval / 2 * 3) {
+					isEmptyHead = false;
+					// cout << index << "th object: Head is full" << endl;
+				}
+				else {
+					isEmptyHead = true;
+					// cout << index << "th object: Head is empty" << endl;
+				}
+
+				// 꼬리 있는지 인식
+				int checkpoint;
+				if (width > staffInterval * 1.2) {
+					checkpoint = width / 7 * 6;
+				}
+				else {
+					checkpoint = width / 3;
+				}
+				bool pre = false;
+				for (int nr = 0; nr < staffInterval; nr++) {
+					uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
+					if (pre == false && pixel[checkpoint] != 0) {
+						flag += 1;
+						pre = true;
+					}
+					else if (pre == true && pixel[checkpoint] == 0) {
+						pre = false;
+					}
+				}
+				// cout << index << "th object: flag: " << flag << endl;
+				//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
+				rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
+			}
+
+			else { // 음표가 아닌 오브젝트들은 비음표로 분류해서 저장
+				nonNoteXY.push_back(objectXY[index]);
+			}
 		}
 
 	}
-	// namedWindow("objects", CV_WINDOW_AUTOSIZE);
-	// imshow("objects", objectsRectImg);
+	//imshow("objects", objectsRectImg);
+	//imwrite("outputImage/objects.jpg", objectsRectImg);
+}
+
+
+void DomiSolConverter::Analysis::extractNoteFeature() {
+
 }
 
 void DomiSolConverter::Analysis::calculatePitch() {
@@ -683,8 +763,8 @@ DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinary
 
 	this->objectsImg = objectsImg;
 	this->objectXY = objectXY;
-	extractFeature();
 
+	classifyNote();
 }
 
 

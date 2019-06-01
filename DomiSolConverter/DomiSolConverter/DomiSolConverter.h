@@ -8,8 +8,10 @@
 using namespace std;
 using namespace cv;
 
+
 class DomiSolConverter {
 private:
+
 	class Preprocessing {
 	private:
 		Mat inputImg;
@@ -46,13 +48,13 @@ private:
 	class Analysis {
 	private:
 
-
 		Mat straightenedImg;
 		Mat straightenedBinaryImg;
 		Mat inputCalculateStaffImg;
 		Mat objectsImg;
 		vector<Rect> objectXY;
 		vector<Rect> noteXY;
+		vector<Rect> nonNoteXY;
 		vector<Point> staffXY;
 		int staffHeight;
 		float staffSpace;
@@ -63,7 +65,8 @@ private:
 		void calculateStaffHeight();
 		void calculateStaffSpace();
 		void calculateStaffXY();
-		void extractFeature();
+		void classifyNote();
+		void extractNoteFeature();
 		void calculatePitch();
 		void recognizeObject();
 		void recognizeGeneralSymbol();
@@ -72,6 +75,7 @@ private:
 		void recognizeNoteSymbol();
 		void colorConers();
 		int show(Mat img, string title);
+
 
 	public:
 
@@ -104,6 +108,9 @@ private:
 	Mat objectsImg;
 	vector<Rect> objectXY;
 	Mat resultImg;
+	vector<Symbol> wholeSymbols;
+	vector<Note> wholeNotes;
+	vector<NonNote> wholeNonNotes;
 
 public:
 	DomiSolConverter(Mat input);
