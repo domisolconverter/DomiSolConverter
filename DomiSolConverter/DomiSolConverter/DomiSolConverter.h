@@ -49,6 +49,7 @@ private:
 		Mat objectsImg;
 		vector<Rect> objectXY;
 		vector<Rect> noteXY;
+		vector<Rect> nonNoteXY;
 		vector<Point> staffXY;
 		int staffHeight;
 		int staffSpace;

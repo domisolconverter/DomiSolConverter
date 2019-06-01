@@ -20,7 +20,7 @@ void DomiSolConverter::Analysis::classifyNote() {
 
 	/*
 	* 여러 음표가 붙은 경우 잘라서 각각의 object저장
-	* TODO: 바꿔야할 임의 값 : staffHeight, staffThickness
+	* TODO: 바꿔야할 임의 값 : staffHeight, staffThickness 
 	*/
 	staffHeight = 34;
 	int staffThickness = 2;
@@ -79,8 +79,8 @@ void DomiSolConverter::Analysis::classifyNote() {
 
 
 	/*
-	* 추출된 오브젝트 중 음표 분류 및 머리와 꼬리 인식
-	* TODO: 바꿔야할 임의값: staffHeight, staffInterval
+	* 추출된 오브젝트 중 음표 분류 & 머리와 꼬리 인식
+	* TODO: 바꿔야할 임의값: staffHeight, staffInterval && 합칠때 vector<Note>에 flag, isEmptyHead 저장
 	*/
 	int staffInterval = 10; // 오선간격 10으로 가정
 	for (int index = 0; index < objectXY.size(); index++) {
@@ -89,11 +89,12 @@ void DomiSolConverter::Analysis::classifyNote() {
 		int width = object.cols;
 		int height = object.rows;
 		staffHeight = 34;
+		int flag = 0;
+		bool isEmptyHead = false;
 
 		//cout << "width: " << width << "height: " << height << endl;
-		// 오브젝트 길이로 1차 선별
-		if (height > staffHeight*0.9 && height < staffHeight*1.2) {
-			bool isLine = 0;
+		// 오브젝트 길이&너비로 1차 선별
+		if (height > staffHeight*0.9 && height < staffHeight*1.3 && width>staffInterval/3) {
 
 			// Y histogram
 			vector<int> Yhist(height, 0);
@@ -109,10 +110,6 @@ void DomiSolConverter::Analysis::classifyNote() {
 				}
 			}
 
-			// noteXY.push_back(objectXY[index]);	// noteXY에 Rect정보 추가
-				//rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
-			imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
-
 
 		/* 가로로 반을 잘라서 위 아래 흑화소 분포를 비교해 음표 위치를 판단한다.*/
 			bool headLocation = true; // true이면 음표머리 하단에 위치. false이면 음표머리 상단에 위치
@@ -124,29 +121,98 @@ void DomiSolConverter::Analysis::classifyNote() {
 			for (int y = Yhist.size() - staffInterval; y < Yhist.size(); y++) {
 				blackDown += Yhist[y];
 			}
-			if (blackUp > blackDown * 1.2) { // 음표 머리가 상단에 위치 (흑화소의 분포가 1.2배 이상 차이남)
-				headLocation = false;
-				noteXY.push_back(objectXY[index]);	// noteXY에 Rect정보 추가
-				rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
 
+			if (blackUp > blackDown * 1.2) { // 음표 머리가 상단에 위치 (흑화소의 분포가 1.2배 이상 차이남)
+				noteXY.push_back(objectXY[index]);	// noteXY에 Rect정보 추가
+
+				// 흑화소 개수가 일정 범위 이상일 경우 머리로 판단. 
+				// --> 타원의 넓이 공식 (2*pi*가로반지름*세로반지름). 이 값보다 크면 머리로 판단한다.
+				//cout << staffInterval / 2 * staffInterval*1.25 / 2 * 3.14 << endl;
+				if (blackUp > staffInterval / 2 * staffInterval / 2 * 3) {
+					isEmptyHead = false;
+					// cout << index << "th object: Head is full" << endl;
+				}
+				else {
+					isEmptyHead = true;
+					// cout << index << "th object: Head is empty" << endl;
+				}
+
+				// 꼬리 있는지 인식
+				int checkpoint;
+				if (width > staffInterval * 1.2) {
+					checkpoint = width / 7;
+				}
+				else {
+					checkpoint = width / 3;
+				}
+				bool pre = false;
+				for (int nr = height-1; nr > height - staffInterval; nr--) {
+					uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
+					if (pre == false && pixel[checkpoint] != 0) {
+						flag += 1;
+						pre = true;
+					}
+					else if (pre == true && pixel[checkpoint] == 0) {
+						pre = false;
+					}
+				}
+				cout << index << "th object: flag: " << flag << endl;
+
+				//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
+				rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
 			}
 			else if (blackUp *1.2 < blackDown) { // 음표 머리가 하단에 위치
 				noteXY.push_back(objectXY[index]);	// noteXY에 Rect정보 추가
-				rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
 
+				// 흑화소 개수가 일정 범위 이상일 경우 머리가 꽉 차있다. 
+				// --> 타원의 넓이 공식 (2*pi*가로반지름*세로반지름). 이 값보다 크면 머리가 차있다.
+				//cout << staffInterval / 2 * staffInterval*1.25 / 2 * 3.14 << endl;
+				if (blackDown > staffInterval / 2 * staffInterval / 2 * 3) {
+					isEmptyHead = false;
+					// cout << index << "th object: Head is full" << endl;
+				}
+				else {
+					isEmptyHead = true;
+					// cout << index << "th object: Head is empty" << endl;
+				}
+
+				// 꼬리 있는지 인식
+				int checkpoint;
+				if (width > staffInterval * 1.2) {
+					checkpoint = width / 7 * 6;
+				}
+				else {
+					checkpoint = width / 3;
+				}
+				bool pre = false;
+				for (int nr = 0; nr < staffInterval; nr++) {
+					uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
+					if (pre == false && pixel[checkpoint] != 0) {
+						flag += 1;
+						pre = true;
+					}
+					else if (pre == true && pixel[checkpoint] == 0) {
+						pre = false;
+					}
+				}
+				cout << index << "th object: flag: " << flag << endl;
+				//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
+				rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
 			}
 
+			else { // 음표가 아닌 오브젝트들은 비음표로 분류해서 저장
+				nonNoteXY.push_back(objectXY[index]);
+			}
 		}
 
 	}
-	imshow("objects", objectsRectImg);
+	//imshow("objects", objectsRectImg);
 	//imwrite("outputImage/objects.jpg", objectsRectImg);
 }
 
 
 void DomiSolConverter::Analysis::extractNoteFeature() {
 
-	
 }
 
 void DomiSolConverter::Analysis::calculatePitch() {
