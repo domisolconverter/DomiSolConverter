@@ -49,8 +49,8 @@ private:
 		vector<Point> staffXY;
 		int staffHeight;
 		float staffSpace;
-		vector<string> note;
-		vector<string> nonNote;
+		vector<Note> noteInfo;
+		vector<NonNote> nonNoteInfo;
 		vector<string> text;
 
 		void calculateStaffHeight();

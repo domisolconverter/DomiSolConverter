@@ -1,9 +1,18 @@
 #include "pch.h"
 #include "Symbol.h"
 
-Symbol::Symbol(int lineNum, int barNum, int orderNum) {
-	this->lineNum = lineNum;
+Symbol::Symbol() {
+}
+
+void Symbol::setbarNum(int barNum) {
 	this->barNum = barNum;
+}
+
+void Symbol::setLineNum(int lineNum) {
+	this->lineNum = lineNum;
+}
+
+void Symbol::setOrderNum(int orderNum) {
 	this->orderNum = orderNum;
 }
 

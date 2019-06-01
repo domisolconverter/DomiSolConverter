@@ -12,7 +12,10 @@ private:
 	int orderNum; // 순서번호 (마디 안에서의 순서)
 
 public:
-	Symbol(int lineNum, int barNum, int orderNum);
+	Symbol();
+	void setLineNum(int lineNum);
+	void setbarNum(int barNum);
+	void setOrderNum(int orderNum);
 	int getLineNum();
 	int getBarNum();
 	int getOrderNum();
@@ -29,7 +32,7 @@ private:
 	//hash_map<string, bool> nonNotes; // 음표에 붙은 비음표들
 	string result;	// 음표 종류 판단 결과 저장
 public:
-	Note(int lineNum, int barNum, int orderNum): Symbol(lineNum, barNum, orderNum) {}
+	Note(): Symbol() {}
 	int getFlag();
 	bool getIsEmptyHead();
 	bool getDot();
@@ -51,7 +54,7 @@ class NonNote : public Symbol {
 private:
 	string nonNoteType;
 public:
-	NonNote(int lineNum, int barNum, int orderNum, string nonNoteType) : Symbol(lineNum, barNum, orderNum) { this->nonNoteType = nonNoteType; }
+	NonNote(string nonNoteType) : Symbol() { this->nonNoteType = nonNoteType; }
 	string getNonNoteType();
 	void setNonNoteType();
 	

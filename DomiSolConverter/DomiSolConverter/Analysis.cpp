@@ -409,7 +409,6 @@ void DomiSolConverter::Analysis::calculatePitch() {
 				line(this->objectsImg, Point(100, staff_end), Point(700, staff_end), Scalar(255, 255, 255));
 
 				if (headY >= staff_start - (3 * this->staffSpace) && headY <= staff_end + (3 * this->staffSpace)) {
-					Note oneNote(lineNum, 0, 0);
 					int octave = 0;
 
 					char tone = 'E';
@@ -445,8 +444,12 @@ void DomiSolConverter::Analysis::calculatePitch() {
 						}
 					}
 					putText(toneImg, string(1, tone), Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
-					oneNote.setScale_Octave(tone, octave);
-					
+					vector<Note>::iterator iter = noteInfo.begin();
+
+					for (iter; iter != noteInfo.end(); iter++) {
+						(*iter).setScale_Octave(tone, octave);
+						(*iter).setLineNum(lineNum);
+					}
 				}
 			}
 		}
