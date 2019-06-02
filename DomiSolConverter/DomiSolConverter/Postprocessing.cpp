@@ -8,9 +8,9 @@
 DomiSolConverter::Postproecessing::Postproecessing(vector<Note> notes, vector<NonNote> nonNotes) {
 	srand((unsigned int)time(0));
 
-	this->nonNotes.push_back(NonNote("4 flat"));
-	this->nonNotes.push_back(NonNote("4 rest"));
-	this->nonNotes.push_back(NonNote("g clef"));
+	this->nonNotes.push_back(NonNote("4_flat"));
+	this->nonNotes.push_back(NonNote("r4"));
+	this->nonNotes.push_back(NonNote("g_clef"));
 	this->nonNotes.push_back(NonNote("slur"));
 	this->nonNotes.push_back(NonNote("slur"));
 	this->nonNotes.push_back(NonNote("bar"));
@@ -175,7 +175,7 @@ string DomiSolConverter::Postproecessing::makeCode() {
 		}
 		code += " ";
 	}
-	/*
+	
 	code += "\n";
 
 	for (int i = 0; i < wholeSign.size(); i++) {
@@ -185,14 +185,11 @@ string DomiSolConverter::Postproecessing::makeCode() {
 		}
 		if (wholeSign[i]->getType().compare("nonNote") == 0) {
 			NonNote *nonNote = (NonNote*)(wholeSign[i]);
-			if ((*nonNote).getNonNoteType().compare("4_4") == 0) {
-				continue;
-			}
 			code += this->makeNonNoteCode(nonNote, &(flat), &(sharp));
 		}
 		code += " ";
 	}
-	*/
+	
 	code += "\n}";
 
 	return code;
@@ -213,20 +210,44 @@ string DomiSolConverter::Postproecessing::makeNonNoteCode(NonNote *nonNote, vect
 		(*sharp).push_back('E');
 	}
 
-	else if ((*nonNote).getNonNoteType().compare("g clef") == 0) {
+	else if ((*nonNote).getNonNoteType().compare("g_clef") == 0) {
 		code = "\\break \\clef treble\n";
 	}
 
-	else if ((*nonNote).getNonNoteType().compare("f clef") == 0) {
+	else if ((*nonNote).getNonNoteType().compare("f_clef") == 0) {
 		code = "\\break \\clef bass\n";
 	}
 
-	else if ((*nonNote).getNonNoteType().compare("4 rest") == 0) {
+	else if ((*nonNote).getNonNoteType().compare("r4") == 0) {
 		code = "r4";
 	}
 
+	else if ((*nonNote).getNonNoteType().compare("r8") == 0) {
+		code = "r8";
+	}
+
+	else if ((*nonNote).getNonNoteType().compare("r16") == 0) {
+		code = "r16";
+	}
+
 	else if ((*nonNote).getNonNoteType().compare("4_4") == 0) {
-		code = " \\time 4/4\n";
+		code = "}\n{\n \\time 4/4\n";
+	}
+
+	else if ((*nonNote).getNonNoteType().compare("2_4") == 0) {
+		code = "}\n{\n \\time 2/4\n";
+	}
+
+	else if ((*nonNote).getNonNoteType().compare("2_8") == 0) {
+		code = "}\n{\n \\time 2/8\n";
+	}
+
+	else if ((*nonNote).getNonNoteType().compare("3_4") == 0) {
+		code = "}\n{\n \\time 3/4\n";
+	}
+
+	else if ((*nonNote).getNonNoteType().compare("3_8") == 0) {
+		code = "}\n{\n \\time 3/8\n";
 	}
 	return code;
 }
