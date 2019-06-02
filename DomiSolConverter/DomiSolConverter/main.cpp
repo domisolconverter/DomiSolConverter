@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 	// Image Resizing
 	double height = img.rows;
 	double width = img.cols;
-	resize(img, img, Size(700, int(height * (700 / width))), 0, 0, CV_INTER_NN);
+	resize(img, img, Size(1000, int(height * (1000 / width))), 0, 0, CV_INTER_NN);
 
 	DomiSolConverter domisolconverter(img, INPUTFILE);
 	

@@ -98,7 +98,7 @@ void DomiSolConverter::Analysis::extractObject() {
 	vector<Vec4i> hierarchy;
 
 	// morphology
-	Mat closingStructure = getStructuringElement(MORPH_ELLIPSE, Size(2, 4));
+	Mat closingStructure = getStructuringElement(MORPH_ELLIPSE, Size(3, 6));
 	morphologyEx(objectsImg, objectsImg, MORPH_CLOSE, closingStructure);
 
 	// find contours
@@ -394,7 +394,8 @@ void DomiSolConverter::Analysis::classifyNote() {
 				Point br = tmp.br();
 				//cout << tl << br << endl;
 				objectXY.erase(objectXY.begin() + i); // 붙은 음표는 벡터에서 제거한다.
-				int num = width / (staffInterval*1.5); // 이어진 음표가 몇개인지는 어떻게 계산하지?
+				int num = (width / (staffInterval*1.25) + 1) / 2;
+				//int num = width / (staffInterval*1.5); // 이어진 음표가 몇개인지는 어떻게 계산하지?
 				int splitWidth = width / num;
 				int remainder = width % num;
 				int addRemainder = remainder / num;
@@ -436,7 +437,7 @@ void DomiSolConverter::Analysis::classifyNote() {
 	* 추출된 오브젝트 중 음표 분류 & 머리와 꼬리 인식
 	* TODO: 합칠때 vector<Note>에 flag, isEmptyHead 저장
 	*/
-	int headMax = staffInterval / 2 * staffInterval / 2 * 2.9;
+	int headMax = staffInterval / 2 * staffInterval / 2 * 2.8;
 	//cout << objectsImg(objectXY[90]) << endl;
 	for (int index = 0; index < objectXY.size(); index++) {
 		//rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
