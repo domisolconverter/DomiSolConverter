@@ -5,12 +5,12 @@
 #include <ctime>
 #include <algorithm>
 
-DomiSolConverter::Postproecessing::Postproecessing(vector<Note> notes, vector<NonNote> nonNotes) {
+DomiSolConverter::Postproecessing::Postproecessing(string inputPath, vector<Note> notes, vector<NonNote> nonNotes) {
 	this->notes = notes;
 	this->nonNotes = nonNotes;
 
 	combineInfo();
-	saveFile(makeCode());
+	saveFile(inputPath, makeCode());
 }
 
 void DomiSolConverter::Postproecessing::combineInfo() {
@@ -187,7 +187,7 @@ string DomiSolConverter::Postproecessing::makeNoteCode(Note *note, Signature *si
 	return code;
 }
 
-void DomiSolConverter::Postproecessing::saveFile(string code) {
+void DomiSolConverter::Postproecessing::saveFile(string inputPath, string code) {
 	ofstream out("output.ly");
 
 	out << code;

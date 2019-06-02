@@ -98,7 +98,7 @@ private:
 		static bool compare(Symbol *a, Symbol *b);
 
 	public:
-		Postproecessing(vector<Note> notes, vector<NonNote> nonNotes);
+		Postproecessing(string inputPath, vector<Note> notes, vector<NonNote> nonNotes);
 	};
 
 	Mat inputImg;
@@ -115,5 +115,5 @@ private:
 	vector<string> text;
 
 public:
-	DomiSolConverter(Mat input);
+	DomiSolConverter(Mat input, string inputPath);
 };
