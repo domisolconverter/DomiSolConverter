@@ -175,6 +175,24 @@ string DomiSolConverter::Postproecessing::makeCode() {
 		}
 		code += " ";
 	}
+	/*
+	code += "\n";
+
+	for (int i = 0; i < wholeSign.size(); i++) {
+		if (wholeSign[i]->getType().compare("note") == 0) {
+			Note *note = (Note*)(wholeSign[i]);
+			code += this->makeNoteCode(note, &(flat), &(sharp));
+		}
+		if (wholeSign[i]->getType().compare("nonNote") == 0) {
+			NonNote *nonNote = (NonNote*)(wholeSign[i]);
+			if ((*nonNote).getNonNoteType().compare("4_4") == 0) {
+				continue;
+			}
+			code += this->makeNonNoteCode(nonNote, &(flat), &(sharp));
+		}
+		code += " ";
+	}
+	*/
 	code += "\n}";
 
 	return code;
@@ -196,11 +214,11 @@ string DomiSolConverter::Postproecessing::makeNonNoteCode(NonNote *nonNote, vect
 	}
 
 	else if ((*nonNote).getNonNoteType().compare("g clef") == 0) {
-		code = " \\clef treble\n";
+		code = "\\break \\clef treble\n";
 	}
 
 	else if ((*nonNote).getNonNoteType().compare("f clef") == 0) {
-		code = " \\clef bass\n";
+		code = "\\break \\clef bass\n";
 	}
 
 	else if ((*nonNote).getNonNoteType().compare("4 rest") == 0) {

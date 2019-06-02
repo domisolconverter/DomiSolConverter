@@ -33,7 +33,6 @@ private:
 	bool isWholeNote; // 온음표 따로 체크
 	char scale; // 도레미파솔라시도
 	int octave; // 음역대
-	//hash_map<string, bool> nonNotes; // 음표에 붙은 비음표들
 	string result;	// 음표 종류 판단 결과 저장
 
 public:
@@ -44,13 +43,11 @@ public:
 	bool getIsWholeNote();
 	char getScale();
 	int getOctave();
-	//hash_map<string, bool> getNonNotes();
 	string getResult;
 	void setFlag_Head(int flag, bool isEmptyHead);
 	void setDot(bool dot);
 	void setIsWholeNote(bool isWholeNote);
 	void setScale_Octave(char scale, int octave);
-	//void setNonNotes(hash_map<string, bool> nonNotes);
 	void setResult(string result);
 	string transposeNote();
 };
