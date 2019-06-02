@@ -17,13 +17,12 @@ DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinary
 	cout << staffHeight << endl;
 	//extractStaff();
 	removeStaff();
-	show(objectsImg, "objectsImg");
 	extractObject();
 
 	classifyNote();
 	//calculatePitch();
 	//recognizeText();
-	//extractFeature();
+	//storeNonNote();
 	//recognizeGeneralSymbol();
 }
 
@@ -560,18 +559,20 @@ void DomiSolConverter::Analysis::classifyNote() {
 }
 
 
-void DomiSolConverter::Analysis::extractFeature() {
+void DomiSolConverter::Analysis::storeNonNote() {
 	//Draw result
-	Mat objectsRectImg = objectsImg;
+	Mat objectsRectImg = objectsImg.clone();
 	//Scalar color(0, 0, 0);
 	Scalar color(255, 255, 255);
-	for (int i = 0; i < objectXY.size(); i++) {
-		rectangle(objectsRectImg, objectXY[i].tl(), objectXY[i].br(), color, 1);
-		Mat extractOject = ~objectsRectImg(Rect(objectXY[i]));
+	for (int i = 0; i < this->nonNoteXY.size(); i++) {
+		rectangle(objectsRectImg, nonNoteXY[i].tl(), nonNoteXY[i].br(), color, 1);
+		/*
+		Mat extractOject = ~objectsRectImg(Rect(nonNoteXY[i]));
 		// assume that it's work
 		string fname = "symbols\\object" + to_string(i) + ".jpg";
-		imwrite(fname, extractOject);
+		imwrite(fname, extractOject);*/
 	}
+	imshow("nonNote obj", objectsRectImg);
 }
 
 void DomiSolConverter::Analysis::calculatePitch() {

@@ -59,7 +59,7 @@ private:
 		void calculateStaffSpace();
 		void calculateStaffXY();
 		void classifyNote();
-		void extractFeature();
+		void storeNonNote();
 		void calculatePitch();
 		void recognizeObject();
 		void recognizeGeneralSymbol();
