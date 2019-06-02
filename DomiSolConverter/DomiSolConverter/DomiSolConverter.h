@@ -89,13 +89,14 @@ private:
 	private:
 		void combineInfo();
 		string makeCode();
-		void saveFile(string code);
+		void saveFile(string inputPath, string code);
 		vector<Note> notes;
 		vector<NonNote> nonNotes;
 		vector<Symbol*> wholeSign;
 		string makeNoteCode(Note *note, Signature *sig);
 		string makeNonNoteCode(NonNote *nonNote, Signature *sig);
 		static bool compare(Symbol *a, Symbol *b);
+		string getResultName(string inputPath);
 
 	public:
 		Postproecessing(string inputPath, vector<Note> notes, vector<NonNote> nonNotes);

@@ -3,6 +3,8 @@
 #include "DomiSolConverter.h"
 #include <fstream>
 #include <ctime>
+#include <sstream>
+#include <string>
 #include <algorithm>
 
 DomiSolConverter::Postproecessing::Postproecessing(string inputPath, vector<Note> notes, vector<NonNote> nonNotes) {
@@ -188,9 +190,24 @@ string DomiSolConverter::Postproecessing::makeNoteCode(Note *note, Signature *si
 }
 
 void DomiSolConverter::Postproecessing::saveFile(string inputPath, string code) {
-	ofstream out("output.ly");
+	string resultFile = getResultName(inputPath);
+	ofstream out(resultFile);
 
 	out << code;
 	out.close();
 	system("\"C:\\Program Files (x86)\\LilyPond\\usr\\bin\\lilypond\" output.ly");
+}
+
+string DomiSolConverter::Postproecessing::getResultName(string inputPath) {
+	vector<string> path;
+	stringstream ss(inputPath);
+	string temp;
+
+	while (getline(ss, temp, '/')) {
+		path.push_back(temp);
+	}
+	string result = path.back();
+	path.pop_back();
+	result = "result_" + result.substr(0, result.size() - 4);
+	return result;
 }
