@@ -943,7 +943,8 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 	}
 
 	// 저장된 비음표들 중 임시표(샵, 플랫, 제자리표)에 대해 음표에 붙은 것인지 확인
-	for (int i = 0; i < nonNoteInfo.size(); i++) {
+	int nonNoteInfoCnt = nonNoteInfo.size();
+	for (int i = 0; i < nonNoteInfoCnt; i++) {
 		String nonNoteType = nonNoteInfo[i].getNonNoteType();
 		if (nonNoteType == "sharp" || nonNoteType == "flat" || nonNoteType == "natural") {
 			
@@ -953,6 +954,8 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 					vector<string> tmpNonNotes = noteInfo[j].getNonNotes();
 					tmpNonNotes.push_back(nonNoteType);
 					noteInfo[j].setNonNotes(tmpNonNotes);
+					nonNoteInfo.erase(nonNoteInfo.begin() + i);
+					nonNoteInfoCnt--;
 					break;
 				}
 			}

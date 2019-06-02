@@ -4,7 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include "Symbol.h"
 #include <vector>
-#include "Symbol.h"
+#include "Signature.h"
 
 using namespace std;
 using namespace cv;
@@ -93,8 +93,8 @@ private:
 		vector<Note> notes;
 		vector<NonNote> nonNotes;
 		vector<Symbol*> wholeSign;
-		string makeNoteCode(Note *note, vector<char> *flat, vector<char> *sharp);
-		string makeNonNoteCode(NonNote *nonNote, vector<char> *flat, vector<char> *sharp);
+		string makeNoteCode(Note *note, Signature *sig);
+		string makeNonNoteCode(NonNote *nonNote, Signature *sig);
 		static bool compare(Symbol *a, Symbol *b);
 
 	public:
