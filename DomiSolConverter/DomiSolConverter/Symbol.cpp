@@ -32,6 +32,10 @@ bool Note::getIsWholeNote() {
 	return this->isWholeNote;
 }
 
+bool Note::getIsHeadUp() {
+	return this->isHeadUp;
+}
+
 char Note::getScale() {
 	return this->scale;
 }
@@ -51,6 +55,10 @@ void Note::setDot(bool dot) {
 
 void Note::setIsWholeNote(bool isWholeNote) {
 	this->isWholeNote = isWholeNote;
+}
+
+void Note::setisHeadUp(bool isHeadUp) {
+	this->isHeadUp = isHeadUp;
 }
 
 void Note::setScale_Octave(char scale, int octave) {
