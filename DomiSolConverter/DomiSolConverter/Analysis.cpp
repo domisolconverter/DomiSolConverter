@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
+#include <Windows.h>
 
 DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImgforStaff, Mat straightenedBinaryImgforObject, vector<Note> note, vector<NonNote> nonNote, vector<string> text) {
 	
@@ -20,11 +21,11 @@ DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinary
 	extractObject();
 
 	classifyNote();
+	calculatePitch();
+	recognizeText();
+	storeNonNote();
+	recognizeGeneralSymbol();
 	recognizeNoteSymbol();
-	//calculatePitch();
-	//recognizeText();
-	//storeNonNote();
-	//recognizeGeneralSymbol();
 }
 
 int DomiSolConverter::Analysis::show(Mat img, string title) {
@@ -567,11 +568,10 @@ void DomiSolConverter::Analysis::storeNonNote() {
 	Scalar color(255, 255, 255);
 	for (int i = 0; i < this->nonNoteXY.size(); i++) {
 		rectangle(objectsRectImg, nonNoteXY[i].tl(), nonNoteXY[i].br(), color, 1);
-		/*
 		Mat extractOject = ~objectsRectImg(Rect(nonNoteXY[i]));
 		// assume that it's work
 		string fname = "symbols\\object" + to_string(i) + ".jpg";
-		imwrite(fname, extractOject);*/
+		imwrite(fname, extractOject);
 	}
 	imshow("nonNote obj", objectsRectImg);
 }
@@ -649,11 +649,13 @@ void DomiSolConverter::Analysis::calculatePitch() {
 			}
 			else {
 				staff_end = (*staff).y;
+				/*
 				line(this->objectsImg, Point(100, staff_start), Point(700, staff_start), Scalar(255, 255, 255));
 				line(this->objectsImg, Point(100, staff_start + staffSpace), Point(700, staff_start + staffSpace), Scalar(255, 255, 255));
 				line(this->objectsImg, Point(100, staff_start + staffSpace * 2), Point(700, staff_start + staffSpace * 2), Scalar(255, 255, 255));
 				line(this->objectsImg, Point(100, staff_start + staffSpace * 3), Point(700, staff_start + staffSpace * 3), Scalar(255, 255, 255));
 				line(this->objectsImg, Point(100, staff_end), Point(700, staff_end), Scalar(255, 255, 255));
+				*/
 
 				if (headY >= staff_start - (3 * this->staffSpace) && headY <= staff_end + (3 * this->staffSpace)) {
 					int octave = 0;
@@ -730,6 +732,7 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 			idx++;
 		}
 	}
+	system("del *.jpg");
 }
 
 

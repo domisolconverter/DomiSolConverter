@@ -13,5 +13,5 @@ DomiSolConverter::DomiSolConverter(Mat input) {
 	Analysis A = Analysis(straightenedImg, straightenedBinaryImgforStaff, straightenedBinaryImgforObject, this->wholeNotes, this->wholeNonNotes, this->text);
 
 
-	//Postproecessing pp = Postproecessing(this->wholeNotes, this->wholeNonNotes);
+	Postproecessing pp = Postproecessing(this->wholeNotes, this->wholeNonNotes);
 }

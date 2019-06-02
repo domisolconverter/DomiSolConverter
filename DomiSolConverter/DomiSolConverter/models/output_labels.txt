@@ -1,11 +1,15 @@
-g clef
-accent
-dot
-double sharp
+2 4
+2 8
+3 4
+3 8
+4 4
+bar
 f clef
 flat
-leo
+g clef
 natural
+r16
+r4
+r8
 sharp
-star
-tie slur
+wholenote
