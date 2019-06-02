@@ -82,8 +82,9 @@ private:
 		vector<Note> notes;
 		vector<NonNote> nonNotes;
 		vector<Symbol*> wholeSign;
-		string makeNoteCode(Note *note);
-		string makeNonNoteCode(NonNote *nonNote);
+		string makeNoteCode(Note *note, vector<char> *flat, vector<char> *sharp);
+		string makeNonNoteCode(NonNote *nonNote, vector<char> *flat, vector<char> *sharp);
+		static bool compare(Symbol *a, Symbol *b);
 
 	public:
 		Postproecessing(vector<Note> notes, vector<NonNote> nonNotes);

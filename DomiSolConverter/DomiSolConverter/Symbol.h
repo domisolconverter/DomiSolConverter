@@ -6,10 +6,10 @@ using namespace std;
 
 class Symbol {
 private:
+	string type;
 	int lineNum; // 줄번호 (몇번째 오선인지)
 	int barNum; // 마디번호 (해당 줄의 몇번째 마디인지)
 	int orderNum; // 순서번호 (마디 안에서의 순서)
-	string type;
 
 public:
 	Symbol(string type) { this->type = type; };
@@ -17,14 +17,9 @@ public:
 	void setbarNum(int barNum);
 	void setOrderNum(int orderNum);
 	string getType();
-	int getFlag();
-	bool getIsEmptyHead();
-	bool getDot();
-	bool getIsWholeNote();
-	char getScale();
-	int getOctave();
-	string transposeNote();
-	string nonNoteType;
+
+	int getLineNum();
+	int getBarNum();
 
 	int x;
 	int y;
@@ -42,7 +37,7 @@ private:
 	string result;	// 음표 종류 판단 결과 저장
 
 public:
-	Note() : Symbol("note") {};
+	Note() : Symbol("note") { this->isWholeNote = false; };
 	int getFlag();
 	bool getIsEmptyHead();
 	bool getDot();

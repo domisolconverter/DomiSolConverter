@@ -13,30 +13,16 @@ void Symbol::setLineNum(int lineNum) {
 	this->lineNum = lineNum;
 }
 
-void Symbol::setOrderNum(int orderNum) {
-	this->orderNum = orderNum;
+int Symbol::getBarNum() {
+	return this->barNum;
 }
 
-int Symbol::getFlag() {
-	return 0;
+int Symbol::getLineNum() {
+	return this->lineNum;
 }
-bool Symbol::getIsEmptyHead() {
-	return true;
-}
-bool Symbol::getDot() {
-	return true;
-}
-bool Symbol::getIsWholeNote() {
-	return false;
-}
-char Symbol::getScale() {
-	return 'C';
-}
-int Symbol::getOctave() {
-	return 1;
-}
-string Symbol::transposeNote() {
-	return "2";
+
+void Symbol::setOrderNum(int orderNum) {
+	this->orderNum = orderNum;
 }
 
 int Note::getFlag() {
