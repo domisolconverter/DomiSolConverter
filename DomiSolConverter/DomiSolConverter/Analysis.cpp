@@ -21,6 +21,7 @@ DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinary
 	extractObject();
 
 	classifyNote();
+	recognizeNoteSymbol();
 	//calculatePitch();
 	//recognizeText();
 	//extractFeature();
@@ -689,13 +690,11 @@ void DomiSolConverter::Analysis::calculatePitch() {
 						}
 					}
 					putText(toneImg, string(1, tone), Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
-					Note n = Note();
-					n.setScale_Octave(tone, octave);
-					n.setLineNum(lineNum);
-					n.x = (*note).x + ((*note).width / 2);
-					n.y = (*note).y + ((*note).height / 2);
-
-					this->noteInfo.push_back(n);
+					vector<Note>::iterator iter = noteInfo.begin();
+					for (iter; iter != noteInfo.end(); iter++) {
+						(*iter).setScale_Octave(tone, octave);
+						(*iter).setLineNum(lineNum);
+					}
 				}
 			}
 		}
@@ -886,7 +885,104 @@ void DomiSolConverter::Analysis::recognizeText() {
 }
 
 void DomiSolConverter::Analysis::recognizeNoteSymbol() {
+
+
+	//Mat dotImg = this->straightenedImg.clone();
+	//// Y histogram
+	//vector<int> Yhist(objectsImg.cols, 0);
+	//vector<uchar*> pixelRows;
+	//for (int nr = 0; nr < objectsImg.cols; nr++) {
+	//	pixelRows.push_back(objectsImg.ptr<uchar>(nr)); // n번째 row에 대한 주소를 저장
+	//}
+
+	//vector<Note>::iterator iter = noteInfo.begin();
+	//for (iter; iter != noteInfo.end(); iter++) {
+	//	(*iter).~~
+	//}
+
+	//for (int i = 0; i < noteXY.size(); i++) {
+	//	Rect dotArea = Rect(Point(noteXY[i].br().x, noteXY[i].tl().y - (staffInterval / 3)), Point(noteXY[i].br().x + staffInterval/3*2, noteXY[i].br().y + (staffInterval / 3)));
+	//	rectangle(dotImg, dotArea.tl(), dotArea.br(), Scalar(0, 0, 0), 2);
+	//	Rect dotDetect = boundingRect(objectsImg(dotArea));
+	//	if (dotDetect.area() != 0) {
+	//		cout << "dot detected" << endl;
+	//		//rectangle(dotImg, dotArea.tl() + dotDetect.tl(), dotArea.br() + dotDetect.br(), Scalar(0, 0, 0), 2);
+	//	}
+	//}
+	//show(dotImg, "dotImg");
+
+	/*
+	* 음표옆에 붙은 점&임시표 인식
+	*/
+	Mat areaImg = this->straightenedImg.clone();
+	int staffThickness = 1;
+	int staffInterval = (staffHeight + staffThickness * 3) / 4;
 	
+	vector<Rect> accidentalAreas;
+	vector<Rect> dotAreas;
+	for (int i=0; i < noteInfo.size(); i++) {
+		bool isHeadUp = noteInfo[i].getIsHeadUp();
+		Rect accidentalArea;
+		Rect dotArea;
+		if (isHeadUp) { // 음표머리가 상단
+			accidentalArea = Rect(Point(noteXY[i].tl().x - staffInterval, noteXY[i].tl().y - staffInterval), Point(noteXY[i].tl().x, noteXY[i].tl().y + staffInterval * 2));
+			dotArea = Rect(Point(noteXY[i].br().x, noteXY[i].tl().y - (staffInterval*0.25)), Point(noteXY[i].br().x + staffInterval, noteXY[i].tl().y + (staffInterval*1.25)));
+		}
+		else { // 음표머리가 하단 
+			accidentalArea = Rect(Point(noteXY[i].tl().x - staffInterval, noteXY[i].br().y - staffInterval*2), Point(noteXY[i].tl().x, noteXY[i].br().y + staffInterval));
+			dotArea = Rect(Point(noteXY[i].br().x, noteXY[i].br().y - (staffInterval*1.25)), Point(noteXY[i].br().x + staffInterval, noteXY[i].br().y + (staffInterval*0.25)));
+		}
+		accidentalAreas.push_back(accidentalArea);
+		dotAreas.push_back(dotArea);
+		//rectangle(areaImg, accidentalArea.tl(), accidentalArea.br(), Scalar(0, 0, 0), 2);
+		//rectangle(areaImg, dotArea.tl(), dotArea.br(), Scalar(0, 0, 0), 2);
+	}
+
+	// 저장된 비음표들 중 임시표(샵, 플랫, 제자리표)에 대해 음표에 붙은 것인지 확인
+	for (int i = 0; i < nonNoteInfo.size(); i++) {
+		String nonNoteType = nonNoteInfo[i].getNonNoteType();
+		if (nonNoteType == "sharp" || nonNoteType == "flat" || nonNoteType == "natural") {
+			
+			for (int j = 0; j < accidentalAreas.size(); j++) { // 음표별로 임시표가 붙을 수 있는 영역 내에 해당 비음표가 존재하는지 검사
+				if (accidentalAreas[j].tl().x < nonNoteInfo[i].x && nonNoteInfo[i].x < accidentalAreas[j].br().x &&
+					accidentalAreas[j].tl().y < nonNoteInfo[i].y && nonNoteInfo[i].y < accidentalAreas[j].br().y) {
+					vector<string> tmpNonNotes = noteInfo[j].getNonNotes();
+					tmpNonNotes.push_back(nonNoteType);
+					noteInfo[j].setNonNotes(tmpNonNotes);
+					break;
+				}
+			}
+
+		}
+	}
+
+	// nonNoteXY 오브젝트들 중 점만큼 작은 오브젝트들을 점일 가능성이 있다 판단하여 비교를 위해 저장
+	vector<Rect> dotPossible;
+	for (int i = 0; i < nonNoteXY.size(); i++) {
+		if (nonNoteXY[i].width < staffInterval && nonNoteXY[i].height < staffInterval) {
+			dotPossible.push_back(nonNoteXY[i]);
+			//rectangle(areaImg, nonNoteXY[i].tl(), nonNoteXY[i].br(), Scalar(0, 0, 0), 2);
+		}
+	}
+
+	vector<Note>::iterator iter = noteInfo.begin();
+	for (int i = 0; i < dotAreas.size(); i++, iter++) {
+		bool isDot = false;
+		for (int d = 0; d < dotPossible.size(); d++) {
+			int centerX = (dotPossible[d].tl().x + dotPossible[d].br().x) / 2;
+			int centerY = (dotPossible[d].tl().y + dotPossible[d].br().y) / 2;
+			// 음표머리 오른쪽 특정 영역에 점으로 추정되는 오브젝트가 있으면 점으로 판단
+			if (dotAreas[i].tl().x < centerX && centerX < dotAreas[i].br().x &&
+				dotAreas[i].tl().y < centerY && centerY < dotAreas[i].br().y ) {
+				isDot = true;
+				cout << "Dot detected" << endl;
+				rectangle(areaImg, dotPossible[d].tl(), dotPossible[d].br(), Scalar(0, 0, 0), 5);
+				break;
+			}
+		}
+		noteInfo[i].setDot(isDot);
+	}
+	show(areaImg, "areaImg");
 }
 
 // 기울기 보정한 이미지의 검은색 모서리 부분을 하얀색으로 바꾸기

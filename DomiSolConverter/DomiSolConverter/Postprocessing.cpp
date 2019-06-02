@@ -148,12 +148,13 @@ void DomiSolConverter::Postproecessing::combineInfo() {
 }
 
 bool DomiSolConverter::Postproecessing::compare(Symbol *a, Symbol *b) {
-	if ((*a).getLineNum() == (*b).getLineNum()) {
-		return ((*a).x < (*b).x);
-	}
-	else {
-		return ((*a).getLineNum() < (*b).getLineNum());
-	}
+	//if ((*a).getLineNum() == (*b).getLineNum()) {
+	//	return ((*a).x < (*b).x);
+	//}
+	//else {
+	//	return ((*a).getLineNum() < (*b).getLineNum());
+	//}
+	return true;
 }
 
 string DomiSolConverter::Postproecessing::makeCode() {
