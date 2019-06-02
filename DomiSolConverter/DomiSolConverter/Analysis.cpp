@@ -458,7 +458,6 @@ void DomiSolConverter::Analysis::classifyNote() {
 				for (int y = Yhist.size() - staffInterval; y < Yhist.size(); y++) {
 					blackDown += Yhist[y];
 				}
-				noteXY.push_back(objectXY[index]);	// noteXY에 Rect정보 추가
 				isNonNote = false;
 
 				if(blackLeft > blackRight) {
@@ -542,7 +541,15 @@ void DomiSolConverter::Analysis::classifyNote() {
 
 		}
 		if (isNonNote) {
-			nonNoteXY.push_back(objectXY[index]);
+			nonNoteXY.push_back(objectXY[index]); //nonNoteXY에 비음표 Rect정보 추가
+		}
+		else {
+			noteXY.push_back(objectXY[index]);	// noteXY에 음표 Rect정보 추가
+			Note n = Note();
+			n.setFlag_Head(flag, isEmptyHead);
+			n.x = objectXY[index].x + (objectXY[index].width / 2);
+			n.y = objectXY[index].y + (objectXY[index].height / 2);
+			this->noteInfo.push_back(n);
 		}
 		//putText(objectsRectImg, to_string(index), objectXY[index].tl(), 0.3, 0.3, Scalar::all(255));
 	}
@@ -680,12 +687,13 @@ void DomiSolConverter::Analysis::calculatePitch() {
 						}
 					}
 					putText(toneImg, string(1, tone), Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
-					vector<Note>::iterator iter = noteInfo.begin();
+					Note n = Note();
+					n.setScale_Octave(tone, octave);
+					n.setLineNum(lineNum);
+					n.x = (*note).x + ((*note).width / 2);
+					n.y = (*note).y + ((*note).height / 2);
 
-					for (iter; iter != noteInfo.end(); iter++) {
-						(*iter).setScale_Octave(tone, octave);
-						(*iter).setLineNum(lineNum);
-					}
+					this->noteInfo.push_back(n);
 				}
 			}
 		}
