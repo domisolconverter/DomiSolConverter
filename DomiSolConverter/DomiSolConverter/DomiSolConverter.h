@@ -20,7 +20,8 @@ private:
 		Mat edgeImg;
 		Mat lineImg;
 		Mat straightenedImg;
-		Mat straightenedBinaryImg;
+		Mat straightenedBinaryImgforStaff;
+		Mat straightenedBinaryImgforObject;
 
 		void binarization();
 		void detectEdge();
@@ -30,14 +31,16 @@ private:
 	public:
 		Preprocessing(Mat inputImg);
 		Mat getStraightenedImg();
-		Mat getStraightenedBinaryImg();
+		Mat getStraightenedBinaryImgforStaff();
+		Mat getStraightenedBinaryImgforObject();
 	};
 	
 	class Analysis {
 	private:
 		Mat staffImg;
 		Mat straightenedImg;
-		Mat straightenedBinaryImg;
+		Mat straightenedBinaryImgforStaff;
+		Mat straightenedBinaryImgforObject;
 		Mat inputCalculateStaffImg;
 		Mat objectsImg;
 		vector<Rect> objectXY;
@@ -75,7 +78,7 @@ private:
 
 
 	public:
-		Analysis(Mat straightenedImg, Mat straightenedBinaryImg, vector<Note> note, vector<NonNote> nonNote, vector<string> text);
+		Analysis(Mat straightenedImg, Mat straightenedBinaryImgforStaff, Mat straightenedBinaryImgforObject, vector<Note> note, vector<NonNote> nonNote, vector<string> text);
 
 		void setObjectsImg(Mat objectsImg);
 		void setObjectXY(vector<Rect> objectXY);
@@ -96,7 +99,8 @@ private:
 	Mat inputImg;
 	Mat binaryImg;
 	Mat straightenedImg;
-	Mat straightenedBinaryImg;
+	Mat straightenedBinaryImgforStaff;
+	Mat straightenedBinaryImgforObject;
 	Mat staffImg;
 	Mat objectsImg;
 	vector<Rect> objectXY;

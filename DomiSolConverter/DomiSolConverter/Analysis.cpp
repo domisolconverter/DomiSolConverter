@@ -1,15 +1,16 @@
 #include "pch.h"
 #include "DomiSolConverter.h"
 
-DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImg, vector<Note> note, vector<NonNote> nonNote, vector<string> text) {
+DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImgforStaff, Mat straightenedBinaryImgforObject, vector<Note> note, vector<NonNote> nonNote, vector<string> text) {
 	
 	this->nonNoteInfo = nonNote;
 	this->noteInfo = note;
 	this->text = text;
 	this->straightenedImg = straightenedImg;
-	this->straightenedBinaryImg = straightenedBinaryImg;
+	this->straightenedBinaryImgforStaff = straightenedBinaryImgforStaff;
+	this->straightenedBinaryImgforObject = straightenedBinaryImgforObject;
 
-	show(straightenedBinaryImg, "binaryImg");
+	//show(straightenedBinaryImg, "binaryImg");
 	colorConers();
 	calculateStaffXY();
 
@@ -40,7 +41,7 @@ int DomiSolConverter::Analysis::show(Mat img, string title) {
 
 void DomiSolConverter::Analysis::extractStaff() {
 
-	staffImg = straightenedBinaryImg.clone();
+	staffImg = straightenedBinaryImgforObject.clone();
 	int horizontalsize = staffImg.cols / 50;
 	Mat horizontalStructure = getStructuringElement(MORPH_RECT, Size(horizontalsize, 1));
 	erode(staffImg, staffImg, horizontalStructure, Point(-1, -1));
@@ -49,7 +50,7 @@ void DomiSolConverter::Analysis::extractStaff() {
 
 void DomiSolConverter::Analysis::removeStaff() {
 
-	objectsImg = straightenedBinaryImg.clone();
+	objectsImg = straightenedBinaryImgforObject.clone();
 	//int verticalsize = objectsImg.rows / 250;
 	int verticalsize = staffHeight / 8;
 	Mat verticalStructure = getStructuringElement(MORPH_RECT, Size(1, verticalsize));
@@ -63,7 +64,7 @@ void DomiSolConverter::Analysis::extractObject() {
 	vector<Vec4i> hierarchy;
 
 	// morphology
-	Mat closingStructure = getStructuringElement(MORPH_ELLIPSE, Size(3, 4));
+	Mat closingStructure = getStructuringElement(MORPH_ELLIPSE, Size(2, 4));
 	morphologyEx(objectsImg, objectsImg, MORPH_CLOSE, closingStructure);
 
 	// find contours
@@ -108,7 +109,6 @@ void DomiSolConverter::Analysis::extractObject() {
 					) {
 					objectXY.erase(objectXY.begin() + i + c);
 					objectsCnt--;
-					i--;
 				}
 			}
 			// i번째 사각형보다 i+c번째 사각형이 클때
@@ -121,7 +121,6 @@ void DomiSolConverter::Analysis::extractObject() {
 					) {
 					objectXY.erase(objectXY.begin() + i);
 					objectsCnt--;
-					i--;
 				}
 			}
 			c++;
@@ -403,7 +402,8 @@ void DomiSolConverter::Analysis::classifyNote() {
 	* 추출된 오브젝트 중 음표 분류 & 머리와 꼬리 인식
 	* TODO: 합칠때 vector<Note>에 flag, isEmptyHead 저장
 	*/
-	cout << objectsImg(objectXY[177]) << endl;
+	int headMax = staffInterval / 2 * staffInterval / 2 * 2.9;
+	//cout << objectsImg(objectXY[90]) << endl;
 	for (int index = 0; index < objectXY.size(); index++) {
 		//rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
 		Mat object = objectsImg(objectXY[index]);
@@ -411,21 +411,32 @@ void DomiSolConverter::Analysis::classifyNote() {
 		int height = object.rows;
 		int flag = 0;
 		bool isEmptyHead = false;
+		bool isNonNote = true;
 
 		//cout << "width: " << width << "height: " << height << endl;
 		// 오브젝트 길이&너비로 1차 선별
-		if (height > staffHeight*0.9 && width>staffInterval/3) {
+		if (height > staffHeight*0.9 && width>staffInterval*0.8) {
 
 			// Y histogram
 			vector<int> Yhist(height, 0);
 			int pixelCnt = 0;
+			int blackLeft = 0;
+			int blackRight = 0;
 			for (int nr = 0; nr < height; nr++) {
 				uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
 
-				for (int nc = 0; nc < width; nc++) {
+				for (int nc = 0; nc < width / 2; nc++) {
 					if (pixel[nc] != 0) {
 						Yhist[nr]++;
 						pixelCnt++;
+						blackLeft++;
+					}
+				}
+				for (int nc = ceil(double(width) / 2); nc < width; nc++) {
+					if (pixel[nc] != 0) {
+						Yhist[nr]++;
+						pixelCnt++;
+						blackRight++;
 					}
 				}
 			}
@@ -435,7 +446,7 @@ void DomiSolConverter::Analysis::classifyNote() {
 				middleCnt += Yhist[y];
 			}
 
-			if (middleCnt < width*(height/5)*0.5) { // 박자표같은 것들 제외
+			if (middleCnt < width*(height/5)*0.4) { // 박자표, 높은음자리표 같은 것들 제외
 
 				/* 가로로 반을 잘라서 위 아래 흑화소 분포를 비교해 음표 위치를 판단한다.*/
 				bool headLocation = true; // true이면 음표머리 하단에 위치. false이면 음표머리 상단에 위치
@@ -447,14 +458,16 @@ void DomiSolConverter::Analysis::classifyNote() {
 				for (int y = Yhist.size() - staffInterval; y < Yhist.size(); y++) {
 					blackDown += Yhist[y];
 				}
+				noteXY.push_back(objectXY[index]);	// noteXY에 Rect정보 추가
+				isNonNote = false;
 
-				if (blackUp > blackDown) { // 음표 머리가 상단에 위치 (흑화소의 분포가 1.2배 이상 차이남)
-					noteXY.push_back(objectXY[index]);	// noteXY에 Rect정보 추가
+				if(blackLeft > blackRight) {
+				//if (blackUp > blackDown) { // 음표 머리가 상단에 위치
 
 					// 흑화소 개수가 일정 범위 이상일 경우 머리로 판단. 
 					// --> 타원의 넓이 공식 (2*pi*가로반지름*세로반지름). 이 값보다 크면 머리로 판단한다.
 					//cout << staffInterval / 2 * staffInterval*1.25 / 2 * 3.14 << endl;
-					if (blackUp > staffInterval / 2 * staffInterval / 2 * 3) {
+					if (blackUp > headMax) {
 						isEmptyHead = false;
 						cout << index << "th object: Up Head is full" << endl;
 					}
@@ -465,14 +478,14 @@ void DomiSolConverter::Analysis::classifyNote() {
 
 					// 꼬리 있는지 인식
 					int checkpoint;
-					if (width > staffInterval * 1.2) {
-						checkpoint = 2;
+					if (width > staffInterval * 1.25) {
+						checkpoint = staffInterval / 3;
 					}
 					else {
 						checkpoint = width / 3;
 					}
 					bool pre = false;
-					for (int nr = height - 1; nr > height - staffInterval; nr--) {
+					for (int nr = height - 1; nr > height / 2; nr--) {
 						uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
 						if (pre == false && pixel[checkpoint] != 0) {
 							flag += 1;
@@ -484,16 +497,16 @@ void DomiSolConverter::Analysis::classifyNote() {
 					}
 					cout << index << "th object: flag: " << flag << endl;
 
-					//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
+					imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
 					rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
 				}
-				else if (blackUp < blackDown) { // 음표 머리가 하단에 위치
-					noteXY.push_back(objectXY[index]);	// noteXY에 Rect정보 추가
+				else {
+				//else if (blackUp < blackDown) { // 음표 머리가 하단에 위치
 
 					// 흑화소 개수가 일정 범위 이상일 경우 머리가 꽉 차있다. 
 					// --> 타원의 넓이 공식 (2*pi*가로반지름*세로반지름). 이 값보다 크면 머리가 차있다.
 					//cout << staffInterval / 2 * staffInterval*1.25 / 2 * 3.14 << endl;
-					if (blackDown > staffInterval / 2 * staffInterval / 2 * 3) {
+					if (blackDown > headMax) {
 						isEmptyHead = false;
 						cout << index << "th object: Down Head is full" << endl;
 					}
@@ -504,14 +517,14 @@ void DomiSolConverter::Analysis::classifyNote() {
 
 					// 꼬리 있는지 인식
 					int checkpoint;
-					if (width > staffInterval * 1.2) {
-						checkpoint = width - 2;
+					if (width > staffInterval * 1.25) {
+						checkpoint = width - staffInterval/3;
 					}
 					else {
 						checkpoint = width / 3;
 					}
 					bool pre = false;
-					for (int nr = 0; nr < staffInterval; nr++) {
+					for (int nr = 0; nr < height/2; nr++) {
 						uchar* pixel = object.ptr<uchar>(nr); // n번째 row에 대한 주소를 저장
 						if (pre == false && pixel[checkpoint] != 0) {
 							flag += 1;
@@ -522,17 +535,15 @@ void DomiSolConverter::Analysis::classifyNote() {
 						}
 					}
 					cout << index << "th object: flag: " << flag << endl;
-					//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
+					imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
 					rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
-				}
-
-				else { // 음표가 아닌 오브젝트들은 비음표로 분류해서 저장
-					nonNoteXY.push_back(objectXY[index]);
 				}
 			}
 
 		}
-
+		if (isNonNote) {
+			nonNoteXY.push_back(objectXY[index]);
+		}
 		//putText(objectsRectImg, to_string(index), objectXY[index].tl(), 0.3, 0.3, Scalar::all(255));
 	}
 	imshow("objects", objectsRectImg);
@@ -831,7 +842,7 @@ void DomiSolConverter::Analysis::cropTextArea(Rect *ROI) {
 
 void DomiSolConverter::Analysis::recognizeText() {
 
-		Mat src = this->straightenedBinaryImg;
+		Mat src = this->straightenedImg.clone();
 		int width = src.cols;
 		int height = src.rows;
 
@@ -871,7 +882,7 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 // 기울기 보정한 이미지의 검은색 모서리 부분을 하얀색으로 바꾸기
 void DomiSolConverter::Analysis::colorConers() {
 
-	Mat input = this->straightenedBinaryImg;
+	Mat input = this->straightenedBinaryImgforStaff;
 	int width = input.cols;
 	int height = input.rows;
 	int bar = (int)((width / 100.0) * 20);
