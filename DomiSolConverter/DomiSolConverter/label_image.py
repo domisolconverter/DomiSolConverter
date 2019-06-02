@@ -115,7 +115,10 @@ def recognize(inputImg, graph):
   labels = load_labels(label_file)
   for i in top_k:
    #print (file_name, "  " , end="")
-   print(labels[i])
+   if results[i] > 0.5:
+        print(labels[i])
+   else:
+        print("wrong")
    #print (results[i], "  ", end="")
    break
 

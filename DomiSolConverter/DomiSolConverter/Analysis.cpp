@@ -2,10 +2,11 @@
 #include <Windows.h>
 #include "DomiSolConverter.h"
 
-DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImgforStaff, Mat straightenedBinaryImgforObject, vector<Note> note, vector<NonNote> nonNote, vector<string> text) {
+DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImgforStaff, Mat straightenedBinaryImgforObject, vector<Note> *note, vector<NonNote> *nonNote, vector<wstring> *text) {
 	
 	this->nonNoteInfo = nonNote;
 	this->noteInfo = note;
+	this->text = text;
 	this->straightenedImg = straightenedImg;
 	this->straightenedBinaryImgforStaff = straightenedBinaryImgforStaff;
 	this->straightenedBinaryImgforObject = straightenedBinaryImgforObject;
@@ -587,7 +588,7 @@ void DomiSolConverter::Analysis::classifyNote() {
 			n.setisHeadUp(isHeadUp);
 			n.x = objectXY[index].x + (objectXY[index].width / 2);
 			n.y = objectXY[index].y + (objectXY[index].height / 2);
-			this->noteInfo.push_back(n);
+			this->noteInfo->push_back(n);
 		}
 		//putText(objectsRectImg, to_string(index), objectXY[index].tl(), 0.3, 0.3, Scalar::all(255));
 	}
@@ -721,8 +722,8 @@ void DomiSolConverter::Analysis::calculatePitch() {
 						}
 					}
 					putText(toneImg, string(1, tone), Point((*note).x + ((*note).width / 2), (*note).y + (*note).height + 10), FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255), 1);
-					vector<Note>::iterator iter = noteInfo.begin();
-					for (iter; iter != noteInfo.end(); iter++) {
+					vector<Note>::iterator iter = noteInfo->begin();
+					for (iter; iter != noteInfo->end(); iter++) {
 						(*iter).setScale_Octave(tone, octave);
 						(*iter).setLineNum(lineNum);
 					}
@@ -752,15 +753,26 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 				}
 				cout << output << "\n";
 
-				NonNote nn(output);
-				nn.x = objectXY[idx].x + (objectXY[idx].width / 2);
-				nn.y = objectXY[idx].y + (objectXY[idx].height / 2);
-				this->nonNoteInfo.push_back(nn);
+				if (strcmp(output, "wrong")) {
+					NonNote nn(output);
+					nn.x = objectXY[idx].x + (objectXY[idx].width / 2);
+					nn.y = objectXY[idx].y + (objectXY[idx].height / 2);
+					int lineNum = 0;
+
+					vector<Point>::iterator iter = staffXY.begin();
+					for (iter; iter != staffXY.end(); iter+=2) {
+						if ((*iter).y < nn.y && (*(iter + 1)).y > nn.y) {
+							nn.setLineNum(lineNum);
+							break;
+						}
+					}
+					this->nonNoteInfo->push_back(nn);
+				}
 			}
 			idx++;
 		}
 	}
-	system("del \\q \\s \\symbols\\*");
+	system("echo y | del \\q \\s C:\\Users\\tyg04\\DomiSolConverter\\DomiSolConverter\\DomiSolConverter\\symbols\\*");
 }
 
 
@@ -952,8 +964,8 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 	
 	vector<Rect> accidentalAreas;
 	vector<Rect> dotAreas;
-	for (int i=0; i < noteInfo.size(); i++) {
-		bool isHeadUp = noteInfo[i].getIsHeadUp();
+	for (int i=0; i < noteInfo->size(); i++) {
+		bool isHeadUp = (*noteInfo)[i].getIsHeadUp();
 		Rect accidentalArea;
 		Rect dotArea;
 		if (isHeadUp) { // 음표머리가 상단
@@ -971,18 +983,18 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 	}
 
 	// 저장된 비음표들 중 임시표(샵, 플랫, 제자리표)에 대해 음표에 붙은 것인지 확인
-	int nonNoteInfoCnt = nonNoteInfo.size();
+	int nonNoteInfoCnt = nonNoteInfo->size();
 	for (int i = 0; i < nonNoteInfoCnt; i++) {
-		String nonNoteType = nonNoteInfo[i].getNonNoteType();
+		String nonNoteType = (*nonNoteInfo)[i].getNonNoteType();
 		if (nonNoteType == "sharp" || nonNoteType == "flat" || nonNoteType == "natural") {
 			
 			for (int j = 0; j < accidentalAreas.size(); j++) { // 음표별로 임시표가 붙을 수 있는 영역 내에 해당 비음표가 존재하는지 검사
-				if (accidentalAreas[j].tl().x < nonNoteInfo[i].x && nonNoteInfo[i].x < accidentalAreas[j].br().x &&
-					accidentalAreas[j].tl().y < nonNoteInfo[i].y && nonNoteInfo[i].y < accidentalAreas[j].br().y) {
-					vector<string> tmpNonNotes = noteInfo[j].getNonNotes();
+				if (accidentalAreas[j].tl().x < (*nonNoteInfo)[i].x && (*nonNoteInfo)[i].x < accidentalAreas[j].br().x &&
+					accidentalAreas[j].tl().y < (*nonNoteInfo)[i].y && (*nonNoteInfo)[i].y < accidentalAreas[j].br().y) {
+					vector<string> tmpNonNotes = (*noteInfo)[j].getNonNotes();
 					tmpNonNotes.push_back(nonNoteType);
-					noteInfo[j].setNonNotes(tmpNonNotes);
-					nonNoteInfo.erase(nonNoteInfo.begin() + i);
+					(*noteInfo)[j].setNonNotes(tmpNonNotes);
+					nonNoteInfo->erase((*nonNoteInfo).begin() + i);
 					nonNoteInfoCnt--;
 					break;
 				}
@@ -1000,7 +1012,7 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 		}
 	}
 
-	vector<Note>::iterator iter = noteInfo.begin();
+	vector<Note>::iterator iter = noteInfo->begin();
 	for (int i = 0; i < dotAreas.size(); i++, iter++) {
 		bool isDot = false;
 		for (int d = 0; d < dotPossible.size(); d++) {
@@ -1015,7 +1027,7 @@ void DomiSolConverter::Analysis::recognizeNoteSymbol() {
 				break;
 			}
 		}
-		noteInfo[i].setDot(isDot);
+		(*noteInfo)[i].setDot(isDot);
 	}
 	show(areaImg, "areaImg");
 }

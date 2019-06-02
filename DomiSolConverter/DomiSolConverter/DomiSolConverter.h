@@ -49,8 +49,9 @@ private:
 		vector<Point> staffXY;
 		int staffHeight;
 		float staffSpace;
-		vector<Note> noteInfo;
-		vector<NonNote> nonNoteInfo;
+		vector<Note> *noteInfo;
+		vector<NonNote> *nonNoteInfo;
+		vector<wstring> *text;
 
 		void removeTextArea();
 		void extractStaff();
@@ -78,7 +79,7 @@ private:
 
 
 	public:
-		Analysis(Mat straightenedImg, Mat straightenedBinaryImgforStaff, Mat straightenedBinaryImgforObject, vector<Note> note, vector<NonNote> nonNote, vector<string> text);
+		Analysis(Mat straightenedImg, Mat straightenedBinaryImgforStaff, Mat straightenedBinaryImgforObject, vector<Note> *note, vector<NonNote> *nonNote, vector<wstring> *text);
 
 		void setObjectsImg(Mat objectsImg);
 		void setObjectXY(vector<Rect> objectXY);
@@ -88,11 +89,13 @@ private:
 
 	class Postproecessing{
 	private:
+		string scale;
+
 		void combineInfo();
 		string makeCode();
-		void saveFile(string inputPath, string code);
-		vector<Note> notes;
-		vector<NonNote> nonNotes;
+		void saveFile(string inputPath, string transposeKey, string code);
+		vector<Note> *notes;
+		vector<NonNote> *nonNotes;
 		vector<Symbol*> wholeSign;
 		string makeNoteCode(Note *note, Signature *sig);
 		string makeNonNoteCode(NonNote *nonNote, Signature *sig);
@@ -100,7 +103,7 @@ private:
 		string getResultName(string inputPath);
 
 	public:
-		Postproecessing(string inputPath, vector<Note> notes, vector<NonNote> nonNotes);
+		Postproecessing(string inputPath,string transposeKey, vector<Note> *notes, vector<NonNote> *nonNotes);
 	};
 
 	Mat inputImg;
@@ -114,8 +117,8 @@ private:
 	Mat resultImg;
 	vector<Note> wholeNotes;
 	vector<NonNote> wholeNonNotes;
-	vector<string> text;
+	vector<wstring> text;
 
 public:
-	DomiSolConverter(Mat input, string inputPath);
+	DomiSolConverter(Mat input, string inputPath, string transposeKey);
 };

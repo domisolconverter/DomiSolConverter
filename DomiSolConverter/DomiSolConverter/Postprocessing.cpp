@@ -7,27 +7,28 @@
 #include <string>
 #include <algorithm>
 
-DomiSolConverter::Postproecessing::Postproecessing(string inputPath, vector<Note> notes, vector<NonNote> nonNotes) {
+DomiSolConverter::Postproecessing::Postproecessing(string inputPath, string transposeKey, vector<Note> *notes, vector<NonNote> *nonNotes) {
 	this->notes = notes;
 	this->nonNotes = nonNotes;
 
 	combineInfo();
-	saveFile(inputPath, makeCode());
+	saveFile(inputPath, transposeKey, makeCode());
 }
 
 void DomiSolConverter::Postproecessing::combineInfo() {
-	vector<Note>::iterator note = notes.begin();
-	vector<NonNote>::iterator nonNote = nonNotes.begin();
+	vector<Note>::iterator note = (*notes).begin();
+	vector<NonNote>::iterator nonNote = (*nonNotes).begin();
 
-	for (int i = 0; i < this->notes.size(); i++) {
-		this->wholeSign.push_back(&(this->notes[i]));
+	for (int i = 0; i < notes->size(); i++) {
+		wholeSign.push_back(&((*notes)[i]));
 	}
 
-	for (int i = 0; i < this->nonNotes.size(); i++) {
-		this->wholeSign.push_back(&(this->nonNotes[i]));
+	for (int i = 0; i < nonNotes->size(); i++) {
+		wholeSign.push_back(&((*nonNotes)[i]));
 	}
 
 	sort(this->wholeSign.begin(), this->wholeSign.end(), compare);
+	cout << "test" << "\n";
 }
 
 bool DomiSolConverter::Postproecessing::compare(Symbol *a, Symbol *b) {
@@ -59,6 +60,7 @@ string DomiSolConverter::Postproecessing::makeCode() {
 			}
 			else {
 				code += signature.getCode();
+				this->scale = signature.getSign();
 				signature.clearElement();
 			}
 		}
@@ -189,13 +191,25 @@ string DomiSolConverter::Postproecessing::makeNoteCode(Note *note, Signature *si
 	return code;
 }
 
-void DomiSolConverter::Postproecessing::saveFile(string inputPath, string code) {
-	string resultFile = getResultName(inputPath);
+void DomiSolConverter::Postproecessing::saveFile(string inputPath, string transposekey, string code) {
+	string resultFile = getResultName(inputPath) + ".ly";
+	string lilypond = code;
+	string key;
+
+	if (transposekey.substr(2, transposekey.size() - 1).compare("minor") == 0) {
+		key = transposekey.substr(0, 1) + "es";
+	}
+	else {
+		key = transposekey.substr(0, 1);
+	}
+	lilypond = "\\transpose " + this->scale + " " + key + " {\n" + code + "\n}";
+
 	ofstream out(resultFile);
 
-	out << code;
+	out << lilypond;
 	out.close();
-	system("\"C:\\Program Files (x86)\\LilyPond\\usr\\bin\\lilypond\" output.ly");
+	string cmd = "\"C:\\Program Files (x86)\\LilyPond\\usr\\bin\\lilypond\" " + resultFile;
+	system(cmd.c_str());
 }
 
 string DomiSolConverter::Postproecessing::getResultName(string inputPath) {

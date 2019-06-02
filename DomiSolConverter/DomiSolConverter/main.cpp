@@ -9,7 +9,9 @@ int main(int argc, char **argv)
 
 	// Change test case
 	//string INPUTFILE = argv[1];
-	string INPUTFILE = "./inputImage/½£¼Ó.jpg";
+	string INPUTFILE = "./inputImage/case1.jpg";
+	//string transposeKey = argv[2];
+	string transposeKey = "D_major";
 
 	cout << "OpenCV Version : " << CV_VERSION << endl;
 	Mat img;
@@ -27,7 +29,7 @@ int main(int argc, char **argv)
 	double width = img.cols;
 	resize(img, img, Size(1000, int(height * (1000 / width))), 0, 0, CV_INTER_NN);
 
-	DomiSolConverter domisolconverter(img, INPUTFILE);
+	DomiSolConverter domisolconverter(img, INPUTFILE, transposeKey);
 	
 	waitKey(0);
 	destroyWindow("CASE01");

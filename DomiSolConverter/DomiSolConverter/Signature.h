@@ -29,6 +29,7 @@ public:
 	void putElement(NonNote nonNote);
 	bool isSignatureEnd(NonNote nonNote);
 	string getCode();
+	string getSign();
 
 	Signature() { this->isMajor = true; };
 };
