@@ -1,11 +1,16 @@
 #include "pch.h"
 #include "Symbol.h"
 
-Symbol::Symbol() {
+string Symbol::getType() {
+	return this->type;
 }
 
 void Symbol::setbarNum(int barNum) {
 	this->barNum = barNum;
+}
+
+void Symbol::setLineNum(int lineNum) {
+	this->lineNum = lineNum;
 }
 
 void Symbol::setLineNum(int lineNum) {
@@ -73,32 +78,27 @@ void NonNote::setNonNoteType() {
 	this->nonNoteType = nonNoteType;
 }
 
-enum {
-	TWO = 2,
-	TWO_DOT,
-	FOUR,
-	FOUR_DOT,
-	EIEGHT = 8,
-	EIEGHT_DOT,
-	WHOLE,
-	SIXT = 16,
-	SIXT_DOT
-};
 
-int Note::transposeNote() {
+string Note::transposeNote() {
+
 	if (isWholeNote) {
-		return WHOLE;
+		return string("4");
 	}
-	else if (flag == 0 && isEmptyHead && !dot) {
-		return TWO;
+	else if (flag == 0 && isEmptyHead) {
+		return string("2");
 	}
-	else if (flag == 0 && isEmptyHead && dot) {
-		return TWO_DOT;
+
+	else if (flag == 0 && !isEmptyHead) {
+		return string("4");
 	}
-	else if (flag == 0 && !isEmptyHead && dot) {
-		return FOUR;
+	else if (flag == 1 && !isEmptyHead) {
+		return string("8");
 	}
-	else if (flag == 0 && !isEmptyHead && dot) {
-		return FOUR_DOT;
+	else if (flag == 2 && !isEmptyHead) {
+		return string("16");
+	}
+
+	else {
+		return "x";
 	}
 }

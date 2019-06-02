@@ -51,7 +51,6 @@ private:
 		float staffSpace;
 		vector<Note> noteInfo;
 		vector<NonNote> nonNoteInfo;
-		vector<string> text;
 
 		void extractStaff();
 		void removeStaff();
@@ -89,11 +88,17 @@ private:
 	class Postproecessing{
 	private:
 		void combineInfo();
-		void transposeKey();
-		void saveFile();
+		string makeCode();
+		void saveFile(string code);
+		vector<Note> notes;
+		vector<NonNote> nonNotes;
+		vector<Symbol*> wholeSign;
+		string makeNoteCode(Note *note, vector<char> *flat, vector<char> *sharp);
+		string makeNonNoteCode(NonNote *nonNote, vector<char> *flat, vector<char> *sharp);
+		static bool compare(Symbol *a, Symbol *b);
 
 	public:
-		Postproecessing();
+		Postproecessing(vector<Note> notes, vector<NonNote> nonNotes);
 	};
 
 	Mat inputImg;
@@ -105,7 +110,6 @@ private:
 	Mat objectsImg;
 	vector<Rect> objectXY;
 	Mat resultImg;
-	vector<Symbol> wholeSymbols;
 	vector<Note> wholeNotes;
 	vector<NonNote> wholeNonNotes;
 	vector<string> text;

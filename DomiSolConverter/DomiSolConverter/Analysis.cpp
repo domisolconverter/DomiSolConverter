@@ -5,7 +5,6 @@ DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinary
 	
 	this->nonNoteInfo = nonNote;
 	this->noteInfo = note;
-	this->text = text;
 	this->straightenedImg = straightenedImg;
 	this->straightenedBinaryImgforStaff = straightenedBinaryImgforStaff;
 	this->straightenedBinaryImgforObject = straightenedBinaryImgforObject;
@@ -57,7 +56,6 @@ void DomiSolConverter::Analysis::removeStaff() {
 	Mat verticalStructure = getStructuringElement(MORPH_RECT, Size(1, verticalsize));
 	erode(objectsImg, objectsImg, verticalStructure, Point(-1, -1));
 	dilate(objectsImg, objectsImg, verticalStructure, Point(-1, -1));
-
 }
 
 void DomiSolConverter::Analysis::extractObject() {
