@@ -21,33 +21,21 @@ private:
 		Mat lineImg;
 		Mat straightenedImg;
 		Mat straightenedBinaryImg;
-		Mat staffImg;
-		Mat objectsImg;
-		vector<Rect> objectXY;
 
 		void binarization();
 		void detectEdge();
 		void straightenImg();
-		void extractStaff();
-		void removeStaff();
-		void extractObject();
 		int show(Mat img, string title);
 
-		struct byX {
-			bool operator () (const Rect & a, const Rect & b) {
-				return a.x < b.x;
-			}
-		};
 	public:
 		Preprocessing(Mat inputImg);
-		Mat getObjectsImg();
 		Mat getStraightenedImg();
 		Mat getStraightenedBinaryImg();
-		vector<Rect> getObjectXY();
 	};
 	
 	class Analysis {
 	private:
+		Mat staffImg;
 		Mat straightenedImg;
 		Mat straightenedBinaryImg;
 		Mat inputCalculateStaffImg;
@@ -62,6 +50,9 @@ private:
 		vector<NonNote> nonNoteInfo;
 		vector<string> text;
 
+		void extractStaff();
+		void removeStaff();
+		void extractObject();
 		void calculateStaffHeight();
 		void calculateStaffSpace();
 		void calculateStaffXY();
@@ -76,13 +67,15 @@ private:
 		void colorConers();
 		int show(Mat img, string title);
 
+		struct byX {
+			bool operator () (const Rect & a, const Rect & b) {
+				return a.x < b.x;
+			}
+		};
+
 
 	public:
-		Analysis(Mat straightenedImg, Mat straightenedBinaryImg, Mat objectsImg, vector<Rect> objectXY, vector<Note> note, vector<NonNote> nonNote, vector<string> text);
-
-		vector<string> getNote();
-		vector<string> getNonNote();
-		vector<string> getText();
+		Analysis(Mat straightenedImg, Mat straightenedBinaryImg, vector<Note> note, vector<NonNote> nonNote, vector<string> text);
 
 		void setObjectsImg(Mat objectsImg);
 		void setObjectXY(vector<Rect> objectXY);

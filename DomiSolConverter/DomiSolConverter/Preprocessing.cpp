@@ -10,13 +10,8 @@ DomiSolConverter::Preprocessing::Preprocessing(Mat inputImg) {
 	//show(edgeImg, "edgeImg");
 	straightenImg();
 	//show(straightenedImg, "straightenedImg");
-	//threshold(~straightenedImg, straightenedBinaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
-	adaptiveThreshold(~straightenedImg, straightenedBinaryImg, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 5, -10);
-	extractStaff();
-	//show(objectsImg, "objectsImg");
-	removeStaff();
-	show(objectsImg, "objectsImg");
-	extractObject();
+	threshold(~straightenedImg, straightenedBinaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	//adaptiveThreshold(~straightenedImg, straightenedBinaryImg, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 7, -10);
 }
 
 int DomiSolConverter::Preprocessing::show(Mat img, string title) {
@@ -33,9 +28,9 @@ int DomiSolConverter::Preprocessing::show(Mat img, string title) {
 }
 
 void DomiSolConverter::Preprocessing::binarization() {
-	adaptiveThreshold(~inputImg, this->binaryImg, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 5, -10);
+	//adaptiveThreshold(~inputImg, this->binaryImg, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 7, -10);
 	//adaptiveThreshold(~inputImg, this->binaryImg, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 15, -2);
-	//threshold(~inputImg, binaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	threshold(~inputImg, binaryImg, 0, 255, THRESH_BINARY | THRESH_OTSU);
 }
 
 void DomiSolConverter::Preprocessing::detectEdge() {
@@ -100,122 +95,6 @@ void DomiSolConverter::Preprocessing::straightenImg(){
 	degree = degree * -1;
 	Mat rot_mat = getRotationMatrix2D(center, degree, scale);
 	warpAffine(inputImg, straightenedImg, rot_mat, inputImg.size());
-}
-
-void DomiSolConverter::Preprocessing::extractStaff() {
-
-	staffImg = straightenedBinaryImg.clone();
-	int horizontalsize = staffImg.cols / 50;
-	Mat horizontalStructure = getStructuringElement(MORPH_RECT, Size(horizontalsize, 1));
-	erode(staffImg, staffImg, horizontalStructure, Point(-1, -1));
-	dilate(staffImg, staffImg, horizontalStructure, Point(-1, -1));
-}
-
-void DomiSolConverter::Preprocessing::removeStaff() {
-
-	objectsImg = straightenedBinaryImg.clone();
-	int verticalsize = objectsImg.rows / 250;
-	Mat verticalStructure = getStructuringElement(MORPH_RECT, Size(1, verticalsize));
-	erode(objectsImg, objectsImg, verticalStructure, Point(-1, -1));
-	dilate(objectsImg, objectsImg, verticalStructure, Point(-1, -1));
-
-}
-
-void DomiSolConverter::Preprocessing::extractObject() {
-	vector<vector<Point>> contours;
-	vector<Vec4i> hierarchy;
-
-	// morphology
-	Mat closingStructure = getStructuringElement(MORPH_ELLIPSE, Size(2, 4));
-	morphologyEx(objectsImg, objectsImg, MORPH_CLOSE, closingStructure);
-
-	// find contours
-	findContours(objectsImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
-	//vector<vector<Point>> contours_poly(contours.size());
-
-	for (int i = 0; i < contours.size(); i++) {
-		/*Contour Approximation
-		   도형 외곽선을 더 적은 꼭지점수를 갖도록 바꿀때 ex) 찢겨진 사각형 복원
-		approxPolyDP(Mat(contours[i]), contours_poly[i], 0, true);
-		if (fabs(contourArea(Mat(contours_poly[i])) > 10)) {
-			objectXY.push_back(boundingRect(Mat(contours_poly[i])));
-		}
-		*/
-		if (fabs(contourArea(Mat(contours[i])) > 5)) {
-			//boundRect[rectCnt] = boundingRect(Mat(contours[i]));
-			objectXY.push_back(boundingRect(Mat(contours[i])));
-		}
-	}
-	// sort object rectangles by x
-	sort(objectXY.begin(), objectXY.end(), byX());
-	for (int i = 0; i < objectXY.size(); i++) {
-		//cout << "x: " << objectXY.at(i).x << "y: " << objectXY.at(i).y << "width: " << objectXY.at(i).width << "height: " << objectXY.at(i).height << endl;
-	}
-
-	int objectsCnt = objectXY.size();
-	for (int i = 0; i < objectsCnt; i++) {
-		//cout << i << "th   " << objectXY[i] << endl;
-		int c = 1;
-		while (1) {
-			if (i + c > objectsCnt - 1) {
-				break;
-			}
-			//cout << "c: " << c << "  " << objectXY[i+c] << endl;
-			// i번째 사각형보다 i+c번째 사각형이 작을때
-			if (objectXY[i].width > objectXY[i + c].width) {
-				// i+c번째 사각형이 내포돼있을때
-				if (!(objectXY[i].x > objectXY[i + c].x) &&
-					!((objectXY[i].x + objectXY[i].width) < (objectXY[i + c].x + objectXY[i + c].width)) &&
-					!(objectXY[i].y > objectXY[i + c].y) &&
-					!((objectXY[i].y + objectXY[i].height) < (objectXY[i + c].y + objectXY[i + c].height))
-					) {
-					objectXY.erase(objectXY.begin() + i + c);
-					objectsCnt--;
-					i--;
-				}
-			}
-			// i번째 사각형보다 i+c번째 사각형이 클때
-			else if (objectXY[i].width > objectXY[i + c].width) {
-				// i번째 사각형이 내포돼있을때
-				if (!(objectXY[i].x < objectXY[i + c].x) &&
-					!((objectXY[i].x + objectXY[i].width) > (objectXY[i + c].x + objectXY[i + c].width)) &&
-					!(objectXY[i].y < objectXY[i + c].y) &&
-					!((objectXY[i].y + objectXY[i].height) > (objectXY[i + c].y + objectXY[i + c].height))
-					) {
-					objectXY.erase(objectXY.begin() + i);
-					objectsCnt--;
-					i--;
-				}
-			}
-			c++;
-		}
-	}
-	
-	////draw result
-	//Mat contourimg = Mat(objectsImg.rows, objectsImg.cols, CV_8U);
-	////scalar color(0, 0, 0);
-	//Scalar color(255, 255, 255);
-	//for (int i = 0; i < contours.size(); i++) {
-	//	drawContours(contourimg, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
-	//}
-	//for (int i = 0; i < objectXY.size(); i++) {
-	//	//printf("%d", i);
-	//	rectangle(contourimg, objectXY[i].tl(), objectXY[i].br(), color, 1);
-	//	
-	//	//putText(contourimg, to_string(i), objectXY[i].tl(), 0.3, 0.3, Scalar::all(255));
-	//}
-	//namedWindow("contours", CV_WINDOW_AUTOSIZE);
-	//imshow("contours", contourimg);
-	
-}
-
-
-Mat DomiSolConverter::Preprocessing::getObjectsImg() {
-	return objectsImg;
-}
-
-vector<Rect> DomiSolConverter::Preprocessing::getObjectXY() {
-	return objectXY;
 }
 
 Mat DomiSolConverter::Preprocessing::getStraightenedImg() {

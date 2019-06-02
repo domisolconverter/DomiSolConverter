@@ -7,7 +7,7 @@
 # define OUTPUTFOLDER "./outputImage/"
 
 // Change test case
-string INPUTFILE = "case1.jpg";
+string INPUTFILE = "case9.jpg";
 string OUTPUTFILE = "";
 
 
@@ -28,6 +28,11 @@ int main()
 		cout << "[!] You can NOT open the test image!" << endl;
 		return -1;
 	}
+
+	// Image Resizing
+	double height = img.rows;
+	double width = img.cols;
+	resize(img, img, Size(int(width * (1000 / height)), 1000), 0, 0, CV_INTER_NN);
 
 	DomiSolConverter domisolconverter(img);
 	
