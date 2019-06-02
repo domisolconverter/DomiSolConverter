@@ -52,6 +52,7 @@ private:
 		vector<Note> noteInfo;
 		vector<NonNote> nonNoteInfo;
 
+		void removeTextArea();
 		void extractStaff();
 		void removeStaff();
 		void extractObject();

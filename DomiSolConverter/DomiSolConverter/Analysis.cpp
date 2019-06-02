@@ -15,8 +15,8 @@ DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinary
 	calculateStaffXY();
 	calculateStaffSpace();
 
-	cout << staffHeight << endl;
 	//extractStaff();
+	removeTextArea();
 	removeStaff();
 	extractObject();
 
@@ -38,6 +38,40 @@ int DomiSolConverter::Analysis::show(Mat img, string title) {
 		return -1;
 	}
 	imshow(title, img);
+}
+
+void DomiSolConverter::Analysis::removeTextArea() {
+	straightenedBinaryImgforObject;
+	int width = straightenedBinaryImgforObject.cols;
+	int height = straightenedBinaryImgforObject.rows;
+	int margin = staffHeight / 2;
+
+	int start = 0;
+	int end = staffXY[0].y - margin;
+	for (int y = start; y < end; ++y) { // 해당 범위(가사영역)의 픽셀들을 검은색으로 변경
+		for (int x = 0; x < width; ++x) {
+			straightenedBinaryImgforObject.at<uchar>(y, x) = 0;
+		}
+	}
+	for (int i = 1; i < staffXY.size() - 1; i += 2) {
+		start = staffXY[i].y + margin;
+		end = staffXY[i + 1].y - margin;
+		for (int y = start; y < end; ++y) { // 해당 범위(가사영역)의 픽셀들을 검은색으로 변경
+			for (int x = 0; x < width; ++x) {
+				straightenedBinaryImgforObject.at<uchar>(y, x) = 0;
+			}
+		}
+	}
+	start = staffXY[staffXY.size() - 1].y + margin;
+	end = height;
+	for (int y = start; y < end; ++y) { // 해당 범위(가사영역)의 픽셀들을 검은색으로 변경
+		for (int x = 0; x < width; ++x) {
+			straightenedBinaryImgforObject.at<uchar>(y, x) = 0;
+		}
+	}
+
+	show(straightenedBinaryImgforObject, "removed Img");
+
 }
 
 void DomiSolConverter::Analysis::extractStaff() {
