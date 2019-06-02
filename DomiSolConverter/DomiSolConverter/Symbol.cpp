@@ -13,12 +13,16 @@ void Symbol::setLineNum(int lineNum) {
 	this->lineNum = lineNum;
 }
 
-void Symbol::setLineNum(int lineNum) {
-	this->lineNum = lineNum;
-}
-
 void Symbol::setOrderNum(int orderNum) {
 	this->orderNum = orderNum;
+}
+
+int Symbol::getLineNum() {
+	return this->lineNum;
+}
+
+int Symbol::getBarNum() {
+	return this->barNum;
 }
 
 int Note::getFlag() {
