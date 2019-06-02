@@ -28,6 +28,10 @@ bool Signature::isSignatureEnd(NonNote nonNote) {
 	return false;
 }
 
+string Signature::getSign() {
+	return this->sign;
+}
+
 string Signature::calculateSign() {
 	vector<string> scales;
 	if (this->type.compare("sharp") == 0) {

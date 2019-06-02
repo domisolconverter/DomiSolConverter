@@ -89,9 +89,11 @@ private:
 
 	class Postproecessing{
 	private:
+		string scale;
+
 		void combineInfo();
 		string makeCode();
-		void saveFile(string inputPath, string code);
+		void saveFile(string inputPath, string transposeKey, string code);
 		vector<Note> *notes;
 		vector<NonNote> *nonNotes;
 		vector<Symbol*> wholeSign;
@@ -101,7 +103,7 @@ private:
 		string getResultName(string inputPath);
 
 	public:
-		Postproecessing(string inputPath, vector<Note> *notes, vector<NonNote> *nonNotes);
+		Postproecessing(string inputPath,string transposeKey, vector<Note> *notes, vector<NonNote> *nonNotes);
 	};
 
 	Mat inputImg;
@@ -118,5 +120,5 @@ private:
 	vector<wstring> text;
 
 public:
-	DomiSolConverter(Mat input, string inputPath);
+	DomiSolConverter(Mat input, string inputPath, string transposeKey);
 };

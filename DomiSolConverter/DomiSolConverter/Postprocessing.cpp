@@ -7,12 +7,12 @@
 #include <string>
 #include <algorithm>
 
-DomiSolConverter::Postproecessing::Postproecessing(string inputPath, vector<Note> *notes, vector<NonNote> *nonNotes) {
+DomiSolConverter::Postproecessing::Postproecessing(string inputPath, string transposeKey, vector<Note> *notes, vector<NonNote> *nonNotes) {
 	this->notes = notes;
 	this->nonNotes = nonNotes;
 
 	combineInfo();
-	saveFile(inputPath, makeCode());
+	saveFile(inputPath, transposeKey, makeCode());
 }
 
 void DomiSolConverter::Postproecessing::combineInfo() {
@@ -60,6 +60,7 @@ string DomiSolConverter::Postproecessing::makeCode() {
 			}
 			else {
 				code += signature.getCode();
+				this->scale = signature.getSign();
 				signature.clearElement();
 			}
 		}
@@ -190,11 +191,22 @@ string DomiSolConverter::Postproecessing::makeNoteCode(Note *note, Signature *si
 	return code;
 }
 
-void DomiSolConverter::Postproecessing::saveFile(string inputPath, string code) {
+void DomiSolConverter::Postproecessing::saveFile(string inputPath, string transposekey, string code) {
 	string resultFile = getResultName(inputPath) + ".ly";
+	string lilypond = code;
+	string key;
+
+	if (transposekey.substr(2, transposekey.size() - 1).compare("minor") == 0) {
+		key = transposekey.substr(0, 1) + "es";
+	}
+	else {
+		key = transposekey.substr(0, 1);
+	}
+	lilypond = "\\transpose " + this->scale + " " + key + " {\n" + code + "\n}";
+
 	ofstream out(resultFile);
 
-	out << code;
+	out << lilypond;
 	out.close();
 	string cmd = "\"C:\\Program Files (x86)\\LilyPond\\usr\\bin\\lilypond\" " + resultFile;
 	system(cmd.c_str());
