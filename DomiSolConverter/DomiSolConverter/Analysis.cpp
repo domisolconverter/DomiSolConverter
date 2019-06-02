@@ -732,7 +732,7 @@ void DomiSolConverter::Analysis::recognizeGeneralSymbol() {
 			idx++;
 		}
 	}
-	system("del *.jpg");
+	system("del \\q \\s \\symbols\\*");
 }
 
 
