@@ -411,6 +411,7 @@ void DomiSolConverter::Analysis::classifyNote() {
 		int flag = 0;
 		bool isEmptyHead = false;
 		bool isNonNote = true;
+		bool isHeadUp;
 
 		//cout << "width: " << width << "height: " << height << endl;
 		// 오브젝트 길이&너비로 1차 선별
@@ -461,7 +462,7 @@ void DomiSolConverter::Analysis::classifyNote() {
 
 				if(blackLeft > blackRight) {
 				//if (blackUp > blackDown) { // 음표 머리가 상단에 위치
-
+					isHeadUp = true;
 					// 흑화소 개수가 일정 범위 이상일 경우 머리로 판단. 
 					// --> 타원의 넓이 공식 (2*pi*가로반지름*세로반지름). 이 값보다 크면 머리로 판단한다.
 					//cout << staffInterval / 2 * staffInterval*1.25 / 2 * 3.14 << endl;
@@ -495,11 +496,12 @@ void DomiSolConverter::Analysis::classifyNote() {
 					}
 					cout << index << "th object: flag: " << flag << endl;
 
-					imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
-					rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
+					//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
+					//rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
 				}
 				else {
 				//else if (blackUp < blackDown) { // 음표 머리가 하단에 위치
+					isHeadUp = false;
 
 					// 흑화소 개수가 일정 범위 이상일 경우 머리가 꽉 차있다. 
 					// --> 타원의 넓이 공식 (2*pi*가로반지름*세로반지름). 이 값보다 크면 머리가 차있다.
@@ -533,8 +535,8 @@ void DomiSolConverter::Analysis::classifyNote() {
 						}
 					}
 					cout << index << "th object: flag: " << flag << endl;
-					imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
-					rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
+					//imwrite("outputImage/objects/" + to_string(index) + ".jpg", object); // 음표 검출 결과 이미지 각각 저장
+					//rectangle(objectsRectImg, objectXY[index].tl(), objectXY[index].br(), Scalar(255, 255, 255), 1);
 				}
 			}
 
@@ -546,6 +548,7 @@ void DomiSolConverter::Analysis::classifyNote() {
 			noteXY.push_back(objectXY[index]);	// noteXY에 음표 Rect정보 추가
 			Note n = Note();
 			n.setFlag_Head(flag, isEmptyHead);
+			n.setisHeadUp(isHeadUp);
 			n.x = objectXY[index].x + (objectXY[index].width / 2);
 			n.y = objectXY[index].y + (objectXY[index].height / 2);
 			this->noteInfo.push_back(n);

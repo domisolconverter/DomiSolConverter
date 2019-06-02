@@ -31,6 +31,7 @@ private:
 	bool isEmptyHead; // 머리에 색칠 유무 (2분음표는 비어있음)
 	bool dot; // 점
 	bool isWholeNote; // 온음표 따로 체크
+	bool isHeadUp; // 음표머리 위아래
 	char scale; // 도레미파솔라시도
 	int octave; // 음역대
 	string result;	// 음표 종류 판단 결과 저장
@@ -41,12 +42,14 @@ public:
 	bool getIsEmptyHead();
 	bool getDot();
 	bool getIsWholeNote();
+	bool getIsHeadUp();
 	char getScale();
 	int getOctave();
 	string getResult;
 	void setFlag_Head(int flag, bool isEmptyHead);
 	void setDot(bool dot);
 	void setIsWholeNote(bool isWholeNote);
+	void setisHeadUp(bool isHeadUp);
 	void setScale_Octave(char scale, int octave);
 	void setResult(string result);
 	string transposeNote();
