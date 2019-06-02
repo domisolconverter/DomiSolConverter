@@ -10,8 +10,8 @@ DomiSolConverter::DomiSolConverter(Mat input, string inputPath) {
 	this->straightenedBinaryImgforStaff = P.getStraightenedBinaryImgforStaff();
 	this->straightenedBinaryImgforObject = P.getStraightenedBinaryImgforObject();
 
-	Analysis A = Analysis(straightenedImg, straightenedBinaryImgforStaff, straightenedBinaryImgforObject, this->wholeNotes, this->wholeNonNotes, this->text);
+	Analysis A = Analysis(straightenedImg, straightenedBinaryImgforStaff, straightenedBinaryImgforObject, &(this->wholeNotes), &(this->wholeNonNotes), &(this->text));
 
 
-	Postproecessing pp = Postproecessing(inputPath, this->wholeNotes, this->wholeNonNotes);
+	Postproecessing pp = Postproecessing(inputPath, &(this->wholeNotes), &(this->wholeNonNotes));
 }
