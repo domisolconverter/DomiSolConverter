@@ -41,33 +41,24 @@ bool DomiSolConverter::Postproecessing::compare(Symbol *a, Symbol *b) {
 string DomiSolConverter::Postproecessing::makeCode() {
 	vector<Symbol*>::iterator iter = wholeSign.begin();
 
-	vector<char> flat;
-	vector<char> sharp;
+	Signature signature = Signature();
 
 	string code = "{\n";
 
 	for (int i = 0; i < wholeSign.size(); i++) {
 		if (wholeSign[i]->getType().compare("note") == 0) {
 			Note *note = (Note*)(wholeSign[i]);
-			code += this->makeNoteCode(note, &(flat), &(sharp));
+			code += this->makeNoteCode(note, &(signature));
 		}
 		if (wholeSign[i]->getType().compare("nonNote") == 0) {
 			NonNote *nonNote = (NonNote*)(wholeSign[i]);
-			code += this->makeNonNoteCode(nonNote, &(flat), &(sharp));
-		}
-		code += " ";
-	}
-	
-	code += "\n";
-
-	for (int i = 0; i < wholeSign.size(); i++) {
-		if (wholeSign[i]->getType().compare("note") == 0) {
-			Note *note = (Note*)(wholeSign[i]);
-			code += this->makeNoteCode(note, &(flat), &(sharp));
-		}
-		if (wholeSign[i]->getType().compare("nonNote") == 0) {
-			NonNote *nonNote = (NonNote*)(wholeSign[i]);
-			code += this->makeNonNoteCode(nonNote, &(flat), &(sharp));
+			if (!signature.isSignatureEnd((*nonNote))) {
+				code += this->makeNonNoteCode(nonNote, &(signature));
+			}
+			else {
+				code += signature.getCode();
+				signature.clearElement();
+			}
 		}
 		code += " ";
 	}
@@ -77,19 +68,15 @@ string DomiSolConverter::Postproecessing::makeCode() {
 	return code;
 }
 
-string DomiSolConverter::Postproecessing::makeNonNoteCode(NonNote *nonNote, vector<char> *flat, vector<char> *sharp) {
+string DomiSolConverter::Postproecessing::makeNonNoteCode(NonNote *nonNote, Signature *sig) {
 	string code = "";
 
 	if ((*nonNote).getNonNoteType().compare("bar") == 0) {
 		code = "|";
 	}
 	
-	else if ((*nonNote).getNonNoteType().compare("4 flat") == 0) {
-		code = " \\key aes \\major\n";
-		(*sharp).push_back('A');
-		(*sharp).push_back('B');
-		(*sharp).push_back('D');
-		(*sharp).push_back('E');
+	else if ((*nonNote).getNonNoteType().compare("flat") == 0 || (*nonNote).getNonNoteType().compare("sharp") == 0) {
+		sig->putElement((*nonNote));
 	}
 
 	else if ((*nonNote).getNonNoteType().compare("g clef") == 0) {
@@ -137,7 +124,7 @@ string DomiSolConverter::Postproecessing::makeNonNoteCode(NonNote *nonNote, vect
 	return code;
 }
 
-string DomiSolConverter::Postproecessing::makeNoteCode(Note *note, vector<char> *flat, vector<char> *sharp) {
+string DomiSolConverter::Postproecessing::makeNoteCode(Note *note, Signature *sig) {
 	string code = "";
 
 	switch (note->getScale()) {
@@ -171,12 +158,15 @@ string DomiSolConverter::Postproecessing::makeNoteCode(Note *note, vector<char> 
 	}
 	}
 
-	if (find((*flat).begin(), (*flat).end(), note->getScale()) != (*flat).end()) {
-		code += "is";
-	}
+	vector<string> speical = sig->getScale();
 
-	if (find((*sharp).begin(), (*sharp).end(), note->getScale()) != (*sharp).end()) {
-		code += "es";
+	if (find(speical.begin(), speical.end(), string(1, note->getScale())) != speical.end()) {
+		if (sig->getType().compare("flat") == 0) {
+			code += "is";
+		}
+		else {
+			code += "es";
+		}
 	}
 
 	for (int oct = 0; oct < note->getOctave(); oct++) {
