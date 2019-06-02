@@ -249,6 +249,9 @@ string DomiSolConverter::Postproecessing::makeNonNoteCode(NonNote *nonNote, vect
 	else if ((*nonNote).getNonNoteType().compare("3_8") == 0) {
 		code = "}\n{\n \\time 3/8\n";
 	}
+	else {
+		return "";
+	}
 	return code;
 }
 
@@ -297,6 +300,8 @@ string DomiSolConverter::Postproecessing::makeNoteCode(Note *note, vector<char> 
 	for (int oct = 0; oct < note->getOctave(); oct++) {
 		code += '\'';
 	}
+
+	
 
 	string bit = note->transposeNote();
 	if (bit.compare(string("0")) != 0) {
