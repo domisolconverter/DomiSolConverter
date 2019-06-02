@@ -92,11 +92,11 @@ string DomiSolConverter::Postproecessing::makeNonNoteCode(NonNote *nonNote, vect
 		(*sharp).push_back('E');
 	}
 
-	else if ((*nonNote).getNonNoteType().compare("g_clef") == 0) {
+	else if ((*nonNote).getNonNoteType().compare("g clef") == 0) {
 		code = "\\break \\clef treble\n";
 	}
 
-	else if ((*nonNote).getNonNoteType().compare("f_clef") == 0) {
+	else if ((*nonNote).getNonNoteType().compare("f clef") == 0) {
 		code = "\\break \\clef bass\n";
 	}
 
@@ -112,23 +112,23 @@ string DomiSolConverter::Postproecessing::makeNonNoteCode(NonNote *nonNote, vect
 		code = "r16";
 	}
 
-	else if ((*nonNote).getNonNoteType().compare("4_4") == 0) {
+	else if ((*nonNote).getNonNoteType().compare("4 4") == 0) {
 		code = "}\n{\n \\time 4/4\n";
 	}
 
-	else if ((*nonNote).getNonNoteType().compare("2_4") == 0) {
+	else if ((*nonNote).getNonNoteType().compare("2 4") == 0) {
 		code = "}\n{\n \\time 2/4\n";
 	}
 
-	else if ((*nonNote).getNonNoteType().compare("2_8") == 0) {
+	else if ((*nonNote).getNonNoteType().compare("2 8") == 0) {
 		code = "}\n{\n \\time 2/8\n";
 	}
 
-	else if ((*nonNote).getNonNoteType().compare("3_4") == 0) {
+	else if ((*nonNote).getNonNoteType().compare("3 4") == 0) {
 		code = "}\n{\n \\time 3/4\n";
 	}
 
-	else if ((*nonNote).getNonNoteType().compare("3_8") == 0) {
+	else if ((*nonNote).getNonNoteType().compare("3 8") == 0) {
 		code = "}\n{\n \\time 3/8\n";
 	}
 	else {
