@@ -2,6 +2,7 @@
 #include "pch.h"
 #include <iostream>
 #include <algorithm>
+#include <vector>
 using namespace std;
 
 class Symbol {
@@ -34,6 +35,7 @@ private:
 	bool isHeadUp; // 음표머리 위아래
 	char scale; // 도레미파솔라시도
 	int octave; // 음역대
+	vector<string> nonNotes; // 음표에붙은 비음표들
 	string result;	// 음표 종류 판단 결과 저장
 
 public:
@@ -45,12 +47,14 @@ public:
 	bool getIsHeadUp();
 	char getScale();
 	int getOctave();
+	vector<string> getNonNotes();
 	string getResult;
 	void setFlag_Head(int flag, bool isEmptyHead);
 	void setDot(bool dot);
 	void setIsWholeNote(bool isWholeNote);
 	void setisHeadUp(bool isHeadUp);
 	void setScale_Octave(char scale, int octave);
+	void setNonNotes(vector<string> nonNotes);
 	void setResult(string result);
 	string transposeNote();
 };

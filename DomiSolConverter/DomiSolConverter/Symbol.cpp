@@ -53,6 +53,10 @@ int Note::getOctave() {
 	return this->octave;
 }
 
+vector<string> Note::getNonNotes() {
+	return this->nonNotes;
+}
+
 void Note::setFlag_Head(int flag, bool isEmptyHead) {
 	this->flag = flag;
 	this->isEmptyHead = isEmptyHead;
@@ -75,6 +79,9 @@ void Note::setScale_Octave(char scale, int octave) {
 	this->octave = octave;
 }
 
+void Note::setNonNotes(vector<string> nonNotes) {
+	this->nonNotes = nonNotes;
+}
 
 void Note::setResult(string result) {
 	this->result = result;
