@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "DomiSolConverter.h"
 #include <Windows.h>
+#include "DomiSolConverter.h"
 
 DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinaryImgforStaff, Mat straightenedBinaryImgforObject, vector<Note> note, vector<NonNote> nonNote, vector<string> text) {
 	
