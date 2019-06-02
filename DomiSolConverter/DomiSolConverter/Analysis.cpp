@@ -13,6 +13,7 @@ DomiSolConverter::Analysis::Analysis(Mat straightenedImg, Mat straightenedBinary
 	//show(straightenedBinaryImg, "binaryImg");
 	colorConers();
 	calculateStaffXY();
+	calculateStaffSpace();
 
 	cout << staffHeight << endl;
 	//extractStaff();

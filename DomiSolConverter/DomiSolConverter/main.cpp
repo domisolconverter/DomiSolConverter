@@ -7,7 +7,7 @@
 # define OUTPUTFOLDER "./outputImage/"
 
 // Change test case
-string INPUTFILE = "case9.jpg";
+string INPUTFILE = "case1.jpg";
 string OUTPUTFILE = "";
 
 
