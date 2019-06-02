@@ -7,7 +7,9 @@
 DomiSolConverter::Postproecessing::Postproecessing(vector<Note> notes, vector<NonNote> nonNotes) {
 	srand((unsigned int)time(0));
 
-	for (int i = 0; i < 3; i++) {
+	this->nonNotes(NonNote(""))
+
+	for (int i = 0; i < 5; i++) {
 		Note note = Note();
 		char tone = 'A' + (rand() % 7);
 		int octave = rand() % 2 + 1;
